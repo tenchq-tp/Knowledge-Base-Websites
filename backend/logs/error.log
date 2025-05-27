@@ -1,0 +1,2 @@
+2025-05-27 10:06:56,581 - root - ERROR - Error creating database tables: Foreign key associated with column 'user.created_by' could not find table 'users' with which to generate a foreign key to target column 'id'
+2025-05-27 10:07:48,771 - root - ERROR - Error creating database tables: Foreign key associated with column 'user.modified_by' could not find table 'users' with which to generate a foreign key to target column 'id'
