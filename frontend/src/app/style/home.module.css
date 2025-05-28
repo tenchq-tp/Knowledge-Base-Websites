@@ -1,13 +1,22 @@
-
-
-.homepage {
-  padding: 20px;
+.container {
+  background-color: #fff;
+  color: #fff;
+  min-height: 100vh;
+  padding: 2rem;
   text-align: center;
-  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .title {
-  font-size: 32px;
-  color: #333;
-  background-color: aliceblue;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #23c686;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  margin-top: 1rem;
 }
