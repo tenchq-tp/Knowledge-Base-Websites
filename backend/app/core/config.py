@@ -1,19 +1,18 @@
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
 import os
 
-class Settings(BaseSettings):
-    # ใช้ตัวแปรที่ตรงกับใน docker-compose
-    DATABASE_URL: str = "postgresql://admin:admin123@db:5432/kbdb"
-    SECRET_KEY: str = "123456"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    ALGORITHM: str = "HS256"
+load_dotenv()
 
-    model_config = {
-        "env_file": ".env",
-        "env_file_encoding": "utf-8",
-        "case_sensitive": False,
-        "extra": "allow"
-    }
+class Settings(BaseSettings):
+    DATABASE_URL: str
+    SECRET_KEY: str 
+    ACCESS_TOKEN_EXPIRE_MINUTES: int 
+    ALGORITHM: str
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
     @property
     def database_url(self):
