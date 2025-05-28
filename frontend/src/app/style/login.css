@@ -104,3 +104,27 @@
 .btn-login:hover {
   background: #099d02;
 }
+
+/* ปรับแต่ง SweetAlert buttons */
+.btn-retry {
+  background-color: #3085d6 !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  font-weight: 500 !important;
+}
+
+.btn-retry:hover {
+  background-color: #2574c7 !important;
+}
+
+/* ปรับแต่ง warning icon */
+.swal2-icon.swal2-warning {
+  border-color: #ff9500 !important;
+  color: #ff9500 !important;
+}
+
+/* ปรับแต่ง error icon */
+.swal2-icon.swal2-error {
+  border-color: #ff4444 !important;
+  color: #ff4444 !important;
+}
