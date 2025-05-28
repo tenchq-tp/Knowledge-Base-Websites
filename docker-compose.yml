@@ -1,4 +1,11 @@
 services:
+  frontend:
+    build: ./frontend # สร้าง image จาก Dockerfile
+    ports:
+      - "3000:3000" # เชื่อมพอร์ต ภายนอก:ภายใน
+    depends_on:
+      - backend # เริ่ม backend ก่อน frontend
+  
   db:
     image: postgres:15
     restart: always
