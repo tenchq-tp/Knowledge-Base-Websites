@@ -1,22 +1,256 @@
-.container {
+.homeContainer {
   background-color: #fff;
-  color: #fff;
   min-height: 100vh;
-  padding: 2rem;
-  text-align: center;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #000;
+  font-weight: 700;
+}
+
+.centerContent {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  margin-bottom: 40px;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #23c686;
+.earthSearchWrapper {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  overflow: visible;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
-.subtitle {
-  font-size: 1.2rem;
-  margin-top: 1rem;
+.spinningEarth {
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s linear;
+  user-select: none;
+  pointer-events: none;
+}
+
+.searchWrapper {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 650px;
+  z-index: 10;
+
+}
+
+.searchInputOverlay {
+  width: 100%;
+  padding: 18px 50px 18px 25px;
+  /* เว้นขวา 50px สำหรับไอคอน */
+  border-radius: 35px;
+  border: 2px solid #3498db;
+  /* เปลี่ยนเป็นสีฟ้า */
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #000;
+  background-color: #fff;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+  /* เงาสีฟ้า */
+  outline: none;
+}
+
+.searchInputOverlay::placeholder {
+  color: #666;
+  font-weight: 600;
+}
+
+.searchInputOverlay:focus {
+  border-color: #2980b9;
+  /* สีฟ้าเข้มเวลาโฟกัส */
+  box-shadow: 0 0 12px rgba(41, 128, 185, 0.7);
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  right: 25px;
+  transform: translateY(-50%);
+  color: #3498db;
+  font-size: 1.6rem;
+  pointer-events: none;
+  /* คลิกทะลุไอคอนได้ */
+}
+
+.categoryDetail {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  text-align: center;
+  padding: 10px 15px;
+  pointer-events: none;
+  z-index: 5;
+
+  /* ป้องกันโยกเวลาเพิ่ม/ลด description */
+  min-height: 120px;
+  /* คุณสามารถปรับความสูงให้เหมาะสมได้ */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.categoryIconAndName {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.categoryIconAndName h2 {
+  font-size: 2.4rem;
+  font-weight: 900;
+  margin: 0;
+}
+
+.categoryDetail p {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0;
+  /* ไม่ให้ดัน layout */
+  color: #000;
+  min-height: 1.3rem;
+}
+
+.categoryGrid {
+  width: 90%;
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  padding-bottom: 40px;
+}
+
+.categoryCard {
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #000;
+  font-weight: 700;
+}
+
+.categoryCard:hover {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.categoryIcon {
+  margin-bottom: 15px;
+}
+
+.categoryInfo {
+  text-align: center;
+}
+
+.categoryInfo h3 {
+  margin: 0 0 10px;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.categoryDescription {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.backButton {
+  background-color: #000;
+  /* สีดำเหมือนเดิม */
+  color: #fff;
+  min-width: 180px;
+  max-height: 50px;
+  padding: 1rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+
+  margin-bottom: 25px;
+
+}
+
+.backButton:hover {
+  background-color: #222;
+
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.7);
+
+  transform: translateY(-2px);
+}
+
+.readBtn,
+.createArticleBtn {
+  max-height: 50px;
+  padding: 1rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.readBtn {
+  background-color: #3498db;
+  color: white;
+  min-width: 140px;
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.45);
+}
+
+.readBtn:hover {
+  background-color: #2980b9;
+  box-shadow: 0 6px 14px rgba(41, 128, 185, 0.7);
+}
+
+.createArticleBtn {
+  background-color: #23c686;
+  color: white;
+  min-width: 220px;
+  box-shadow: 0 4px 10px rgba(35, 198, 134, 0.45);
+}
+
+.createArticleBtn:hover {
+  background-color: #1aa56b;
+  box-shadow: 0 6px 14px rgba(26, 165, 107, 0.7);
+}
+
+.readBtn .icon,
+.createArticleBtn .icon {
+  font-size: 1.1rem;
 }
