@@ -146,37 +146,22 @@ def reset_user_password(
     
     return {"message": "Password reset successfully. User logged out from all sessions."}
 
-@router.delete("/{user_id}")
-def delete_user(
-    user_id: int,
+@router.delete("/{username}", response_model=UserSafeResponse)
+def delete_user_by_username(
+    username: str,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(get_admin_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """Soft delete user (admin only)"""
-    user = crud_user.get_user_by_id(db, user_id=user_id)
+    # Optional: Restrict role (e.g., only admin can delete)
+    # if current_user.role != "admin":
+    #     raise HTTPException(status_code=403, detail="Not authorized to delete user")
+
+    user = crud_user.get_user_by_username(db, username=username)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    # Prevent admin from deleting themselves
-    if user.id == admin_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot delete your own account"
-        )
-    
-    # Instead of hard delete, mark as unverified and inactive
-    user.is_verified = False
-    user.modified_by = admin_user.id
-    
-    # Invalidate all sessions
-    crud_user.invalidate_all_user_sessions(db, user_id)
-    
-    db.commit()
-    
-    return {"message": "User deactivated successfully"}
+        raise HTTPException(status_code=404, detail="User not found")
+
+    deleted_user = crud_user.delete_user(db, user)
+    return deleted_user
 
 @router.post("/create", response_model=UserSafeResponse, summary="Create new user (admin only)")
 def create_user_by_authenticated_user(

@@ -247,3 +247,8 @@ def get_user_active_sessions(db: Session, user_id: int) -> List[UserSession]:
             UserSession.expires_at > datetime.utcnow()
         )
     ).all()
+    
+def delete_user(db: Session, user: User) -> User:
+    db.delete(user)
+    db.commit()
+    return user
