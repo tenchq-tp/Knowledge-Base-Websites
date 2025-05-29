@@ -14,7 +14,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- For hash functions
 
 -- Create enum types
 DO $$ BEGIN
-    CREATE TYPE user_role AS ENUM ('admin', 'user', 'moderator');
+    CREATE TYPE user_role AS ENUM ('user', 'moderator');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -284,20 +284,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Insert sample admin user with properly hashed password
 DO $$
 DECLARE
-    admin_id BIGINT;
+    user_id BIGINT;
     hashed_password TEXT;
 BEGIN
-    -- Generate ID for admin user
-    admin_id := generate_user_id();
-    
+    user_id := generate_user_id();
+
     -- Create a secure hash (in production, use bcrypt from your application)
     -- This is just for initialization - use proper bcrypt in your app
     hashed_password := crypt('admin123', gen_salt('bf', 12));
     
-    -- Insert admin user
     INSERT INTO users (
         id,
         username, 

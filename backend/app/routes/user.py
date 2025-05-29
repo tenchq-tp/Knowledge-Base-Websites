@@ -9,15 +9,6 @@ from app.crud import user as crud_user
 
 router = APIRouter(prefix="/users", tags=["User Management"])
 
-def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
-    """Dependency to ensure user is admin"""
-    if current_user.role != UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
-    return current_user
-
 @router.get("/", response_model=List[UserResponse])
 def list_users(
     skip: int = Query(0, ge=0),
@@ -26,9 +17,8 @@ def list_users(
     is_verified: Optional[bool] = Query(None),
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    admin_user: User = Depends(get_admin_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """List all users with filtering (admin only)"""
     users = crud_user.get_users_list(
         db=db, 
         skip=skip, 
@@ -42,9 +32,8 @@ def list_users(
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(get_admin_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """Get user by ID with full details (admin only)"""
     user = crud_user.get_user_by_id(db, user_id=user_id)
     if not user:
         raise HTTPException(
@@ -58,9 +47,8 @@ def update_user_role(
     user_id: int,
     new_role: UserRole,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(get_admin_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """Update user role (admin only)"""
     user = crud_user.get_user_by_id(db, user_id=user_id)
     if not user:
         raise HTTPException(
@@ -68,15 +56,8 @@ def update_user_role(
             detail="User not found"
         )
     
-    # Prevent admin from changing their own role
-    if user.id == admin_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot change your own role"
-        )
-    
     user.role = new_role
-    user.modified_by = admin_user.id
+    user.modified_by = current_user.id
     db.commit()
     db.refresh(user)
     
@@ -86,10 +67,9 @@ def update_user_role(
 def verify_user(
     user_id: int,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(get_admin_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """Verify user email (admin only)"""
-    if not crud_user.verify_user_email(db, user_id, verified_by=admin_user.id):
+    if not crud_user.verify_user_email(db, user_id, verified_by=current_user.id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
@@ -98,13 +78,12 @@ def verify_user(
     return {"message": "User verified successfully"}
 
 @router.put("/{user_id}/profile", response_model=UserProfileResponse)
-def update_user_profile_admin(
+def update_user_profile(
     user_id: int,
     profile_update: UserProfileUpdate,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(get_admin_user)
+    current_user: User = Depends(get_current_user)
 ):
-    """Update any user's profile (admin only)"""
     user = crud_user.get_user_by_id(db, user_id=user_id)
     if not user:
         raise HTTPException(
@@ -116,7 +95,7 @@ def update_user_profile_admin(
         db=db,
         user_id=user_id,
         profile_update=profile_update,
-        modified_by=admin_user.id
+        modified_by=current_user.id
     )
     
     if not updated_profile:
@@ -132,10 +111,9 @@ def reset_user_password(
     user_id: int,
     new_password: str,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(get_admin_user)
+    curr_user: User = Depends(get_current_user)
 ):
-    """Reset user password (admin only)"""
-    if not crud_user.update_user_password(db, user_id, new_password, modified_by=admin_user.id):
+    if not crud_user.update_user_password(db, user_id, new_password, modified_by=curr_user.id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
@@ -163,7 +141,7 @@ def delete_user_by_username(
     deleted_user = crud_user.delete_user(db, user)
     return deleted_user
 
-@router.post("/create", response_model=UserSafeResponse, summary="Create new user (admin only)")
+@router.post("/create", response_model=UserSafeResponse, summary="Create new user")
 def create_user_by_authenticated_user(
     user: UserCreate,
     db: Session = Depends(get_db),

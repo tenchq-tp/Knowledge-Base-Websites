@@ -10,7 +10,6 @@ import hashlib
 import uuid
 
 class UserRole(str, enum.Enum):
-    ADMIN = "admin"
     USER = "user"
     MODERATOR = "moderator"
 
@@ -48,7 +47,8 @@ class User(Base):
     # Relationships
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan", foreign_keys="[UserProfile.user_id]")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
-    
+    setting = relationship("UserSetting", back_populates="user", uselist=False)
+
     # Self-referential relationships for audit (nullable)
     creator = relationship("User", foreign_keys=[created_by], remote_side=[id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[id], post_update=True)

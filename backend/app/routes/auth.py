@@ -261,14 +261,3 @@ def verify_email(user_id: int, current_user: User = Depends(get_current_user), d
         raise HTTPException(status_code=404, detail="User not found")
     
     return {"message": "Email verified successfully"}
-
-# Background task to clean expired sessions
-@router.post("/admin/clean-sessions")
-def clean_expired_sessions(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Clean expired sessions (admin only)"""
-    
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
-    count = crud_user.clean_expired_sessions(db)
-    return {"message": f"Cleaned {count} expired sessions"}

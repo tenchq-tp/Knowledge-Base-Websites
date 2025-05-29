@@ -49,7 +49,3 @@ def log_password_change(user_id: int, ip_address: str):
     security_logger = logging.getLogger('security')
     security_logger.warning(f"PASSWORD_CHANGE: user_id={user_id} ip={ip_address}")
 
-def log_admin_action(admin_id: int, action: str, target_user_id: int = None):
-    """Log admin action"""
-    security_logger = logging.getLogger('security')
-    security_logger.warning(f"ADMIN_ACTION: admin_id={admin_id} action={action} target={target_user_id}")
