@@ -1,0 +1,234 @@
+.container {
+    width: 100vw;
+    /* กินความกว้างเต็ม viewport */
+    height: 100vh;
+    /* กินความสูงเต็ม viewport */
+    margin: 0;
+    /* เอาระยะขอบออก */
+    padding: 1rem;
+    /* เว้นระยะขอบด้านในเล็กน้อย */
+    background-color: #ffffff;
+    border-radius: 0;
+    /* เอากรอบมุมมนออก */
+    box-shadow: none;
+    /* เอาเงาออก */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    overflow: auto;
+    /* เผื่อมี content overflow */
+}
+
+/* ปุ่ม +Add Category ด้านบนขวา */
+.addBtn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background-color: #23c686;
+    margin-right: 20px;
+
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+    box-shadow: 0 4px 8px rgba(35, 198, 134, 0.5);
+    user-select: none;
+}
+
+.addBtn:hover {
+    background-color: #1ca870;
+    box-shadow: 0 6px 14px rgba(28, 168, 112, 0.7);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 ต่อแถว */
+    gap: 2rem;
+    margin-top: 100px;
+    /* เปลี่ยนจาก padding-top เป็น margin-top */
+}
+
+/* Card แต่ละอัน */
+.card {
+    background: #f9f9f9;
+
+    border-radius: 12px;
+    padding: 1.8rem 1.5rem 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* โซนไอคอน */
+.iconWrapper {
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #e6f9f4;
+    box-shadow: 0 2px 6px rgba(35, 198, 134, 0.25);
+}
+
+/* ชื่อ Category */
+.cardTitle {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #23c686;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+/* คำอธิบาย */
+.cardDesc {
+    font-size: 0.95rem;
+    color: #666;
+    text-align: center;
+    flex-grow: 1;
+    margin-bottom: 1.2rem;
+    line-height: 1.3;
+    padding: 0 0.5rem;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    /* ระยะห่างระหว่างปุ่ม */
+    margin-bottom: 1rem;
+}
+
+.readBtn {
+    background-color: #3498db;
+    /* สีน้ำเงิน */
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 0.9rem 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* ช่องว่างระหว่างไอคอนกับข้อความ */
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.45);
+    transition: background-color 0.3s ease;
+    user-select: none;
+}
+
+.readBtn:hover {
+    background-color: #2980b9;
+    box-shadow: 0 6px 14px rgba(41, 128, 185, 0.7);
+}
+
+.readBtn .icon {
+    font-size: 1.1rem;
+}
+
+/* ปรับ createArticleBtn ให้ใช้สไตล์เดียวกับ readBtn */
+.createArticleBtn {
+    background-color: #23c686;
+    /* สีเขียว */
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 0.9rem 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 10px rgba(35, 198, 134, 0.45);
+    transition: background-color 0.3s ease;
+    user-select: none;
+}
+
+.createArticleBtn:hover {
+    background-color: #1aa56b;
+    box-shadow: 0 6px 14px rgba(26, 165, 107, 0.7);
+}
+
+.createArticleBtn .icon {
+    font-size: 1.1rem;
+}
+
+/* โซนปุ่ม edit / delete */
+.actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 1rem;
+    /* เพิ่มช่องว่างเล็กน้อย */
+}
+
+/* ปุ่ม edit และ delete */
+.editBtn,
+.deleteBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.4rem;
+    /* ขยายขนาดไอคอนใหญ่ขึ้น */
+    color: #f39c12;
+    /* สีส้ม (orange) สำหรับ edit */
+    padding: 6px 10px;
+    /* เพิ่มพื้นที่รอบ ๆ ปุ่ม */
+    border-radius: 8px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    transition: color 0.25s ease;
+}
+
+.deleteBtn {
+    color: #e74c3c;
+    /* สีแดงสำหรับ delete */
+}
+
+.editBtn:hover {
+    color: #b9770e;
+    /* สีส้มเข้มกว่า */
+}
+
+.deleteBtn:hover {
+    color: #c0392b;
+    /* สีแดงเข้มกว่า */
+}
+
+/* Responsive - เมื่อจอเล็กลงเหลือ 2 หรือ 1 ต่อแถว */
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .addBtn {
+        position: static;
+        display: block;
+        margin: 1rem auto 2rem;
+    }
+}
