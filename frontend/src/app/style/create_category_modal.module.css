@@ -42,29 +42,40 @@
     margin-bottom: 16px;
 }
 
-/* กล่องเลือกสี */
 .colorPicker {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(10, 32px);
+    /* 10 สีต่อแถว */
+    grid-auto-rows: 32px;
     gap: 12px;
+    justify-content: center;
     margin-bottom: 16px;
 }
 
 .colorCircle {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: 2px solid transparent;
     cursor: pointer;
-    transition: border-color 0.3s ease;
+    border: 2px solid transparent;
+    transition: transform 0.2s ease;
 }
+
+
 
 .colorCircle:hover {
     border-color: #999;
 }
 
 .colorSelected {
-    border-color: #f44336;
+    border: 3px solid #f44336;
+    /* ขอบหนาและสีแดงเข้ม */
+    border-radius: 4px;
+    /* มุมไม่กลมเท่าปกติ เพื่อให้ต่าง */
+    box-shadow: 0 0 8px #f44336aa;
+    /* เงาเรืองแสงสีแดง */
+    transform: scale(1.2);
+    /* ขยายชัดขึ้น */
 }
 
 .searchBox {

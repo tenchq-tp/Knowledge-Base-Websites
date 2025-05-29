@@ -6,18 +6,31 @@ import { FaSearch } from "react-icons/fa";
 import * as FaIcons from "react-icons/fa";
 import Swal from "sweetalert2";
 import { FaQuestionCircle } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+
 const colors = [
   "#000000", // Black
   "#555555", // Dark Gray
-  "#23c686", // Green
+  "#999999", // Light Gray
   "#f44336", // Red
-  "#ff9800", // Orange
-  "#2196f3", // Blue
-  "#9c27b0", // Purple
-  "#009688", // Teal
   "#e91e63", // Pink
-  "#795548", // Brown
+  "#9c27b0", // Purple
+  "#673ab7", // Deep Purple
+  "#3f51b5", // Indigo
+  "#2196f3", // Blue
+  "#03a9f4", // Light Blue
+  "#00bcd4", // Cyan
+  "#009688", // Teal
+  "#4caf50", // Green
+  "#23c686", // Light Green
+  "#8bc34a", // Lime
+  "#cddc39", // Yellow Green
+  "#ffeb3b", // Yellow
+  "#999145",
+  "#ff9800", // Orange
+  "#ff5722", // Deep Orange
 ];
+
 const categoryIcons = [
   "FaBook", // หนังสือ, ความรู้
   "FaGraduationCap", // การศึกษา
@@ -119,11 +132,12 @@ export default function CreateCategoryModal({
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const { t } = useTranslation();
   // ✅ ดึงข้อมูลเก่ามาใช้เมื่อ mode = "edit"
   useEffect(() => {
     if (mode === "edit" && categoryData) {
-      const [iconName, iconColor] = categoryData.icon.split("_");
+      const [iconName, iconColorRaw] = categoryData.icon.split("_");
+      const iconColor = "#" + iconColorRaw; // เติม # นำหน้า
       setSelectedIcon(iconName);
       setSelectedColor(colors.includes(iconColor) ? iconColor : "#000000");
       setName(categoryData.name || "");
@@ -146,7 +160,7 @@ export default function CreateCategoryModal({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories${
+        `${process.env.NEXT_PUBLIC_API}/categories${
           mode === "edit" ? `/${categoryData.id}` : ""
         }`,
         {
@@ -170,10 +184,11 @@ export default function CreateCategoryModal({
 
       const result = await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: `Category ${
-          mode === "edit" ? "updated" : "created"
-        } successfully.`,
+        title: t("categoryModal.successTitle"),
+        text:
+          mode === "edit"
+            ? t("categoryModal.successUpdate")
+            : t("categoryModal.successCreate"),
         showCancelButton: true,
         confirmButtonText: "Yes",
         cancelButtonText: "No",
@@ -190,10 +205,11 @@ export default function CreateCategoryModal({
 
       Swal.fire({
         icon: "error",
-        title: "Failed!",
+        title: t("categoryModal.errorTitle"),
         text:
-          err.message ||
-          `Failed to ${mode === "edit" ? "update" : "create"} category.`,
+          mode === "edit"
+            ? t("categoryModal.errorUpdate")
+            : t("categoryModal.errorCreate"),
         confirmButtonColor: "#d33",
         confirmButtonText: "OK",
       });
@@ -206,7 +222,9 @@ export default function CreateCategoryModal({
     <div className={styles.overlay}>
       <div className={styles.modal}>
         <h2 className={styles.headerTitle}>
-          {mode === "edit" ? "Edit Category" : "Create Category"}
+          {mode === "edit"
+            ? t("categoryModal.editTitle")
+            : t("categoryModal.createTitle")}
         </h2>
 
         <div className={styles.selectedIconPreview}>
@@ -236,7 +254,7 @@ export default function CreateCategoryModal({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search icons..."
+            placeholder={t("categoryModal.searchPlaceholder")}
             style={{ color: "black" }}
           />
         </div>
@@ -258,22 +276,24 @@ export default function CreateCategoryModal({
           })}
         </div>
 
-        <label className={styles.label}>Category Name *</label>
+        <label className={styles.label}>{t("categoryModal.nameLabel")}</label>
         <input
           className={styles.input}
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter category name..."
+          placeholder={t("categoryModal.nameLabelinput")}
         />
 
-        <label className={styles.label}>Description (optional)</label>
+        <label className={styles.label}>
+          {t("categoryModal.descriptionLabel")}
+        </label>
         <input
           className={styles.input}
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter short description..."
+          placeholder={t("categoryModal.descriptionLabelinput")}
         />
 
         {error && <p style={{ color: "red" }}>{error}</p>}
@@ -286,18 +306,18 @@ export default function CreateCategoryModal({
           >
             {loading
               ? mode === "edit"
-                ? "Updating..."
-                : "Creating..."
+                ? `${t("categoryModal.updateBtn")}...`
+                : `${t("categoryModal.createBtn")}...`
               : mode === "edit"
-              ? "Update"
-              : "Create"}
+              ? t("categoryModal.updateBtn")
+              : t("categoryModal.createBtn")}
           </button>
           <button
             className={styles.cancelBtn}
             onClick={onClose}
             disabled={loading}
           >
-            Cancel
+            {t("categoryModal.cancelBtn")}
           </button>
         </div>
       </div>
