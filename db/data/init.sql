@@ -116,6 +116,14 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     modified_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 4. CATEGORIES TABLE (Optional, for user categorization)
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    icon TEXT,
+    name TEXT NOT NULL,
+    description TEXT
+);
+
 -- Create indexes for performance
 -- Users table indexes
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);

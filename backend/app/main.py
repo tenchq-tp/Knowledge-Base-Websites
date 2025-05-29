@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from app.routes import auth, profiles, user, admin
+from app.routes import auth, profiles, user, admin, category
 from app.db.database import engine, Base
 from app.core.logging import setup_logging
 from app.middleware.security import SecurityHeadersMiddleware
@@ -45,6 +45,7 @@ app.include_router(auth.router)
 app.include_router(profiles.router)
 app.include_router(user.router)
 app.include_router(admin.router)
+app.include_router(category.router)
 
 @app.get("/")
 async def root():
@@ -69,7 +70,8 @@ async def root():
             "auth": "/auth",
             "profiles": "/profiles", 
             "user": "/user",
-            "admin": "/admin"
+            "admin": "/admin",
+            "category": "/categories"
         }
     }
 
