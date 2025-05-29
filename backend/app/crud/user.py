@@ -170,21 +170,32 @@ def validate_refresh_token(db: Session, refresh_token: str) -> Optional[UserSess
     return session
 
 def refresh_user_session(db: Session, refresh_token: str) -> Optional[tuple[str, str]]:
-    """Refresh session using refresh token"""
     session = validate_refresh_token(db, refresh_token)
     if not session:
         return None
     
-    # Generate new tokens
+    # Revoke old session
+    session.is_active = False
+    session.refresh_expires_at = datetime.utcnow()  # หมดอายุ refresh token เดิมทันที
+    session.modified_at = datetime.utcnow()
+    
+    # สร้าง token ใหม่
     new_session_token = generate_secure_token(32)
     new_refresh_token = generate_secure_token(32)
     
-    # Update session with new hashed tokens
-    session.session_token_hash = hash_token(new_session_token)
-    session.refresh_token_hash = hash_token(new_refresh_token)
-    session.expires_at = datetime.utcnow() + timedelta(minutes=30)
-    session.refresh_expires_at = datetime.utcnow() + timedelta(hours=168)
-    
+    # สร้าง session ใหม่ใน DB
+    new_session = UserSession(
+        user_id=session.user_id,
+        session_token_hash=hash_token(new_session_token),
+        refresh_token_hash=hash_token(new_refresh_token),
+        expires_at=datetime.utcnow() + timedelta(minutes=30),
+        refresh_expires_at=datetime.utcnow() + timedelta(hours=168),
+        is_active=True,
+        created_at=datetime.utcnow(),
+        modified_at=datetime.utcnow(),
+        # device_info, ip_address, user_agent ถ้ามี ให้ใส่ตามที่จำเป็น
+    )
+    db.add(new_session)
     db.commit()
     
     return new_session_token, new_refresh_token

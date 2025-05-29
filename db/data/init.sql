@@ -274,6 +274,7 @@ BEGIN
     UPDATE user_sessions 
     SET 
         is_active = FALSE,
+        refresh_expires_at = CURRENT_TIMESTAMP,
         modified_at = CURRENT_TIMESTAMP
     WHERE (expires_at < CURRENT_TIMESTAMP OR refresh_expires_at < CURRENT_TIMESTAMP) 
     AND is_active = TRUE;

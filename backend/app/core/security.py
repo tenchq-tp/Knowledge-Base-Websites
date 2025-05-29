@@ -2,6 +2,7 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta
 from typing import Optional
+from uuid import UUID
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
@@ -33,15 +34,24 @@ def hash_token(token: str) -> str:
     """Hash token using SHA-256"""
     return hashlib.sha256(token.encode()).hexdigest()
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, session_id: Optional[UUID] = None):
     """Create JWT access token"""
     to_encode = data.copy()
+    
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     
-    to_encode.update({"exp": expire, "type": "access"})
+    to_encode.update({
+        "exp": expire,
+        "type": "access",
+    })
+
+    # เพิ่ม session_id เข้าไปถ้ามี
+    if session_id:
+        to_encode["session_id"] = str(session_id)  # แปลงเป็น str เพื่อใส่ใน JWT
+
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 

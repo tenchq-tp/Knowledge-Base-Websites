@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import INET, UUID
 from app.db.database import Base
+from pydantic import BaseModel
 import enum
 import random
 import hashlib

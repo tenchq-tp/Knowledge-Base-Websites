@@ -62,7 +62,8 @@ class UserSafeResponse(BaseModel):
     role: UserRole
     is_verified: bool
     profile: Optional[UserProfileResponse] = None
-
+    session_id: Optional[str] = None
+    
     class Config:
         from_attributes = True
 
@@ -77,13 +78,22 @@ class SessionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+class UserWithSession(UserSafeResponse):
+    session_id: str
+
+    class Config:
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
     refresh_token: Optional[str] = None
     token_type: str = "bearer"
     expires_in: int  # seconds
-    user: UserSafeResponse
+    user: UserWithSession 
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+    
+class LogoutRequest(BaseModel):
+    username: str

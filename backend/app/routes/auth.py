@@ -1,21 +1,55 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
+from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.user import (
     UserCreate, UserLogin, Token, UserResponse, UserSafeResponse, 
-    RefreshTokenRequest, SessionResponse
+    RefreshTokenRequest, SessionResponse, LogoutRequest
 )
 from app.crud import user as crud_user
 from app.core.security import create_access_token, verify_token, validate_password_strength
 from app.core.config import settings
-from app.models.user import User
+from app.models.user import User, UserSession
 import ipaddress
+from jose import jwt, JWTError
+from uuid import UUID
+from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 
+app = FastAPI()
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-# เปลี่ยนจาก HTTPBearer เป็น HTTPBasic สำหรับ username/password
-security = HTTPBasic()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="My API",
+        version="1.0.0",
+        description="API with JWT + username/password (OAuth2PasswordBearer)",
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "OAuth2Password": {
+            "type": "oauth2",
+            "flows": {
+                "password": {
+                    "tokenUrl": "/auth/login",  
+                    "scopes": {}
+                }
+            }
+        }
+    }
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method["security"] = [{"OAuth2Password": []}]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 def get_client_ip(request: Request) -> str:
     """Get client IP address"""
@@ -73,23 +107,17 @@ def register_user(user: UserCreate, request: Request, db: Session = Depends(get_
     )
 
 @router.post("/login", response_model=Token)
-def login_user(user_credentials: UserLogin, request: Request, db: Session = Depends(get_db)):
-    """Login user and return JWT token with session management"""
-    
-    user = crud_user.authenticate_user(db, user_credentials.username, user_credentials.password)
+def login_user(form_data: OAuth2PasswordRequestForm = Depends(), request: Request = ..., db: Session = Depends(get_db)):
+    user = crud_user.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    # Allow login without email verification - user can verify later
-    
-    # Get device info
+
     device_info = get_device_info(request)
     
-    # Create session with secure tokens
     session, session_token, refresh_token = crud_user.create_user_session(
         db=db,
         user_id=user.id,
@@ -98,10 +126,9 @@ def login_user(user_credentials: UserLogin, request: Request, db: Session = Depe
         user_agent=device_info["user_agent"]
     )
     
-    # Create JWT access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username, "session_id": str(session.id)}, 
+        data={"sub": user.username, "session_id": str(session.id)},  # ใช้ username เป็น sub
         expires_delta=access_token_expires
     )
     
@@ -115,14 +142,13 @@ def login_user(user_credentials: UserLogin, request: Request, db: Session = Depe
             username=user.username,
             role=user.role,
             is_verified=user.is_verified,
-            profile=user.profile
+            profile=user.profile,
+            session_id=str(session.id),
         )
     )
-    
+
 @router.post("/refresh", response_model=Token)
 def refresh_token(refresh_request: RefreshTokenRequest, request: Request, db: Session = Depends(get_db)):
-    """Refresh access token using refresh token"""
-    
     result = crud_user.refresh_user_session(db, refresh_request.refresh_token)
     if not result:
         raise HTTPException(
@@ -132,7 +158,6 @@ def refresh_token(refresh_request: RefreshTokenRequest, request: Request, db: Se
     
     new_session_token, new_refresh_token = result
     
-    # Get session to find user
     session = crud_user.validate_session_token(db, new_session_token)
     if not session:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session not found")
@@ -141,10 +166,9 @@ def refresh_token(refresh_request: RefreshTokenRequest, request: Request, db: Se
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
-    # Create new JWT access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username, "session_id": str(session.id)}, 
+        data={"sub": user.username, "session_id": str(session.id)},  # ใช้ username เป็น sub
         expires_delta=access_token_expires
     )
     
@@ -162,18 +186,28 @@ def refresh_token(refresh_request: RefreshTokenRequest, request: Request, db: Se
         )
     )
 
-def get_current_user(credentials: HTTPBasicCredentials = Depends(security), db: Session = Depends(get_db)) -> User:
-    """Get current authenticated user using Basic Auth (username/password)"""
-    
-    # Authenticate user with username and password
-    user = crud_user.authenticate_user(db, credentials.username, credentials.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+
+        session_id = UUID(payload.get("session_id"))
+        session = db.query(UserSession).filter_by(id=session_id, is_active=True).first()
+        if not session:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    user = db.query(User).filter(User.username == username).first()
+    if user is None:
+        raise credentials_exception
     return user
 
 @router.get("/me", response_model=UserResponse)
@@ -182,12 +216,18 @@ def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.post("/logout")
-def logout_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Logout user and invalidate session"""
-    
-    # This would require extracting session info from JWT
-    # For now, just return success
-    return {"message": "Logged out successfully"}
+def logout_user(
+    current_user: User = Depends(get_current_user),
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    session_id = UUID(jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])["session_id"])
+    session = db.query(UserSession).filter_by(id=session_id).first()
+    if session:
+        session.is_active = False
+        db.commit()
+
+    return {"message": f"User '{current_user.username}' logged out successfully"}
 
 @router.post("/logout-all")
 def logout_all_sessions(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
