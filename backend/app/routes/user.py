@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.schemas.user import UserResponse, UserProfileUpdate, UserSafeResponse, UserProfileResponse
+from app.schemas.user import UserResponse, UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate
 from app.models.user import User, UserRole
 from app.routes.auth import get_current_user
 from app.crud import user as crud_user
@@ -177,3 +177,38 @@ def delete_user(
     db.commit()
     
     return {"message": "User deactivated successfully"}
+
+@router.post("/create", response_model=UserSafeResponse, summary="Create new user (admin only)")
+def create_user_by_authenticated_user(
+    user: UserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Create a new user and user profile, must be logged in.
+    
+    - **Requires authentication**
+    - **Automatically hashes password**
+    - **Creates profile with blank fields**
+    """
+    # Optional: Restrict role (e.g., only admin can create)
+    # if current_user.role != "admin":
+    #     raise HTTPException(status_code=403, detail="Not authorized to create user")
+
+    # Validation: Check for existing email or username
+    if crud_user.get_user_by_email(db, email=user.email):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    if crud_user.get_user_by_username(db, username=user.username):
+        raise HTTPException(status_code=400, detail="Username already taken")
+    
+    # Create the user
+    new_user = crud_user.create_user(db=db, user=user, created_by=current_user.id)
+
+    return UserSafeResponse(
+        id=new_user.id,
+        username=new_user.username,
+        role=new_user.role,
+        is_verified=new_user.is_verified,
+        profile=new_user.profile,
+        session_id=None
+    )

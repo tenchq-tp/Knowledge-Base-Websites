@@ -97,3 +97,11 @@ class RefreshTokenRequest(BaseModel):
     
 class LogoutRequest(BaseModel):
     username: str
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+    role: Optional[UserRole] = "user"
+    is_verified: Optional[bool] = False
+    profile: Optional[UserProfileBase] = None
