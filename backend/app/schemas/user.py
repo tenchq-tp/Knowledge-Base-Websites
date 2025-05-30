@@ -105,3 +105,8 @@ class UserCreate(BaseModel):
     role: Optional[UserRole] = "user"
     is_verified: Optional[bool] = False
     profile: Optional[UserProfileBase] = None
+
+class ChangePasswordRequest(BaseModel):
+    username: str = Field(...,min_length=3, max_length=50)
+    old_password: str = Field(...,min_length=8)
+    new_password: str = Field(...,min_length=8)

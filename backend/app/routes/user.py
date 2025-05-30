@@ -2,10 +2,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.schemas.user import UserResponse, UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate
+from app.schemas.user import UserResponse, UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate, ChangePasswordRequest
 from app.models.user import User, UserRole
 from app.routes.auth import get_current_user
 from app.crud import user as crud_user
+from app.core.security import verify_password, get_password_hash, validate_password_strength
 
 router = APIRouter(prefix="/users", tags=["User Management"])
 
@@ -105,6 +106,33 @@ def update_user_profile(
         )
     
     return updated_profile
+
+@router.post("/change-password", summary="Change password without login")
+def change_password(
+    payload: ChangePasswordRequest,
+    db: Session = Depends(get_db)
+):
+    user = crud_user.get_user_by_username(db, username=payload.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_password(payload.old_password, user.password):
+        raise HTTPException(status_code=401, detail="Old password is incorrect")
+
+    if not validate_password_strength(payload.new_password):
+        raise HTTPException(
+            status_code=400,
+            detail="New password must be at least 8 characters and include 3 of: uppercase, lowercase, digits, special characters"
+        )
+
+    user.password = get_password_hash(payload.new_password)
+    user.modified_by = user.id
+    db.commit()
+
+    # Invalidate all user sessions (force logout)
+    crud_user.invalidate_all_user_sessions(db, user.id)
+
+    return {"message": "Password changed successfully. All sessions invalidated."}
 
 @router.post("/{user_id}/reset-password")
 def reset_user_password(

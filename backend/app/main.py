@@ -44,9 +44,9 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(profiles.router)
 app.include_router(user.router)
+app.include_router(user_setting.router)
 app.include_router(category.router)
 app.include_router(role.router)
-app.include_router(user_setting.router)
 
 @app.get("/")
 async def root():
