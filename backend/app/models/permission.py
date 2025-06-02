@@ -6,7 +6,6 @@ class Permission(Base):
     __tablename__ = "permissions"
 
     id = Column(Integer, primary_key=True, index=True)
-    icon = Column(String, nullable=True)
     name = Column(String, unique=True, nullable=False)  # เช่น view_user, edit_user
     description = Column(String, nullable=True)
 

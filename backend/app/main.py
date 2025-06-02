@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from app.routes import auth, profiles, user, category, user_setting, role, permission, feature, role_permission
+from app.routes import auth, profiles, user, category, user_setting, role, permission, role_permission
 from app.db.database import engine, Base
 from app.core.logging import setup_logging
 from app.middleware.security import SecurityHeadersMiddleware
@@ -47,7 +47,6 @@ app.include_router(user.router)
 app.include_router(user_setting.router)
 app.include_router(role.router)
 app.include_router(permission.router)
-app.include_router(feature.router)
 app.include_router(role_permission.router)
 app.include_router(category.router)
 

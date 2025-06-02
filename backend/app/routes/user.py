@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.schemas.user import UserResponse, UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate, ChangePasswordRequest
+from app.schemas.user import UserResponse, UserUpdate,UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate, ChangePasswordRequest
 from app.models.user import User
 from app.routes.auth import get_current_user
 from app.crud import user as crud_user
@@ -46,7 +46,7 @@ def get_user(
 @router.put("/{user_id}", response_model=UserResponse)
 def update_user(
     user_id: int,
-    user_update: UserResponse,
+    user_update: UserUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):

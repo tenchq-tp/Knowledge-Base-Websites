@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 
 class PermissionBase(BaseModel):
-    icon: Optional[str] = Field(None, max_length=255)
     name: str = Field(..., max_length=50)
     description: Optional[str] = Field(None, max_length=255)
 

@@ -25,6 +25,16 @@ class UserProfileBase(BaseModel):
 class UserProfileCreate(UserProfileBase):
     pass
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+    role_id: Optional[int] = None
+    is_verified: Optional[bool] = None
+
+    class Config:
+        from_attributes = True
+
 class UserProfileUpdate(UserProfileBase):
     pass
 
@@ -57,7 +67,6 @@ class UserSafeResponse(BaseModel):
     username: str
     role_id: Optional[int] = None
     is_verified: bool
-    profile: Optional[UserProfileResponse] = None
     session_id: Optional[str] = None
     
     class Config:
@@ -74,19 +83,13 @@ class SessionResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        
-class UserWithSession(UserSafeResponse):
-    session_id: str
-
-    class Config:
-        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
     refresh_token: Optional[str] = None
     token_type: str = "bearer"
     expires_in: int  # seconds
-    user: UserWithSession 
+    user: UserSafeResponse
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str

@@ -8,8 +8,6 @@ class RolePermission(Base):
     id = Column(Integer, primary_key=True, index=True)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     permission_id = Column(Integer, ForeignKey("permissions.id"), nullable=False)
-    feature_id = Column(Integer, ForeignKey("features.id"), nullable=False)
 
     role = relationship("Role", back_populates="permissions")
     permission = relationship("Permission", back_populates="roles")
-    feature = relationship("Feature", back_populates="permissions")

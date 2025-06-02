@@ -128,23 +128,24 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), request: Reques
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username, "session_id": str(session.id)},  # ใช้ username เป็น sub
+        data={"sub": user.username, "session_id": str(session.id)},
         expires_delta=access_token_expires
     )
-    
+
+    user_safe = UserSafeResponse(
+        id=user.id,
+        username=user.username,
+        role_id=user.role_id,
+        is_verified=user.is_verified,
+        session_id=str(session.id),
+    )
+
     return Token(
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="bearer",
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        user=UserSafeResponse(
-            id=user.id,
-            username=user.username,
-            role_id=user.role_id,
-            is_verified=user.is_verified,
-            profile=user.profile,
-            session_id=str(session.id),
-        )
+        user=user_safe
     )
 
 @router.post("/refresh", response_model=Token)

@@ -13,8 +13,13 @@ def get_all_role_permissions(db: Session = Depends(get_db), current_user: User =
     return crud.get_all_role_permissions(db)
 
 @router.post("/", response_model=schemas.RolePermissionResponse)
-def create_role_permission(data: schemas.RolePermissionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return crud.create_role_permission(db, data)
+def create_role_permission(
+    rp: schemas.RolePermissionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return crud.create_role_permission(db, rp)
+
 
 @router.get("/{rp_id}", response_model=schemas.RolePermissionResponse)
 def get_role_permission(rp_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -22,6 +27,16 @@ def get_role_permission(rp_id: int, db: Session = Depends(get_db), current_user:
     if not rp:
         raise HTTPException(status_code=404, detail="RolePermission not found")
     return rp
+
+@router.get("/role/{role_id}", response_model=list[schemas.RolePermissionResponse])
+def get_role_permissions_by_role_id(
+    role_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    rps = crud.get_role_permissions_by_role_id(db, role_id)
+    return rps
+
 
 @router.put("/{role_permission_id}", response_model=schemas.RolePermissionResponse)
 def update_role_permission(role_permission_id: int, data: schemas.RolePermissionUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -36,3 +51,4 @@ def delete_role_permission(role_permission_id: int, db: Session = Depends(get_db
     if not deleted:
         raise HTTPException(status_code=404, detail="RolePermission not found")
     return deleted
+
