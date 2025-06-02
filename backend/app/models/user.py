@@ -9,10 +9,6 @@ import random
 import hashlib
 import uuid
 
-class UserRole(str, enum.Enum):
-    USER = "user"
-    MODERATOR = "moderator"
-
 class GenderType(str, enum.Enum):
     MALE = "male"
     FEMALE = "female"
@@ -34,7 +30,7 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)  # bcrypt/scrypt/argon2 hashed
-    role = Column(Enum(UserRole), default=UserRole.USER, index=True)
+    role_id = Column(BigInteger, ForeignKey("roles.id"))
     is_verified = Column(Boolean, default=False, index=True)
     last_login = Column(DateTime(timezone=True), index=True)
     
@@ -48,7 +44,8 @@ class User(Base):
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan", foreign_keys="[UserProfile.user_id]")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     setting = relationship("UserSetting", back_populates="user", uselist=False)
-
+    role = relationship("Role", back_populates="users")
+    
     # Self-referential relationships for audit (nullable)
     creator = relationship("User", foreign_keys=[created_by], remote_side=[id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[id], post_update=True)
@@ -174,3 +171,5 @@ class UserSession(Base):
     def invalidate(self):
         """Invalidate this session"""
         self.is_active = False
+        
+        

@@ -3,8 +3,10 @@ from sqlalchemy import and_, or_
 from typing import Optional, List
 from datetime import datetime, timedelta
 from app.models.user import User, UserProfile, UserSession
-from app.schemas.user import UserCreate, UserProfileCreate, UserProfileUpdate
+from app.models.role import Role
+from app.schemas.user import UserCreate, UserProfileCreate, UserProfileUpdate, UserResponse
 from app.core.security import get_password_hash, verify_password, generate_secure_token, hash_token
+from fastapi import HTTPException
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     """Get user by email with profile"""
@@ -21,30 +23,33 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
 def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None) -> User:
     """Create new user with hashed password and auto-created profile"""
     hashed_password = get_password_hash(user.password)
-    
-    # Create user
+
     db_user = User(
         username=user.username,
         email=user.email,
         password=hashed_password,
-        role=user.role,
+        role_id=user.role_id,
         created_by=created_by,
         modified_by=created_by
     )
     db.add(db_user)
-    db.flush()  # Get the ID without committing
-    
-    # Create profile with same ID (trigger will handle this, but we can also do it manually)
+    db.flush()  # เพื่อให้ db_user.id ถูกสร้าง
+
+    # 👇 ดึงค่าจาก user.profile ถ้ามี
+    profile_data = user.profile.dict() if user.profile else {}
+
     db_profile = UserProfile(
         id=db_user.id,
         user_id=db_user.id,
         created_by=created_by,
-        modified_by=created_by
+        modified_by=created_by,
+        **profile_data  # 👈 เติมข้อมูล profile ทั้งหมด
     )
+
     db.add(db_profile)
     db.commit()
     db.refresh(db_user)
-    
+
     return db_user
 
 def update_user_profile(db: Session, user_id: int, profile_update: UserProfileUpdate, 
@@ -252,3 +257,23 @@ def delete_user(db: Session, user: User) -> User:
     db.delete(user)
     db.commit()
     return user
+
+def update_user(db: Session, user_id: int, user_update: UserResponse, modified_by: Optional[int] = None) -> Optional[User]:
+    """Update user basic info including role"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+
+    update_data = user_update.model_dump(exclude_unset=True)
+    
+    if "password" in update_data:
+        user.password = get_password_hash(update_data.pop("password"))  # แฮชรหัสผ่านใหม่
+
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
+    user.modified_by = modified_by
+    db.commit()
+    db.refresh(user)
+    return user
+

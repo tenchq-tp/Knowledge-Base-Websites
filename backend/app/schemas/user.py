@@ -1,16 +1,12 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime, date
-from app.models.user import UserRole, GenderType
+from app.models.user import GenderType
 
 class UserBase(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
-
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=8, max_length=128)
-    role: Optional[UserRole] = UserRole.USER
-
+   
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -45,7 +41,7 @@ class UserProfileResponse(UserProfileBase):
 
 class UserResponse(UserBase):
     id: int
-    role: UserRole
+    role_id: Optional[int] = None
     is_verified: bool
     last_login: Optional[datetime] = None
     created_at: datetime
@@ -59,7 +55,7 @@ class UserSafeResponse(BaseModel):
     """Safe user response without sensitive data"""
     id: int
     username: str
-    role: UserRole
+    role_id: Optional[int] = None
     is_verified: bool
     profile: Optional[UserProfileResponse] = None
     session_id: Optional[str] = None
@@ -98,15 +94,14 @@ class RefreshTokenRequest(BaseModel):
 class LogoutRequest(BaseModel):
     username: str
 
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    role: Optional[UserRole] = "user"
-    is_verified: Optional[bool] = False
-    profile: Optional[UserProfileBase] = None
-
 class ChangePasswordRequest(BaseModel):
     username: str = Field(...,min_length=3, max_length=50)
     old_password: str = Field(...,min_length=8)
     new_password: str = Field(...,min_length=8)
+
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=8, max_length=128)
+    role_id: Optional[int] = None
+    is_verified: Optional[bool] = False
+    profile: Optional[UserProfileBase] = None
+ 

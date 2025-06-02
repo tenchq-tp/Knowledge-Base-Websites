@@ -1,18 +1,17 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
-class RoleBase(BaseModel):
-    icon: Optional[str] = Field(None, max_length=255)
-    name: str = Field(..., max_length=50)
+class FeatureBase(BaseModel):
+    name: str = Field(..., max_length=100)
     description: Optional[str] = Field(None, max_length=255)
 
-class RoleCreate(RoleBase):
+class FeatureCreate(FeatureBase):
     pass
 
-class RoleUpdate(RoleBase):
+class FeatureUpdate(FeatureBase):
     pass
 
-class RoleResponse(RoleBase):
+class FeatureResponse(FeatureBase):
     id: int
 
     class Config:

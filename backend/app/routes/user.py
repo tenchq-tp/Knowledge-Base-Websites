@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.user import UserResponse, UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate, ChangePasswordRequest
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.routes.auth import get_current_user
 from app.crud import user as crud_user
 from app.core.security import verify_password, get_password_hash, validate_password_strength
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/users", tags=["User Management"])
 def list_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    role: Optional[UserRole] = Query(None),
+    role: Optional[str] = Query(None),
     is_verified: Optional[bool] = Query(None),
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -24,7 +24,7 @@ def list_users(
         db=db, 
         skip=skip, 
         limit=limit, 
-        role=role.value if role else None,
+        role=role if role else None,
         is_verified=is_verified
     )
     return users
@@ -43,26 +43,17 @@ def get_user(
         )
     return user
 
-@router.put("/{user_id}/role")
-def update_user_role(
+@router.put("/{user_id}", response_model=UserResponse)
+def update_user(
     user_id: int,
-    new_role: UserRole,
+    user_update: UserResponse,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    user = crud_user.get_user_by_id(db, user_id=user_id)
+    user = crud_user.update_user(db, user_id=user_id, user_update=user_update, modified_by=current_user.id)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    user.role = new_role
-    user.modified_by = current_user.id
-    db.commit()
-    db.refresh(user)
-    
-    return {"message": f"User role updated to {new_role.value}", "user": UserSafeResponse.from_orm(user)}
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 @router.put("/{user_id}/verify")
 def verify_user(
@@ -198,8 +189,9 @@ def create_user_by_authenticated_user(
     return UserSafeResponse(
         id=new_user.id,
         username=new_user.username,
-        role=new_user.role,
+        role_id=new_user.role_id,
         is_verified=new_user.is_verified,
         profile=new_user.profile,
         session_id=None
     )
+    

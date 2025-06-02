@@ -76,7 +76,7 @@ def search_users(
         UserSafeResponse(
             id=user.id,
             username=user.username,
-            role=user.role,
+            role_id=user.role_id,
             is_verified=user.is_verified,
             profile=user.profile
         )

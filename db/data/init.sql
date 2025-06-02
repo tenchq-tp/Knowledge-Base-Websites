@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) UNIQUE NOT NULL,
     email CITEXT UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL, -- bcrypt/scrypt/argon2 hashed
-    role user_role DEFAULT 'user',
+    role_id INTEGER REFERENCES roles(id),
     is_verified BOOLEAN DEFAULT FALSE,
     last_login TIMESTAMP WITH TIME ZONE,
     
@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS users (
     modified_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     modified_by BIGINT REFERENCES users(id) -- NULLABLE
 );
+
 
 -- 2. USER_PROFILES TABLE (Profile data)
 CREATE TABLE IF NOT EXISTS user_profiles (

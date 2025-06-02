@@ -101,7 +101,7 @@ def register_user(user: UserCreate, request: Request, db: Session = Depends(get_
     return UserSafeResponse(
         id=new_user.id,
         username=new_user.username,
-        role=new_user.role,
+        role_id=new_user.role_id,
         is_verified=new_user.is_verified,
         profile=new_user.profile
     )
@@ -140,7 +140,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), request: Reques
         user=UserSafeResponse(
             id=user.id,
             username=user.username,
-            role=user.role,
+            role_id=user.role_id,
             is_verified=user.is_verified,
             profile=user.profile,
             session_id=str(session.id),
@@ -180,7 +180,7 @@ def refresh_token(refresh_request: RefreshTokenRequest, request: Request, db: Se
         user=UserSafeResponse(
             id=user.id,
             username=user.username,
-            role=user.role,
+            role_id=user.role_id,
             is_verified=user.is_verified,
             profile=user.profile
         )

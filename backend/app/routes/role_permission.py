@@ -1,0 +1,38 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from app.db.database import get_db
+import app.crud.role_permission as crud
+import app.schemas.role_permission as schemas
+from app.routes.auth import get_current_user
+from app.models.user import User
+
+router = APIRouter(prefix="/role-permissions", tags=["RolePermission"])
+
+@router.get("/", response_model=list[schemas.RolePermissionResponse])
+def get_all_role_permissions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return crud.get_all_role_permissions(db)
+
+@router.post("/", response_model=schemas.RolePermissionResponse)
+def create_role_permission(data: schemas.RolePermissionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return crud.create_role_permission(db, data)
+
+@router.get("/{rp_id}", response_model=schemas.RolePermissionResponse)
+def get_role_permission(rp_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    rp = crud.get_role_permission_by_id(db, rp_id)
+    if not rp:
+        raise HTTPException(status_code=404, detail="RolePermission not found")
+    return rp
+
+@router.put("/{role_permission_id}", response_model=schemas.RolePermissionResponse)
+def update_role_permission(role_permission_id: int, data: schemas.RolePermissionUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    updated = crud.update_role_permission(db, role_permission_id, data)
+    if not updated:
+        raise HTTPException(status_code=404, detail="RolePermission not found")
+    return updated
+
+@router.delete("/{role_permission_id}", response_model=schemas.RolePermissionResponse)
+def delete_role_permission(role_permission_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    deleted = crud.delete_role_permission(db, role_permission_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="RolePermission not found")
+    return deleted
