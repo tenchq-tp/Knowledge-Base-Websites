@@ -159,6 +159,8 @@ export default function CreateCategoryModal({
     const iconColor = selectedIcon ? selectedColor : "#ccc";
 
     try {
+      const accessToken = localStorage.getItem("access_token");
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API}/categories${
           mode === "edit" ? `/${categoryData.id}` : ""
@@ -167,6 +169,7 @@ export default function CreateCategoryModal({
           method: mode === "edit" ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             icon: `${iconName}_${iconColor.replace("#", "")}`,
@@ -234,7 +237,9 @@ export default function CreateCategoryModal({
             <FaQuestionCircle size={64} color="#ccc" />
           )}
         </div>
-
+        <h4 className={styles.sectionTitle}>
+          {t("categoryModal.selectColorTitle")}
+        </h4>
         <div className={styles.colorPicker}>
           {colors.map((color) => (
             <div
@@ -247,7 +252,9 @@ export default function CreateCategoryModal({
             />
           ))}
         </div>
-
+        <h4 className={styles.sectionTitle}>
+          {t("categoryModal.selectIconTitle")}
+        </h4>
         <div className={styles.searchBox}>
           <FaSearch className={styles.searchIcon} />
           <input

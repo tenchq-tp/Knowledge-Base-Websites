@@ -25,9 +25,20 @@ export default function Homepage() {
   useEffect(() => {
     async function fetchCategories() {
       setLoading(true);
+
+      const accessToken = localStorage.getItem("access_token");
+
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API}/categories`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API}/categories`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
         const data = await res.json();
+
         if (Array.isArray(data)) {
           setCategories(data);
         } else {
@@ -41,6 +52,7 @@ export default function Homepage() {
         setLoading(false);
       }
     }
+
     fetchCategories();
   }, []);
 

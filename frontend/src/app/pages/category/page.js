@@ -18,10 +18,20 @@ export default function CategoryPage() {
 
   async function fetchCategories() {
     setLoading(true);
+    const accessToken = localStorage.getItem("access_token");
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API}/categories`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API}/categories`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
       const data = await res.json();
       console.log("Fetched categories:", data); // เช็คข้อมูล
+
       if (Array.isArray(data)) {
         setCategories(data);
       } else {
@@ -56,6 +66,8 @@ export default function CategoryPage() {
 
   // ฟังก์ชันลบ category พร้อม Swal และ fetch ใหม่
   const handleDelete = async (categoryId) => {
+    const accessToken = localStorage.getItem("access_token");
+
     const result = await Swal.fire({
       title: t("categoryModal.deleteConfirmTitle"),
       text: t("categoryModal.deleteConfirmText"),
@@ -73,6 +85,10 @@ export default function CategoryPage() {
           `${process.env.NEXT_PUBLIC_API}/categories/${categoryId}`,
           {
             method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
           }
         );
 

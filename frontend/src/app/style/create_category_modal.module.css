@@ -206,3 +206,17 @@
 .cancelBtn:hover {
     background-color: #999;
 }
+
+.sectionTitle {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-left: 4px solid #dc3545;
+    /* สีแดงเข้ม */
+    padding-left: 12px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}

@@ -17,7 +17,8 @@ const resources = {
         createArticle: "สร้างบทความ",
         read: "อ่าน",
         edit: "แก้ไข",
-        delete: "ลบ"
+        delete: "ลบ",
+        backtoearth: "กลับสู่โลก"
       },
       settings: {
         title: "การตั้งค่า",
@@ -119,7 +120,8 @@ const resources = {
         createArticle: "Create Article",
         read: "Read",
         edit: "Edit",
-        delete: "Delete"
+        delete: "Delete",
+        backtoearth: "Back to Earth"
       },
       settings: {
         title: "Settings",
