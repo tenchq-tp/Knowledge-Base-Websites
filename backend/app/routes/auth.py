@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -218,9 +218,27 @@ def logout_user(
     db: Session = Depends(get_db)
 ):
     session_id = UUID(jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])["session_id"])
-    session = db.query(UserSession).filter_by(id=session_id).first()
-    if session:
-        session.is_active = False
+    old_session = db.query(UserSession).filter_by(id=session_id).first()
+    if old_session:
+        # สร้าง record ใหม่ โดย copy ข้อมูลจาก session เก่า
+        new_session = UserSession(
+            user_id=old_session.user_id,
+            session_token_hash="-",
+            refresh_token_hash=None,
+            device_info=old_session.device_info,
+            ip_address=old_session.ip_address,
+            user_agent=old_session.user_agent,
+            expires_at=old_session.expires_at,
+            refresh_expires_at=old_session.refresh_expires_at,
+            is_active=False,  # ปิด session ใหม่ (id ใหม่)
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow()
+        )
+        db.add(new_session)
+
+        # ลบ record เก่าที่เป็น is_active=True ทิ้งไปเลย (หรือจะลบก็ได้ตามต้องการ)
+        db.delete(old_session)
+
         db.commit()
 
     return {"message": f"User '{current_user.username}' logged out successfully"}

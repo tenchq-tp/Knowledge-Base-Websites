@@ -79,7 +79,6 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
     if not verify_password(password, user.password):
         return None
     
-    # Update last login
     user.last_login = datetime.utcnow()
     db.commit()
     
@@ -120,16 +119,20 @@ def verify_user_email(db: Session, user_id: int, verified_by: Optional[int] = No
     db.commit()
     return True
 
-# Session Management CRUD
-def create_user_session(db: Session, user_id: int, device_info: Optional[str] = None,
-                       ip_address: Optional[str] = None, user_agent: Optional[str] = None,
-                       session_expires_minutes: int = 30, refresh_expires_hours: int = 168) -> tuple[UserSession, str, str]:
-    """Create new session with secure tokens"""
-    # Generate secure tokens
-    session_token = generate_secure_token(32)
-    refresh_token = generate_secure_token(32)
-    
-    # Create session with hashed tokens
+def create_user_session(db: Session, user_id: int, device_info: str = None, ip_address: str = None, user_agent: str = None,
+                        session_expires_minutes: int = 30, refresh_expires_hours: int = 168):
+    session_token = generate_secure_token()  # สร้าง token ใหม่
+    refresh_token = generate_secure_token()  # สร้าง refresh token ใหม่
+
+    # หา session เก่า active
+    old_session = db.query(UserSession).filter_by(user_id=user_id, is_active=True).first()
+
+    if old_session:
+        # ลบ session เก่าออกเลย
+        db.delete(old_session)
+        db.commit()
+
+    # สร้าง session ใหม่ (id ใหม่)
     session = UserSession.create_session(
         user_id=user_id,
         session_token=session_token,
@@ -140,11 +143,10 @@ def create_user_session(db: Session, user_id: int, device_info: Optional[str] = 
         session_expires_minutes=session_expires_minutes,
         refresh_expires_hours=refresh_expires_hours
     )
-    
     db.add(session)
     db.commit()
     db.refresh(session)
-    
+
     return session, session_token, refresh_token
 
 def validate_session_token(db: Session, session_token: str) -> Optional[UserSession]:
@@ -258,7 +260,6 @@ def delete_user(db: Session, user: User) -> User:
     return user
 
 def update_user(db: Session, user_id: int, user_update: UserResponse, modified_by: Optional[int] = None) -> Optional[User]:
-    """Update user basic info including role"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return None
@@ -266,10 +267,14 @@ def update_user(db: Session, user_id: int, user_update: UserResponse, modified_b
     update_data = user_update.model_dump(exclude_unset=True)
     
     if "password" in update_data:
-        user.password = get_password_hash(update_data.pop("password"))  # แฮชรหัสผ่านใหม่
+        user.password = get_password_hash(update_data.pop("password"))
 
     for key, value in update_data.items():
         setattr(user, key, value)
+
+    # Sync profile.role_id if profile exists and role_id updated
+    if "role_id" in update_data and user.profile:
+        user.profile.role_id = update_data["role_id"]
 
     user.modified_by = modified_by
     db.commit()
