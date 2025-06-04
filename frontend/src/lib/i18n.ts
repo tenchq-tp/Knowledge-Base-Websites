@@ -50,7 +50,12 @@ const resources = {
           light: "ธีมสว่าง",
           dark: "ธีมมืด",
           auto: "อัตโนมัติ (ระบบ)",
-          apply: "ใช้ธีม"
+          apply: "ใช้ธีม",
+          changed: "เปลี่ยนธีมเรียบร้อยแล้ว",
+          lightMode: "โหมดสว่าง",
+          darkMode: "โหมดมืด",
+          switchedToLight: "เปลี่ยนเป็นโหมดสว่างแล้ว",
+          switchedToDark: "เปลี่ยนเป็นโหมดมืดแล้ว"
         },
         language: {
           title: "การตั้งค่าภาษา",
@@ -153,7 +158,12 @@ const resources = {
           light: "Light Theme",
           dark: "Dark Theme",
           auto: "Auto (System)",
-          apply: "Apply Theme"
+          apply: "Apply Theme",
+          changed: "Theme changed successfully",
+          lightMode: "Light Mode",
+          darkMode: "Dark Mode",
+          switchedToLight: "Switched to Light Mode",
+          switchedToDark: "Switched to Dark Mode"
         },
         language: {
           title: "Language Settings",
@@ -168,46 +178,203 @@ const resources = {
           title: "Save Error",
           message: "Failed to save settings. Please try again."
         }
-      },
-      logout: {
-        confirm_title: "Confirm Logout",
-        confirm_text: "Are you sure you want to log out?",
-        yes_logout: "Yes, Logout",
-        cancel: "Cancel",
-        success_title: "Logged Out",
-        warning_title: "Logout Warning",
-        warning_text: "Logout failed on server, but you are logged out locally.",
-        error_title: "Error",
-        error_text: "Unable to logout. Please try again later.",
-      },
-      categoryModal: {
-        deleteSuccessTitle: "Deleted Successfully",
-        deleteSuccessText: "The category has been successfully removed",
-        createTitle: "Create Category",
-        deleteConfirmTitle: "Confirm Deletion",
-        deleteConfirmText: "Are you sure you want to delete this category? This action cannot be undone.",
-        confirmYes: "Yes",
-        confirmNo: "No",
-        editTitle: "Edit Category",
-        nameLabel: "Category Name *",
-        descriptionLabel: "Description (optional)",
-        nameLabelinput: "Enter category name...",  
-        descriptionLabelinput: "Enter short description...", 
-        searchPlaceholder: "Search icon...",
-        
-        createBtn: "Create",
-        updateBtn: "Update",
-        cancelBtn: "Cancel",
-        successTitle: "Success!",
-        successCreate: "Category created successfully",
-        successUpdate: "Category updated successfully",
-        errorTitle: "Failed!",
-        errorCreate: "Failed to create category",
-        errorUpdate: "Failed to update category"
       }
-      
     }
-    
+  },
+
+  zh: {
+    translation: {
+      navbar: {
+        welcome: "欢迎 - KB",
+        home: "首页",
+        dashboard: "仪表盘",
+        article: "文章",
+        profile: "个人资料",
+        settings: "设置",
+        logout: "登出"
+      },
+      settings: {
+        title: "设置",
+        subtitle: "管理您的账户设置和偏好",
+        user: {
+          title: "用户设置",
+          username: "用户名",
+          email: "邮箱",
+          firstName: "名",
+          lastName: "姓",
+          edit: "编辑",
+          cancel: "取消",
+          save: "保存用户设置"
+        },
+        role: {
+          title: "角色设置",
+          current: "当前角色",
+          select: "选择角色",
+          admin: "管理员",
+          user: "用户",
+          moderator: "版主",
+          guest: "访客",
+          edit: "编辑",
+          cancel: "取消",
+          save: "保存角色设置"
+        },
+        theme: {
+          title: "主题设置",
+          light: "浅色主题",
+          dark: "深色主题",
+          auto: "自动（系统）",
+          apply: "应用主题",
+          changed: "主题更改成功",
+          lightMode: "浅色模式",
+          darkMode: "深色模式",
+          switchedToLight: "已切换到浅色模式",
+          switchedToDark: "已切换到深色模式"
+        },
+        language: {
+          title: "语言设置",
+          select: "选择语言",
+          save: "保存语言"
+        },
+        success: {
+          title: "保存成功",
+          message: "您的设置已成功保存！"
+        },
+        error: {
+          title: "保存错误",
+          message: "保存设置失败，请重试。"
+        }
+      }
+    }
+  },
+
+  ja: {
+    translation: {
+      navbar: {
+        welcome: "ようこそ - KB",
+        home: "ホーム",
+        dashboard: "ダッシュボード",
+        article: "記事",
+        profile: "プロフィール",
+        settings: "設定",
+        logout: "ログアウト"
+      },
+      settings: {
+        title: "設定",
+        subtitle: "アカウント設定と環境設定を管理",
+        user: {
+          title: "ユーザー設定",
+          username: "ユーザー名",
+          email: "メール",
+          firstName: "名",
+          lastName: "姓",
+          edit: "編集",
+          cancel: "キャンセル",
+          save: "ユーザー設定を保存"
+        },
+        role: {
+          title: "役割設定",
+          current: "現在の役割",
+          select: "役割を選択",
+          admin: "管理者",
+          user: "ユーザー",
+          moderator: "モデレーター",
+          guest: "ゲスト",
+          edit: "編集",
+          cancel: "キャンセル",
+          save: "役割設定を保存"
+        },
+        theme: {
+          title: "テーマ設定",
+          light: "ライトテーマ",
+          dark: "ダークテーマ",
+          auto: "自動（システム）",
+          apply: "テーマを適用",
+          changed: "テーマを変更しました",
+          lightMode: "ライトモード",
+          darkMode: "ダークモード",
+          switchedToLight: "ライトモードに切り替えました",
+          switchedToDark: "ダークモードに切り替えました"
+        },
+        language: {
+          title: "言語設定",
+          select: "言語を選択",
+          save: "言語を保存"
+        },
+        success: {
+          title: "保存成功",
+          message: "設定が正常に保存されました！"
+        },
+        error: {
+          title: "保存エラー",
+          message: "設定の保存に失敗しました。再試行してください。"
+        }
+      }
+    }
+  },
+
+  ko: {
+    translation: {
+      navbar: {
+        welcome: "환영합니다 - KB",
+        home: "홈",
+        dashboard: "대시보드",
+        article: "기사",
+        profile: "프로필",
+        settings: "설정",
+        logout: "로그아웃"
+      },
+      settings: {
+        title: "설정",
+        subtitle: "계정 설정 및 환경 설정 관리",
+        user: {
+          title: "사용자 설정",
+          username: "사용자명",
+          email: "이메일",
+          firstName: "이름",
+          lastName: "성",
+          edit: "편집",
+          cancel: "취소",
+          save: "사용자 설정 저장"
+        },
+        role: {
+          title: "역할 설정",
+          current: "현재 역할",
+          select: "역할 선택",
+          admin: "관리자",
+          user: "사용자",
+          moderator: "모더레이터",
+          guest: "게스트",
+          edit: "편집",
+          cancel: "취소",
+          save: "역할 설정 저장"
+        },
+        theme: {
+          title: "테마 설정",
+          light: "라이트 테마",
+          dark: "다크 테마",
+          auto: "자동 (시스템)",
+          apply: "테마 적용",
+          changed: "테마가 변경되었습니다",
+          lightMode: "라이트 모드",
+          darkMode: "다크 모드",
+          switchedToLight: "라이트 모드로 전환했습니다",
+          switchedToDark: "다크 모드로 전환했습니다"
+        },
+        language: {
+          title: "언어 설정",
+          select: "언어 선택",
+          save: "언어 저장"
+        },
+        success: {
+          title: "저장 성공",
+          message: "설정이 성공적으로 저장되었습니다!"
+        },
+        error: {
+          title: "저장 오류",
+          message: "설정 저장에 실패했습니다. 다시 시도해주세요."
+        }
+      }
+    }
   }
 };
 
