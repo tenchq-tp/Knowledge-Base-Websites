@@ -13,6 +13,32 @@ const resources = {
         settings: "การตั้งค่า",
         logout: "ออกจากระบบ"
       },
+      profile: {
+        loading: "กำลังโหลดข้อมูลโปรไฟล์...",
+        myProfile: "ข้อมูลโปรไฟล์ของฉัน",
+        editmyProfile: "เเก้ไขโปรไฟล์ของฉัน",
+        title: "คำนำหน้า",
+        selectTitle: "เลือกคำนำหน้า",
+        fullName: "ชื่อเต็ม",
+        displayName: "ชื่อที่ใช้แสดง",
+        firstName: "ชื่อ",
+        lastName: "นามสกุล",
+        phone: "เบอร์โทรศัพท์",
+        dateOfBirth: "วันเกิด",
+        gender: "เพศ",
+        selectGender: "เลือกเพศ",
+        male: "ชาย",
+        female: "หญิง",
+        other: "อื่นๆ",
+        country: "ประเทศ",
+        city: "เมือง",
+        address: "ที่อยู่",
+        edit: "แก้ไข",
+        save: "บันทึก",
+        saveSuccess:"บันทึกสำเร็จ"
+        
+        
+      },
       actions: {
         createArticle: "สร้างบทความ",
         read: "อ่าน",
@@ -105,7 +131,10 @@ const resources = {
         successUpdate: "อัปเดตหมวดหมู่เรียบร้อยแล้ว",
         errorTitle: "ล้มเหลว!",
         errorCreate: "ไม่สามารถสร้างหมวดหมู่ได้",
-        errorUpdate: "ไม่สามารถอัปเดตหมวดหมู่ได้"
+        errorUpdate: "ไม่สามารถอัปเดตหมวดหมู่ได้",
+        selectColorTitle: "เลือกสี",
+        selectIconTitle: "เลือกไอคอน"
+
       }
     }
   },
@@ -121,6 +150,31 @@ const resources = {
         settings: "Settings",
         logout: "Logout"
       },
+      profile: {
+        saveSuccess:"Save Success",
+        editmyProfile: "Edit My Profile",
+        loading: "Loading profile...",
+        myProfile: "My Profile",
+        title: "Title",
+        selectTitle: "Select Title",
+        fullName: "Full Name",
+        displayName: "Display Name",
+        firstName: "First Name",
+        lastName: "Last Name",
+        phone: "Phone",
+        dateOfBirth: "Date of Birth",
+        gender: "Gender",
+        selectGender: "Select Gender",
+        male: "Male",
+        female: "Female",
+        other: "Other",
+        country: "Country",
+        city: "City",
+        address: "Address",
+        edit: "Edit",
+        save: "Save"
+      },
+      
       actions: {
         createArticle: "Create Article",
         read: "Read",
