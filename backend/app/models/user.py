@@ -28,9 +28,9 @@ class User(Base):
 
     id = Column(BigInteger, primary_key=True, default=generate_user_id)
     username = Column(String(50), unique=True, nullable=False, index=True)
-    email = Column(String, unique=True, nullable=False, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)  # bcrypt/scrypt/argon2 hashed
-    role_id = Column(BigInteger, ForeignKey("roles.id"))
+    role_id = Column(BigInteger, ForeignKey("roles.id"), index=True) # เพิ่ม nullable=False ให้ role_id ถ้าต้องการบังคับทุก user ต้องมี role
     is_verified = Column(Boolean, default=False, index=True)
     last_login = Column(DateTime(timezone=True), index=True)
     
@@ -44,11 +44,15 @@ class User(Base):
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan", foreign_keys="[UserProfile.user_id]")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     setting = relationship("UserSetting", back_populates="user", uselist=False)
-    role = relationship("Role", back_populates="users")
+    role = relationship("Role", back_populates="users", foreign_keys=[role_id])
     
     # Self-referential relationships for audit (nullable)
     creator = relationship("User", foreign_keys=[created_by], remote_side=[id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[id], post_update=True)
+    
+    @property
+    def role_name(self) -> str:
+        return self.role.name if self.role else None
 
     def verify_password(self, password: str) -> bool:
         """Verify password against stored hash"""
@@ -62,9 +66,7 @@ class User(Base):
 class UserProfile(Base):
     __tablename__ = "user_profiles"
 
-    id = Column(BigInteger, primary_key=True)  # Same as user.id
-    user_id = Column(BigInteger, ForeignKey('users.id'), unique=True, nullable=False)
-    
+    user_id = Column(BigInteger,ForeignKey('users.id', ondelete='CASCADE'),primary_key=True)
     # Personal information
     title = Column(String(50))  # Mr., Ms., Dr., etc.
     first_name = Column(String(50), index=True)
@@ -72,6 +74,7 @@ class UserProfile(Base):
     phone = Column(String(20))
     date_of_birth = Column(Date)
     gender = Column(Enum(GenderType), index=True)  # ENUM for data integrity
+    role_id = Column(BigInteger, ForeignKey("roles.id"), index=True) # เพิ่ม nullable=False ให้ role_id ถ้าต้องการบังคับทุก user ต้องมี role
     
     # Location
     country = Column(String(50), index=True)
@@ -88,6 +91,11 @@ class UserProfile(Base):
     user = relationship("User", back_populates="profile", foreign_keys=[user_id])
     creator = relationship("User", foreign_keys=[created_by], remote_side=[User.id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[User.id], post_update=True)
+    role = relationship("Role", viewonly=True)
+
+    @property
+    def role_name(self) -> str:
+        return self.role.name if self.role else None
 
     @property
     def full_name(self) -> str:
@@ -113,34 +121,34 @@ class UserSession(Base):
     __tablename__ = "user_sessions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(BigInteger, ForeignKey('users.id'), nullable=False, index=True)
-    
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+
     # Hashed tokens (NOT plain JWT!)
-    session_token_hash = Column(String(255), nullable=False, index=True)  # SHA-256 hash
-    refresh_token_hash = Column(String(255), index=True)  # SHA-256 hash
-    
+    session_token_hash = Column(String(255), nullable=False, unique=True, index=True)  # SHA-256 hash
+    refresh_token_hash = Column(String(255), nullable=True, unique=True, index=True)   # SHA-256 hash
+
     # Session metadata
-    device_info = Column(Text)
-    ip_address = Column(INET, index=True)
-    user_agent = Column(Text)
+    device_info = Column(Text, nullable=True)
+    ip_address = Column(INET, nullable=True, index=True)
+    user_agent = Column(Text, nullable=True)
+
     expires_at = Column(DateTime(timezone=True), nullable=False, index=True)
-    refresh_expires_at = Column(DateTime(timezone=True))  # Separate expiry for refresh token
+    refresh_expires_at = Column(DateTime(timezone=True), nullable=True)
+
     is_active = Column(Boolean, default=True, index=True)
-    
-    # Simplified audit (no created_by/modified_by as suggested)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    
-    # Relationships
+
+    # Relationship to User
     user = relationship("User", back_populates="sessions")
 
     @classmethod
     def create_session(cls, user_id: int, session_token: str, refresh_token: str = None, 
-                      device_info: str = None, ip_address: str = None, user_agent: str = None,
-                      session_expires_minutes: int = 30, refresh_expires_hours: int = 168):
+                       device_info: str = None, ip_address: str = None, user_agent: str = None,
+                       session_expires_minutes: int = 30, refresh_expires_hours: int = 168):
         """Create new session with hashed tokens"""
         from datetime import datetime, timedelta
-        
+
         return cls(
             user_id=user_id,
             session_token_hash=hash_token(session_token),
@@ -156,7 +164,8 @@ class UserSession(Base):
         """Validate session token against stored hash"""
         if not self.is_active:
             return False
-        if self.expires_at and self.expires_at < func.now():
+        from datetime import datetime
+        if self.expires_at and self.expires_at < datetime.utcnow():
             return False
         return self.session_token_hash == hash_token(token)
 
@@ -164,12 +173,12 @@ class UserSession(Base):
         """Validate refresh token against stored hash"""
         if not self.is_active or not self.refresh_token_hash:
             return False
-        if self.refresh_expires_at and self.refresh_expires_at < func.now():
+        from datetime import datetime
+        if self.refresh_expires_at and self.refresh_expires_at < datetime.utcnow():
             return False
         return self.refresh_token_hash == hash_token(token)
 
     def invalidate(self):
         """Invalidate this session"""
         self.is_active = False
-        
-        
+       

@@ -18,20 +18,17 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         client_ip = request.client.host
         now = datetime.utcnow()
 
-        # ลบ request เก่า ๆ เกินช่วงเวลาออก
         self.clients[client_ip] = [
             ts for ts in self.clients[client_ip]
             if now - ts < timedelta(seconds=self.period)
         ]
 
-        # ตรวจสอบจำนวน request
         if len(self.clients[client_ip]) >= self.calls:
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Rate limit exceeded"}
             )
 
-        # บันทึก timestamp ของ request นี้
         self.clients[client_ip].append(now)
 
         return await call_next(request)

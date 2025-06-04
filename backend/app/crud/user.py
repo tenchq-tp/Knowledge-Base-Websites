@@ -39,7 +39,6 @@ def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None)
     profile_data = user.profile.dict() if user.profile else {}
 
     db_profile = UserProfile(
-        id=db_user.id,
         user_id=db_user.id,
         created_by=created_by,
         modified_by=created_by,

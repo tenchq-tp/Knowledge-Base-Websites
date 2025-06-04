@@ -1,17 +1,16 @@
 from pydantic import BaseModel
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List, Union, TYPE_CHECKING
 from app.schemas.permission import PermissionResponse
 
 class RolePermissionBase(BaseModel):
     role_id: int
-    permission_id: int
+    permission_id: Union[int, List[int]]
 
 class RolePermissionCreate(RolePermissionBase):
     pass
 
 class RolePermissionUpdate(RolePermissionBase):
-    role_id: Optional[int] = None
-    permission_id: Optional[int] = None
+    permission_id: Optional[Union[int, List[int]]]
 
 class RolePermissionResponse(RolePermissionBase):
     id: int

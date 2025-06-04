@@ -12,19 +12,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "citext";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- For hash functions
 
--- Create enum types
-DO $$ BEGIN
-    CREATE TYPE user_role AS ENUM ('user', 'moderator');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
-    CREATE TYPE gender_type AS ENUM ('male', 'female', 'other', 'prefer_not_to_say');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
 -- Create function to generate consistent random 10-digit IDs
 CREATE OR REPLACE FUNCTION generate_user_id()
 RETURNS BIGINT AS $$
@@ -51,105 +38,6 @@ BEGIN
     RETURN encode(digest(token, 'sha256'), 'hex');
 END;
 $$ LANGUAGE plpgsql;
-
--- 1. USERS TABLE (Authentication data only)
-CREATE TABLE IF NOT EXISTS users (
-    id BIGINT PRIMARY KEY DEFAULT generate_user_id(),
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email CITEXT UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL, -- bcrypt/scrypt/argon2 hashed
-    role_id INTEGER REFERENCES roles(id),
-    is_verified BOOLEAN DEFAULT FALSE,
-    last_login TIMESTAMP WITH TIME ZONE,
-    
-    -- Audit fields (NULLABLE for first user)
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT REFERENCES users(id), -- NULLABLE
-    modified_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    modified_by BIGINT REFERENCES users(id) -- NULLABLE
-);
-
-
--- 2. USER_PROFILES TABLE (Profile data)
-CREATE TABLE IF NOT EXISTS user_profiles (
-    id BIGINT PRIMARY KEY, -- Same ID as users table
-    user_id BIGINT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    
-    -- Personal information
-    title VARCHAR(50), -- Mr., Ms., Dr., etc.
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    phone VARCHAR(20),
-    date_of_birth DATE,
-    gender gender_type, -- ENUM for data integrity
-    
-    -- Location
-    country VARCHAR(50),
-    city VARCHAR(50),
-    address TEXT,
-    
-    -- Audit fields (NULLABLE)
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    created_by BIGINT REFERENCES users(id), -- NULLABLE
-    modified_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    modified_by BIGINT REFERENCES users(id) -- NULLABLE
-);
-
--- 3. USER_SESSIONS TABLE (Session management - simplified)
-CREATE TABLE IF NOT EXISTS user_sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    
-    -- Hashed tokens (NOT plain JWT!)
-    session_token_hash VARCHAR(255) NOT NULL, -- SHA-256 hash of session token
-    refresh_token_hash VARCHAR(255), -- SHA-256 hash of refresh token
-    
-    -- Session metadata
-    device_info TEXT,
-    ip_address INET,
-    user_agent TEXT,
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    refresh_expires_at TIMESTAMP WITH TIME ZONE, -- Separate expiry for refresh token
-    is_active BOOLEAN DEFAULT TRUE,
-    
-    -- Simplified audit (no created_by/modified_by as suggested)
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    modified_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- 4. CATEGORIES TABLE (Optional, for user categorization)
-CREATE TABLE categories (
-    id SERIAL PRIMARY KEY,
-    icon TEXT,
-    name TEXT NOT NULL,
-    description TEXT
-);
-
--- Create indexes for performance
--- Users table indexes
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
-CREATE INDEX IF NOT EXISTS idx_users_is_verified ON users(is_verified);
-CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
-CREATE INDEX IF NOT EXISTS idx_users_last_login ON users(last_login);
-
--- User profiles indexes
-CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_first_name ON user_profiles(first_name);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_last_name ON user_profiles(last_name);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_country ON user_profiles(country);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_city ON user_profiles(city);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_gender ON user_profiles(gender);
-
--- User sessions indexes
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_session_token_hash ON user_sessions(session_token_hash);
-CREATE INDEX IF NOT EXISTS idx_sessions_refresh_token_hash ON user_sessions(refresh_token_hash);
-CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON user_sessions(expires_at);
-CREATE INDEX IF NOT EXISTS idx_sessions_is_active ON user_sessions(is_active);
-CREATE INDEX IF NOT EXISTS idx_sessions_created_at ON user_sessions(created_at);
-CREATE INDEX IF NOT EXISTS idx_sessions_ip_address ON user_sessions(ip_address);
 
 -- Create trigger function for modified_at
 CREATE OR REPLACE FUNCTION update_modified_at_column()
@@ -284,49 +172,6 @@ BEGIN
     RETURN deleted_count;
 END;
 $$ LANGUAGE plpgsql;
-
-DO $$
-DECLARE
-    user_id BIGINT;
-    hashed_password TEXT;
-BEGIN
-    user_id := generate_user_id();
-
-    -- Create a secure hash (in production, use bcrypt from your application)
-    -- This is just for initialization - use proper bcrypt in your app
-    hashed_password := crypt('admin123', gen_salt('bf', 12));
-    
-    INSERT INTO users (
-        id,
-        username, 
-        email, 
-        password, 
-        role,
-        is_verified,
-        created_at,
-        modified_at
-    ) VALUES (
-        admin_id,
-        'admin', 
-        'admin@example.com',
-        hashed_password,
-        'admin',
-        TRUE,
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP
-    ) ON CONFLICT (username) DO NOTHING;
-    
-    -- Update profile if user was created
-    UPDATE user_profiles 
-    SET 
-        title = 'Mr.',
-        first_name = 'System',
-        last_name = 'Administrator'
-    WHERE user_id = admin_id;
-    
-    RAISE NOTICE 'Admin user created with ID: %', admin_id;
-    
-END $$;
 
 -- Create comprehensive view for user data (with security considerations)
 CREATE OR REPLACE VIEW user_safe_view AS

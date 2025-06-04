@@ -190,6 +190,7 @@ def create_user_by_authenticated_user(
         id=new_user.id,
         username=new_user.username,
         role_id=new_user.role_id,
+        role_name=new_user.role_name,
         is_verified=new_user.is_verified,
         profile=new_user.profile,
         session_id=None

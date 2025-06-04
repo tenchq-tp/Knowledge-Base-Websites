@@ -22,6 +22,12 @@ class UserProfileBase(BaseModel):
     city: Optional[str] = Field(None, max_length=50)
     address: Optional[str] = None
 
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=8, max_length=128)
+    role_id: Optional[int] = None
+    is_verified: Optional[bool] = False
+    profile: Optional[UserProfileBase] = None
+ 
 class UserProfileCreate(UserProfileBase):
     pass
 
@@ -30,6 +36,7 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
     role_id: Optional[int] = None
+    role_name: Optional[str] = None
     is_verified: Optional[bool] = None
 
     class Config:
@@ -41,6 +48,8 @@ class UserProfileUpdate(UserProfileBase):
 class UserProfileResponse(UserProfileBase):
     # id: int
     # user_id: int
+    role_id: Optional[int] = None 
+    role_name: Optional[str] = None
     full_name: str
     display_name: str
     created_at: datetime
@@ -52,6 +61,7 @@ class UserProfileResponse(UserProfileBase):
 class UserResponse(UserBase):
     id: int
     role_id: Optional[int] = None
+    role_name: Optional[str] = None
     is_verified: bool
     last_login: Optional[datetime] = None
     created_at: datetime
@@ -66,6 +76,7 @@ class UserSafeResponse(BaseModel):
     id: int
     username: str
     role_id: Optional[int] = None
+    role_name: Optional[str] = None
     is_verified: bool
     session_id: Optional[str] = None
     
@@ -102,9 +113,3 @@ class ChangePasswordRequest(BaseModel):
     old_password: str = Field(...,min_length=8)
     new_password: str = Field(...,min_length=8)
 
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=8, max_length=128)
-    role_id: Optional[int] = None
-    is_verified: Optional[bool] = False
-    profile: Optional[UserProfileBase] = None
- 

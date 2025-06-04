@@ -50,53 +50,6 @@ app.include_router(permission.router)
 app.include_router(role_permission.router)
 app.include_router(category.router)
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Secure User Management API v2.0",
-        "features": [
-            "Enhanced Security with Argon2 password hashing",
-            "Secure session management with hashed tokens",
-            "User profiles with data validation",
-            "Comprehensive audit trails"
-        ],
-        "security_features": [
-            "Password strength validation",
-            "Email verification",
-            "Session token hashing",
-            "Rate limiting ready",
-            "Audit logging"
-        ],
-        "endpoints": {
-            "docs": "/docs",
-            "auth": "/auth",
-            "profiles": "/profiles", 
-            "user": "/user",
-            "category": "/categories"
-        }
-    }
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    try:
-        from app.db.database import SessionLocal
-        from sqlalchemy import text
-        with SessionLocal() as db:
-            result = db.execute(text("SELECT 1"))
-            return {
-                "status": "healthy",
-                "database": "connected",
-                "timestamp": datetime.utcnow().isoformat()
-            }
-    except Exception as e:
-        return {
-            "status": "unhealthy", 
-            "database": "disconnected",
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
-        }
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info", access_log=True)
