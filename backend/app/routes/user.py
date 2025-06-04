@@ -157,8 +157,18 @@ def delete_user_by_username(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    deleted_user = crud_user.delete_user(db, user)
-    return deleted_user
+    user_data = UserSafeResponse(
+        id=user.id,
+        username=user.username,
+        role_id=user.role_id,
+        role_name=user.role.name if user.role else None,
+        is_verified=user.is_verified,
+        profile=user.profile,
+        session_id=None
+    )
+
+    crud_user.delete_user(db, user)
+    return user_data
 
 @router.post("/create", response_model=UserSafeResponse, summary="Create new user")
 def create_user_by_authenticated_user(
