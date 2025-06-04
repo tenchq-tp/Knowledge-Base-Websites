@@ -20,36 +20,36 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     """Get user by ID with profile"""
     return db.query(User).options(joinedload(User.profile)).filter(User.id == user_id).first()
 
-def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None) -> User:
-    """Create new user with hashed password and auto-created profile"""
-    hashed_password = get_password_hash(user.password)
-
-    db_user = User(
+def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None):
+    new_user = User(
         username=user.username,
         email=user.email,
-        password=hashed_password,
+        password=get_password_hash(user.password),
         role_id=user.role_id,
-        created_by=created_by,
-        modified_by=created_by
-    )
-    db.add(db_user)
-    db.flush()  # เพื่อให้ db_user.id ถูกสร้าง
-
-    # 👇 ดึงค่าจาก user.profile ถ้ามี
-    profile_data = user.profile.dict() if user.profile else {}
-
-    db_profile = UserProfile(
-        user_id=db_user.id,
-        created_by=created_by,
-        modified_by=created_by,
-        **profile_data  # 👈 เติมข้อมูล profile ทั้งหมด
+        is_verified=user.is_verified,
+        created_by=created_by
     )
 
-    db.add(db_profile)
+    db.add(new_user)
+    db.flush()
+
+    profile = UserProfile(
+        user_id=new_user.id,
+        title=user.profile.title,
+        first_name=user.profile.first_name,
+        last_name=user.profile.last_name,
+        phone=user.profile.phone,
+        date_of_birth=user.profile.date_of_birth,
+        gender=user.profile.gender,
+        country=user.profile.country,
+        city=user.profile.city,
+        address=user.profile.address,
+        role_id=new_user.role_id 
+    )
+    db.add(profile)
     db.commit()
-    db.refresh(db_user)
-
-    return db_user
+    db.refresh(new_user)
+    return new_user
 
 def update_user_profile(db: Session, user_id: int, profile_update: UserProfileUpdate, 
                        modified_by: Optional[int] = None) -> Optional[UserProfile]:
@@ -272,7 +272,6 @@ def update_user(db: Session, user_id: int, user_update: UserResponse, modified_b
     for key, value in update_data.items():
         setattr(user, key, value)
 
-    # Sync profile.role_id if profile exists and role_id updated
     if "role_id" in update_data and user.profile:
         user.profile.role_id = update_data["role_id"]
 
