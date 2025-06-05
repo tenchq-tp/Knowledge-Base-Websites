@@ -5,9 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPalette, faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
+import { useTheme } from "../../contexts/ThemeContext";
+import "../../style/theme_setting.css";
 
-export default function ThemeSettings({ isDark, styles, toggleTheme }) {
+
+export default function ThemeSettings( ) {
   const { t } = useTranslation();
+  const { isDark, tokens, toggleTheme } = useTheme(); 
 
   const handleThemeToggle = () => {
     toggleTheme(); // ใช้จาก context
@@ -22,25 +26,21 @@ export default function ThemeSettings({ isDark, styles, toggleTheme }) {
     });
   };
 
-  return (
-    <div style={styles.card}>
-      <div style={styles.sectionHeader}>
-        <FontAwesomeIcon
-          icon={faPalette}
-          style={{
-            fontSize: "1.5rem",
-            color: "#4a90e2",
-            marginRight: "0.75rem",
-          }}
-        />
-        <h2 style={styles.sectionTitle}>
-          {t("settings.theme.title")}
+return (
+    <div className="theme-setting-card" style={{ 
+      backgroundColor: tokens.surface, 
+      borderColor: tokens.border 
+    }}>
+      <div className="section-header" style={{ borderBottomColor: tokens.borderLight }}>
+        <FontAwesomeIcon icon={faPalette} className="section-icon" />
+        <h2 className="section-title" style={{ color: tokens.text }}>
+          {t("settings.theme.title") || "Theme Setting"}
         </h2>
       </div>
 
-      <div style={styles.flexColumn}>
-        <div style={styles.flexBetween}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <div className="theme-content">
+        <div className="theme-toggle-row">
+          <div className="theme-status">
             <FontAwesomeIcon
               icon={isDark ? faMoon : faSun}
               style={{
@@ -49,53 +49,27 @@ export default function ThemeSettings({ isDark, styles, toggleTheme }) {
                 transition: "color 0.3s ease",
               }}
             />
-            <span style={styles.text}>
-              {t(isDark ? "settings.theme.darkMode" : "settings.theme.lightMode")}
+            <span className="theme-label" style={{ color: tokens.text }}>
+              {t(isDark ? "settings.theme.darkMode" : "settings.theme.lightMode") || 
+               (isDark ? "Dark Mode" : "Light Mode")}
             </span>
           </div>
-
-          {/* Toggle Switch */}
-          <div
+          
+           <div
             onClick={handleThemeToggle}
-            style={{
-              width: "60px",
-              height: "30px",
-              borderRadius: "15px",
-              backgroundColor: isDark ? "#4a90e2" : "#ccc",
-              position: "relative",
-              cursor: "pointer",
-              transition: "background-color 0.3s ease",
-              boxShadow: "inset 0 1px 3px rgba(0, 0, 0, 0.3)",
-            }}
+            className="theme-toggle-switch"
+            tabIndex={0}
+            role="switch"
+            aria-checked={isDark}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
-            <div
-              style={{
-                width: "26px",
-                height: "26px",
-                borderRadius: "50%",
-                backgroundColor: "white",
-                position: "absolute",
-                top: "2px",
-                left: isDark ? "32px" : "2px",
-                transition: "left 0.3s ease",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div className="toggle-slider">
               <FontAwesomeIcon
                 icon={isDark ? faMoon : faSun}
-                style={{
-                  fontSize: "0.8rem",
-                  color: isDark ? "#4a90e2" : "#FFA500",
-                }}
+                className="slider-icon"
               />
             </div>
           </div>
-        </div>
-
-        <div style={styles.backgroundSecondary}>
         </div>
       </div>
     </div>

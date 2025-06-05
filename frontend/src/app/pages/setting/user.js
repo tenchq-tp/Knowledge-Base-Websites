@@ -6,11 +6,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
-import Modal from "../../component/Modal";
+import Modal from "../../component/setting_modal";
+import { useTheme } from "../../contexts/ThemeContext";
+import "../../style/user_setting.css";
 
-export default function UserSettings({ isDark, styles }) {
+
+export default function UserSettings() {
   const { t } = useTranslation();
-  
+  const { tokens, getComponentStyle } = useTheme();
+
   // State Management
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
@@ -20,11 +24,10 @@ export default function UserSettings({ isDark, styles }) {
   const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
-  
+
   const [userFormData, setUserFormData] = useState({
     username: "",
     email: "",
-    password: "",
     role: "",
     profile: {
       title: "",
@@ -53,13 +56,13 @@ export default function UserSettings({ isDark, styles }) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       let errorMessage = "API request failed";
-      
+
       if (errorData.detail) {
-        errorMessage = Array.isArray(errorData.detail) 
+        errorMessage = Array.isArray(errorData.detail)
           ? errorData.detail.map(err => `${err.loc?.slice(-1)[0] || 'field'}: ${err.msg}`).join(', ')
           : errorData.detail;
       }
-      
+
       throw new Error(errorMessage);
     }
 
@@ -83,9 +86,9 @@ export default function UserSettings({ isDark, styles }) {
     try {
       const params = new URLSearchParams({ skip: 0, limit: 100 });
       if (searchTerm) params.append('search', searchTerm);
-      
+
       const users = await apiCall(`/users/?${params.toString()}`);
-      
+
       const formattedUsers = users.map(user => {
         return {
           id: user.id,
@@ -93,15 +96,14 @@ export default function UserSettings({ isDark, styles }) {
           email: user.email,
           role: user.role?.name || user.role_name || user.role || 'N/A', // เช็คหลายแบบ
           status: user.is_verified ? "active" : "inactive",
-          updatedDate: user.updated_at ? 
+          updatedDate: user.updated_at ?
             new Date(user.updated_at).toLocaleString('en-GB', {
-              day: '2-digit', month: '2-digit', year: 'numeric',
-              hour: '2-digit', minute: '2-digit'
+              day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
             }).replace(',', '') : 'N/A',
           profile: user.profile || {}
         };
       });
-      
+
       setUsersList(formattedUsers);
     } catch (error) {
       console.error("Load users error:", error);
@@ -112,31 +114,17 @@ export default function UserSettings({ isDark, styles }) {
   };
 
   const createUser = async (userData) => {
-    try {
-      await apiCall("/users/create", {
-        method: "POST",
-        body: JSON.stringify(userData),
-      });
-      
-      await loadUsers(searchUsername);
-      showAlert("success", "Success", "User created successfully!");
-    } catch (error) {
-      throw error;
-    }
+    await apiCall("/users/create", { method: "POST", body: JSON.stringify(userData) });
+    await loadUsers(searchUsername);
+    showAlert("success", "Success", "User created successfully!");
   };
 
-  // Utility Functions
-  const showAlert = (type, title, text, timer = 2000) => {
-    return Swal.fire({
-      icon: type, title, text, timer,
-      timerProgressBar: true,
-      showConfirmButton: false,
-    });
-  };
+  const showAlert = (type, title, text, timer = 2000) =>
+    Swal.fire({ icon: type, title, text, timer, timerProgressBar: true, showConfirmButton: false });
 
   const resetForm = () => {
     setUserFormData({
-      username: "", email: "", password: "", role: "",
+      username: "", email: "", role: "",
       profile: {
         title: "",
         first_name: "",
@@ -163,7 +151,6 @@ export default function UserSettings({ isDark, styles }) {
     setUserFormData({
       username: user.username,
       email: user.email,
-      password: "",
       role: user.role,
       profile: {
         title: user.profile?.title || "",
@@ -180,93 +167,95 @@ export default function UserSettings({ isDark, styles }) {
     setIsCreateUserModalOpen(true);
   };
 
-  const handleDeleteUser = async (userId, username) => {
-    const result = await Swal.fire({
-      icon: "warning",
-      title: "Are you sure?",
-      text: `You want to delete user "${username}"?`,
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel"
-    });
+ const handleDeleteUser = async (userId, username) => {
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "Are you sure?",
+    text: `You want to delete user "${username}"?`,
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!",
+    cancelButtonText: "Cancel"
+  });
 
-    if (result.isConfirmed) {
+  if (result.isConfirmed) {
+    try {
+      await apiCall(`/users/${username}`, { method: "DELETE" });
       setUsersList(prev => prev.filter(user => user.id !== userId));
-      showAlert("success", "Deleted!", "User has been deleted.");
+      await loadUsers(searchUsername);
+      showAlert("success", "Success", "User deleted successfully!");
+    } catch (error) {
+      const errorMessage = error.message !== "[object Object]" ? error.message : "Failed to delete user.";
+      showAlert("error", "Error", errorMessage);
     }
-  };
+  }
+};
 
   const handleSaveUser = async () => {
     // Validation
-    const { username, email, password, role } = userFormData;
-    
-    if (!username.trim() || !email.trim() || !role) {
-      return showAlert("warning", "Warning", "Please fill in all required fields");
-    }
+    const { username, email, role, profile } = userFormData;
 
-    if (!editingUser && (!password.trim() || password.trim().length < 8)) {
-      return showAlert("warning", "Warning", 
-        !password.trim() ? "Password is required for new users" : "Password must be at least 8 characters long"
-      );
+    if (!username.trim() || !email.trim() || !role ||
+      !profile.title || !profile.first_name?.trim() ||
+      !profile.last_name?.trim() || !profile.gender) {
+      return showAlert("warning", "Warning", "Please fill in all required fields");
     }
 
     try {
       if (editingUser) {
-        // TODO: Add update API call
         setUsersList(prev => prev.map(user =>
           user.id === editingUser.id
             ? {
-                ...user,
-                username: userFormData.username,
-                email: userFormData.email,
-                role: userFormData.role,
-                profile: userFormData.profile,
-                updatedDate: new Date().toLocaleString('en-GB', {
-                  day: '2-digit', month: '2-digit', year: 'numeric',
-                  hour: '2-digit', minute: '2-digit'
-                }).replace(',', '')
-              }
+              ...user,
+              username: userFormData.username,
+              email: userFormData.email,
+              role: userFormData.role,
+              profile: userFormData.profile,
+              updatedDate: new Date().toLocaleString('en-GB', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+              }).replace(',', '')
+            }
             : user
         ));
         showAlert("success", "Success", "User updated successfully!");
       } else {
         const selectedRole = rolesList.find(role => role.name === userFormData.role.trim());
-        
+
         if (!selectedRole) {
           return showAlert("warning", "Warning", `Role "${userFormData.role}" not found`);
         }
-        
+
         const apiData = {
           username: username.trim(),
           email: email.trim(),
-          password: password.trim(),
+          password: "P@ssW0rd",
           role_id: selectedRole.id,
           is_verified: false,
           profile: {
-            title: userFormData.profile.title || null,
-            first_name: userFormData.profile.first_name || null,
-            last_name: userFormData.profile.last_name || null,
+            title: userFormData.profile.title,
+            first_name: userFormData.profile.first_name.trim(),
+            last_name: userFormData.profile.last_name.trim(),
             phone: userFormData.profile.phone || null,
             date_of_birth: userFormData.profile.date_of_birth || null,
-            gender: userFormData.profile.gender || null,
+            gender: userFormData.profile.gender,
             country: userFormData.profile.country || null,
             city: userFormData.profile.city || null,
             address: userFormData.profile.address || null,
           }
         };
-        
+
         await createUser(apiData);
       }
 
       setIsCreateUserModalOpen(false);
       setEditingUser(null);
     } catch (error) {
-      const errorMessage = error.message && error.message !== "[object Object]" 
-        ? error.message 
+      const errorMessage = error.message && error.message !== "[object Object]"
+        ? error.message
         : "Failed to save user. Please try again.";
-      
+
       showAlert("error", "Error", errorMessage);
     }
   };
@@ -284,17 +273,13 @@ export default function UserSettings({ isDark, styles }) {
 
   // Render Helpers
   const renderUserTable = () => (
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <table className="users-table">
       <thead>
-        <tr style={{ backgroundColor: isDark ? "#374151" : "#f9fafb" }}>
+        <tr className="table-header" style={{ backgroundColor: tokens.surfaceAlt }}>
           {["#", "Username", "Email", "Role", "Status", "Updated date", "Action"].map((header) => (
             <th key={header} style={{
-              padding: "0.75rem 0.5rem",
-              textAlign: "left",
-              fontSize: "0.9rem",
-              fontWeight: "600",
-              color: isDark ? "#e5e7eb" : "#374151",
-              borderBottom: `1px solid ${isDark ? "#4a5568" : "#e5e7eb"}`
+              color: tokens.text,
+              borderBottomColor: tokens.border
             }}>
               {header}
             </th>
@@ -303,66 +288,35 @@ export default function UserSettings({ isDark, styles }) {
       </thead>
       <tbody>
         {usersList.map((user, index) => (
-          <tr key={user.id} style={{
-            borderBottom: `1px solid ${isDark ? "#4a5568" : "#e5e7eb"}`,
-            backgroundColor: index % 2 === 0 
-              ? (isDark ? "#2d3748" : "#ffffff") 
-              : (isDark ? "#374151" : "#f9fafb")
-          }}>
-            <td style={{ padding: "0.75rem 0.5rem", fontSize: "0.9rem", color: isDark ? "#ffffff" : "#333333" }}>
-              {index + 1}
-            </td>
-            <td style={{ padding: "0.75rem 0.5rem", fontSize: "0.9rem", color: isDark ? "#ffffff" : "#333333" }}>
-              {user.username}
-            </td>
-            <td style={{ padding: "0.75rem 0.5rem", fontSize: "0.9rem", color: isDark ? "#ffffff" : "#333333" }}>
-              {user.email}
-            </td>
-            <td style={{ padding: "0.75rem 0.5rem", fontSize: "0.9rem", color: isDark ? "#ffffff" : "#333333" }}>
-              {user.role}
-            </td>
-            <td style={{ padding: "0.75rem 0.5rem" }}>
-              <span style={{
-                padding: "0.25rem 0.5rem",
-                borderRadius: "4px",
-                fontSize: "0.8rem",
-                fontWeight: "500",
-                backgroundColor: user.status === "active" ? "#10b981" : "#ef4444",
-                color: "white"
-              }}>
+          <tr
+            key={user.id}
+            className="table-row"
+            style={{
+              ...getComponentStyle('table-stripe')(index),
+              borderBottomColor: tokens.border
+            }}
+          >
+            <td style={{ color: tokens.text }}>{index + 1}</td>
+            <td style={{ color: tokens.text }}>{user.username}</td>
+            <td style={{ color: tokens.text }}>{user.email}</td>
+            <td style={{ color: tokens.text }}>{user.role}</td>
+            <td>
+              <span className={`status-badge ${user.status === "active" ? "status-active" : "status-inactive"}`}>
                 {user.status}
               </span>
             </td>
-            <td style={{ padding: "0.75rem 0.5rem", fontSize: "0.9rem", color: isDark ? "#ffffff" : "#333333" }}>
-              {user.updatedDate}
-            </td>
-            <td style={{ padding: "0.75rem 0.5rem" }}>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
+            <td style={{ color: tokens.text }}>{user.updatedDate}</td>
+            <td>
+              <div className="action-buttons">
                 <button
                   onClick={() => handleEditUser(user)}
-                  style={{
-                    backgroundColor: "#007bff",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    padding: "0.25rem 0.5rem",
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                  }}
+                  className="btn btn-edit"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDeleteUser(user.id, user.username)}
-                  style={{
-                    backgroundColor: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    padding: "0.25rem 0.5rem",
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                  }}
+                  className="btn btn-delete"
                 >
                   Delete
                 </button>
@@ -375,29 +329,20 @@ export default function UserSettings({ isDark, styles }) {
   );
 
   const renderFormField = (label, name, type = "text", placeholder = "", required = false, options = null) => (
-    <div>
-      <label style={{
-        display: "block",
-        fontSize: "0.9rem",
-        fontWeight: "500",
-        color: isDark ? "#ffffff" : "#333333",
-        marginBottom: "0.5rem"
-      }}>
-        {label} {required && "*"}
+    <div className="form-group">
+      <label className="form-label" style={{ color: tokens.text }}>
+        {label} {required && <span className="required">*</span>}
       </label>
       {options ? (
         <select
           value={userFormData[name] || ""}
           onChange={(e) => setUserFormData(prev => ({ ...prev, [name]: e.target.value }))}
           disabled={name === 'role' && isLoadingRoles}
+          className="form-field form-select"
           style={{
-            width: "100%",
-            padding: "0.75rem",
-            fontSize: "1rem",
-            border: `1px solid ${isDark ? "#4a5568" : "#d1d5db"}`,
-            borderRadius: "6px",
-            backgroundColor: isDark ? "#2d3748" : "#ffffff",
-            color: isDark ? "#ffffff" : "#333333",
+            backgroundColor: tokens.surface,
+            borderColor: tokens.border,
+            color: tokens.text,
             opacity: (name === 'role' && isLoadingRoles) ? 0.6 : 1,
           }}
         >
@@ -410,50 +355,15 @@ export default function UserSettings({ isDark, styles }) {
           type={type}
           value={userFormData[name] || ""}
           onChange={(e) => setUserFormData(prev => ({ ...prev, [name]: e.target.value }))}
+          className="form-field"
           style={{
-            width: "100%",
-            padding: "0.75rem",
-            fontSize: "1rem",
-            border: `1px solid ${isDark ? "#4a5568" : "#d1d5db"}`,
-            borderRadius: "6px",
-            backgroundColor: isDark ? "#2d3748" : "#ffffff",
-            color: isDark ? "#ffffff" : "#333333",
+            backgroundColor: tokens.surface,
+            borderColor: tokens.border,
+            color: tokens.text
           }}
           placeholder={placeholder}
         />
       )}
-    </div>
-  );
-
-  const renderProfileField = (label, name, type = "text", placeholder = "") => (
-    <div>
-      <label style={{
-        display: "block",
-        fontSize: "0.9rem",
-        fontWeight: "500",
-        color: isDark ? "#ffffff" : "#333333",
-        marginBottom: "0.5rem"
-      }}>
-        {label}
-      </label>
-      <input
-        type={type}
-        value={userFormData.profile[name] || ""}
-        onChange={(e) => setUserFormData(prev => ({
-          ...prev,
-          profile: { ...prev.profile, [name]: e.target.value }
-        }))}
-        style={{
-          width: "100%",
-          padding: "0.75rem",
-          fontSize: "1rem",
-          border: `1px solid ${isDark ? "#4a5568" : "#d1d5db"}`,
-          borderRadius: "6px",
-          backgroundColor: isDark ? "#2d3748" : "#ffffff",
-          color: isDark ? "#ffffff" : "#333333",
-        }}
-        placeholder={placeholder}
-      />
     </div>
   );
 
@@ -466,35 +376,17 @@ export default function UserSettings({ isDark, styles }) {
   return (
     <>
       {/* User Settings Card */}
-      <div style={styles.card}>
-        <div style={{ ...styles.sectionHeader, justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <FontAwesomeIcon
-              icon={faUser}
-              style={{
-                fontSize: "1.5rem",
-                color: "#4a90e2",
-                marginRight: "0.75rem",
-              }}
-            />
-            <h2 style={styles.sectionTitle}>
+      <div className="setting-card" style={{ backgroundColor: tokens.surface, borderColor: tokens.border }}>
+        <div className="section-header" style={{ borderBottomColor: tokens.border }}>
+          <div className="section-info">
+            <FontAwesomeIcon icon={faUser} className="section-icon" />
+            <h2 className="section-title" style={{ color: tokens.text }}>
               {t("settings.user.title")}
             </h2>
           </div>
           <button
             onClick={() => setIsUserModalOpen(true)}
-            style={{
-              background: "#4a90e2",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.5rem 1rem",
-              cursor: "pointer",
-              fontSize: "0.9rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
+            className="btn btn-primary"
           >
             <FontAwesomeIcon icon={faEdit} />
             {t("settings.user.edit")}
@@ -503,90 +395,46 @@ export default function UserSettings({ isDark, styles }) {
       </div>
 
       {/* User Management Modal */}
-      <Modal 
-        isOpen={isUserModalOpen} 
-        onClose={() => setIsUserModalOpen(false)} 
-        title="User Management" 
+      <Modal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        title="User Management"
         size="large"
       >
-        <div style={{ padding: "1rem" }}>
+        <div className="modal-content">
           {/* Search and Create Button */}
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "1.5rem",
-            flexWrap: "wrap",
-            gap: "1rem"
-          }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              flex: "1",
-              minWidth: "200px"
-            }}>
-              <label style={{
-                fontSize: "1rem",
-                fontWeight: "500",
-                color: isDark ? "#ffffff" : "#333333"
-              }}>
-                Search:
-              </label>
+          <div className="search-section">
+            <div className="search-input-group">
+              <label className="form-label" style={{ color: tokens.text }}>Search:</label>
               <input
                 type="text"
                 placeholder="Search users..."
                 value={searchUsername}
                 onChange={(e) => setSearchUsername(e.target.value)}
+                className="form-field search-input"
                 style={{
-                  flex: "1",
-                  padding: "0.5rem",
-                  fontSize: "0.9rem",
-                  border: `1px solid ${isDark ? "#4a5568" : "#d1d5db"}`,
-                  borderRadius: "6px",
-                  backgroundColor: isDark ? "#2d3748" : "#ffffff",
-                  color: isDark ? "#ffffff" : "#333333",
+                  backgroundColor: tokens.surface,
+                  borderColor: tokens.border,
+                  color: tokens.text
                 }}
               />
             </div>
-            <button
-              onClick={handleCreateUser}
-              style={{
-                backgroundColor: "#007bff",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.5rem 1rem",
-                fontSize: "0.9rem",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleCreateUser} className="btn btn-create">
               Create User
             </button>
           </div>
 
           {/* Users Table */}
-          <div style={{
-            border: `1px solid ${isDark ? "#4a5568" : "#e5e7eb"}`,
-            borderRadius: "8px",
-            backgroundColor: isDark ? "#2d3748" : "#ffffff",
-            overflow: "hidden"
+          <div className="table-container" style={{
+            borderColor: tokens.border,
+            backgroundColor: tokens.surface
           }}>
             {loading ? (
-              <div style={{
-                textAlign: "center",
-                padding: "2rem",
-                color: isDark ? "#a0aec0" : "#666666"
-              }}>
+              <div className="loading-state" style={{ color: tokens.textSecondary }}>
                 Loading users...
               </div>
             ) : usersList.length === 0 ? (
-              <div style={{
-                textAlign: "center",
-                padding: "2rem",
-                color: isDark ? "#a0aec0" : "#666666"
-              }}>
+              <div className="empty-state" style={{ color: tokens.textSecondary }}>
                 No users found
               </div>
             ) : (
@@ -603,54 +451,153 @@ export default function UserSettings({ isDark, styles }) {
         title={editingUser ? "Edit User" : "Create User"}
         size="large"
       >
-        <div style={{ padding: "1rem" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-            {/* Left Column - Basic Info */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <h3 style={{
-                color: isDark ? "#ffffff" : "#333333",
-                marginBottom: "0.5rem",
-                borderBottom: `1px solid ${isDark ? "#4a5568" : "#e5e7eb"}`,
-                paddingBottom: "0.5rem"
+        <div className="modal-content">
+          <div className="form-grid">
+            <div className="form-section">
+              <h3 className="form-section-title" style={{
+                color: tokens.text,
+                borderBottomColor: tokens.border
               }}>
                 Basic Information
               </h3>
 
               {renderFormField("Username", "username", "text", "Enter username", true)}
-              {renderFormField("Email", "email", "email", "Enter email", true)}
-              {!editingUser && renderFormField("Password", "password", "password", "Enter password", true)}
+              {/* Email field with auto-generation on focus */}
+              <div className="form-group">
+                <label className="form-label" style={{ color: tokens.text }}>
+                  Email <span className="required">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={userFormData.email || ""}
+                  onChange={(e) => setUserFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onFocus={(e) => {
+                    // Auto-generate email when focus and email is empty
+                    if (!userFormData.email && userFormData.username) {
+                      setUserFormData(prev => ({
+                        ...prev,
+                        email: `${prev.username}@company.com`
+                      }));
+                    }
+                  }}
+                  className="form-field"
+                  style={{
+                    backgroundColor: tokens.surface,
+                    borderColor: tokens.border,
+                    color: tokens.text
+                  }}
+                  placeholder="Enter email"
+                />
+              </div>
               {renderFormField("Role", "role", "text", "", true, roleOptions)}
             </div>
 
             {/* Right Column - Profile Info */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <h3 style={{
-                color: isDark ? "#ffffff" : "#333333",
-                marginBottom: "0.5rem",
-                borderBottom: `1px solid ${isDark ? "#4a5568" : "#e5e7eb"}`,
-                paddingBottom: "0.5rem"
+            <div className="form-section">
+              <h3 className="form-section-title" style={{
+                color: tokens.text,
+                borderBottomColor: tokens.border
               }}>
                 Profile Information
               </h3>
 
-              {renderProfileField("Title", "title", "text", "Mr./Ms./Dr.")}
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                {renderProfileField("First Name", "first_name", "text", "First name")}
-                {renderProfileField("Last Name", "last_name", "text", "Last name")}
+              <div className="form-group">
+                <label className="form-label" style={{ color: tokens.text }}>
+                  Title <span className="required">*</span>
+                </label>
+                <select
+                  value={userFormData.profile.title || ""}
+                  onChange={(e) => setUserFormData(prev => ({
+                    ...prev,
+                    profile: { ...prev.profile, title: e.target.value }
+                  }))}
+                  className="form-field form-select"
+                  style={{
+                    backgroundColor: tokens.surface,
+                    borderColor: tokens.border,
+                    color: tokens.text
+                  }}
+                >
+                  <option value="">Select title</option>
+                  <option value="Mr.">Mr.</option>
+                  <option value="Ms.">Ms.</option>
+                  <option value="Mrs.">Mrs.</option>
+                  <option value="Dr.">Dr.</option>
+                </select>
               </div>
 
-              {renderProfileField("Phone", "phone", "tel", "Phone number")}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label" style={{ color: tokens.text }}>
+                    First Name <span className="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={userFormData.profile.first_name || ""}
+                    onChange={(e) => setUserFormData(prev => ({
+                      ...prev,
+                      profile: { ...prev.profile, first_name: e.target.value }
+                    }))}
+                    className="form-field"
+                    style={{
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.text
+                    }}
+                    placeholder="First name"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" style={{ color: tokens.text }}>
+                    Last Name <span className="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={userFormData.profile.last_name || ""}
+                    onChange={(e) => setUserFormData(prev => ({
+                      ...prev,
+                      profile: { ...prev.profile, last_name: e.target.value }
+                    }))}
+                    className="form-field"
+                    style={{
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.text
+                    }}
+                    placeholder="Last name"
+                  />
+                </div>
+              </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                <div>
-                  <label style={{
-                    display: "block",
-                    fontSize: "0.9rem",
-                    fontWeight: "500",
-                    color: isDark ? "#ffffff" : "#333333",
-                    marginBottom: "0.5rem"
-                  }}>
+              <div className="form-group">
+                <label className="form-label" style={{ color: tokens.text }}>
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  value={userFormData.profile.phone || ""}
+                  onChange={(e) => {
+                    // Allow only numbers
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setUserFormData(prev => ({
+                      ...prev,
+                      profile: { ...prev.profile, phone: value }
+                    }));
+                  }}
+                  className="form-field"
+                  style={{
+                    backgroundColor: tokens.surface,
+                    borderColor: tokens.border,
+                    color: tokens.text
+                  }}
+                  placeholder="Phone number"
+                  maxLength="15"
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label" style={{ color: tokens.text }}>
                     Date of Birth
                   </label>
                   <input
@@ -660,27 +607,18 @@ export default function UserSettings({ isDark, styles }) {
                       ...prev,
                       profile: { ...prev.profile, date_of_birth: e.target.value }
                     }))}
+                    className="form-field"
                     style={{
-                      width: "100%",
-                      padding: "0.75rem",
-                      fontSize: "1rem",
-                      border: `1px solid ${isDark ? "#4a5568" : "#d1d5db"}`,
-                      borderRadius: "6px",
-                      backgroundColor: isDark ? "#2d3748" : "#ffffff",
-                      color: isDark ? "#ffffff" : "#333333",
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.text
                     }}
                   />
                 </div>
 
-                <div>
-                  <label style={{
-                    display: "block",
-                    fontSize: "0.9rem",
-                    fontWeight: "500",
-                    color: isDark ? "#ffffff" : "#333333",
-                    marginBottom: "0.5rem"
-                  }}>
-                    Gender
+                <div className="form-group">
+                  <label className="form-label" style={{ color: tokens.text }}>
+                    Gender <span className="required">*</span>
                   </label>
                   <select
                     value={userFormData.profile.gender || ""}
@@ -688,14 +626,11 @@ export default function UserSettings({ isDark, styles }) {
                       ...prev,
                       profile: { ...prev.profile, gender: e.target.value }
                     }))}
+                    className="form-field form-select"
                     style={{
-                      width: "100%",
-                      padding: "0.75rem",
-                      fontSize: "1rem",
-                      border: `1px solid ${isDark ? "#4a5568" : "#d1d5db"}`,
-                      borderRadius: "6px",
-                      backgroundColor: isDark ? "#2d3748" : "#ffffff",
-                      color: isDark ? "#ffffff" : "#333333",
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.text
                     }}
                   >
                     <option value="">Select gender</option>
@@ -706,19 +641,23 @@ export default function UserSettings({ isDark, styles }) {
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                {renderProfileField("Country", "country", "text", "Country")}
-                {renderProfileField("City", "city", "text", "City")}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label" style={{ color: tokens.text }}>Country</label>
+                  <input type="text" value={userFormData.profile.country || ""}
+                    onChange={(e) => setUserFormData(prev => ({ ...prev, profile: { ...prev.profile, country: e.target.value } }))}
+                    className="form-field" style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }} placeholder="Country" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" style={{ color: tokens.text }}>City</label>
+                  <input type="text" value={userFormData.profile.city || ""}
+                    onChange={(e) => setUserFormData(prev => ({ ...prev, profile: { ...prev.profile, city: e.target.value } }))}
+                    className="form-field" style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }} placeholder="City" />
+                </div>
               </div>
 
-              <div>
-                <label style={{
-                  display: "block",
-                  fontSize: "0.9rem",
-                  fontWeight: "500",
-                  color: isDark ? "#ffffff" : "#333333",
-                  marginBottom: "0.5rem"
-                }}>
+              <div className="form-group">
+                <label className="form-label" style={{ color: tokens.text }}>
                   Address
                 </label>
                 <textarea
@@ -727,16 +666,11 @@ export default function UserSettings({ isDark, styles }) {
                     ...prev,
                     profile: { ...prev.profile, address: e.target.value }
                   }))}
+                  className="form-field form-textarea"
                   style={{
-                    width: "100%",
-                    padding: "0.75rem",
-                    fontSize: "1rem",
-                    border: `1px solid ${isDark ? "#4a5568" : "#d1d5db"}`,
-                    borderRadius: "6px",
-                    backgroundColor: isDark ? "#2d3748" : "#ffffff",
-                    color: isDark ? "#ffffff" : "#333333",
-                    minHeight: "80px",
-                    resize: "vertical"
+                    backgroundColor: tokens.surface,
+                    borderColor: tokens.border,
+                    color: tokens.text
                   }}
                   placeholder="Full address"
                 />
@@ -745,39 +679,16 @@ export default function UserSettings({ isDark, styles }) {
           </div>
 
           {/* Action Buttons */}
-          <div style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "0.5rem",
-            marginTop: "2rem",
-            paddingTop: "1rem",
-            borderTop: `1px solid ${isDark ? "#4a5568" : "#e5e7eb"}`
-          }}>
+          <div className="modal-actions" style={{ borderTopColor: tokens.border }}>
             <button
               onClick={() => setIsCreateUserModalOpen(false)}
-              style={{
-                backgroundColor: "#6c757d",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.75rem 1.5rem",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-              }}
+              className="btn btn-secondary"
             >
               Cancel
             </button>
             <button
               onClick={handleSaveUser}
-              style={{
-                backgroundColor: "#28a745",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.75rem 1.5rem",
-                fontSize: "0.9rem",
-                cursor: "pointer",
-              }}
+              className="btn btn-success"
             >
               {editingUser ? "Update" : "Create"}
             </button>

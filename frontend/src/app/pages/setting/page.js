@@ -11,11 +11,12 @@ import LanguageSettings from "./language";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../contexts/ThemeContext";
 import "../../../lib/i18n";
+import "../../style/setting.css";
 
 export default function Setting() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { theme, toggleTheme, getThemeStyles, isDark } = useTheme();
+  const { getThemeStyles } = useTheme();
 
   // เช็ค user login
   useEffect(() => {
@@ -28,35 +29,25 @@ export default function Setting() {
   const styles = getThemeStyles();
 
   return (
-    <div style={styles.body}>
+    <div className="setting-page" style={styles.body}>
       <Navbar />
 
-      <div style={styles.container}>
-        {/* Header */}
-        <div style={styles.header}>
-          <h1 style={styles.headerTitle}>
+      <div className="setting-container">
+        <header className="setting-header" style={styles.dynamicCard}>
+          <h1 className="setting-title">
             {t("settings.title")}
           </h1>
-          <p style={styles.headerSubtitle}>
+          <p className="setting-subtitle">
             {t("settings.subtitle")}
           </p>
+        </header>
+
+        <div className="settings-grid">
+          <UserSettings /> 
+          <RoleSettings />
+          <ThemeSettings />
+          <LanguageSettings />
         </div>
-
-        {/* User Settings Section */}
-        <UserSettings isDark={isDark} styles={styles} />
-
-        {/* Role Settings Section */}
-        <RoleSettings isDark={isDark} styles={styles} />
-
-        {/* Theme Settings Section */}
-        <ThemeSettings 
-          isDark={isDark} 
-          styles={styles} 
-          toggleTheme={toggleTheme} 
-        />
-
-        {/* Language Settings Section */}
-        <LanguageSettings styles={styles} />
       </div>
     </div>
   );
