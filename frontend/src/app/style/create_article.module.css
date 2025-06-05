@@ -1,0 +1,407 @@
+.pageBackground {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    background-color: #f8f8f8;
+}
+
+.editorContainer {
+    background-color: #ffffff;
+    /* White background for the editor area */
+    border: 1px solid #e0e0e0;
+    /* Light border */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    width: 100%;
+    max-width: 900px;
+    /* Max width for readability */
+}
+
+/* Article Title Input */
+.title {
+    color: #1a1a1a;
+    margin-bottom: 20px;
+    font-size: 2em;
+    text-align: center;
+}
+
+.inputTitle {
+    width: calc(100% - 20px);
+    /* Adjust for padding */
+    padding: 12px 10px;
+    margin-bottom: 25px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    font-size: 1.4em;
+    color: #333;
+    background-color: #fefefe;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.inputTitle::placeholder {
+    color: #999;
+}
+
+/* Menu Bar (Toolbar) Styles */
+.menuBar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    /* Space between groups */
+    margin-bottom: 25px;
+    background-color: #f0f0f0;
+    /* Light grey background for the toolbar */
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.menuGroup {
+    border: 1px solid #d0d0d0;
+    /* Subtle border for each group */
+    padding: 8px 10px 25px 10px;
+    /* Bottom padding for label space */
+    border-radius: 5px;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    /* Space between buttons within a group */
+    background-color: #fdfdfd;
+    /* Slightly whiter background for groups */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.menuGroupLabel {
+    position: absolute;
+    bottom: 5px;
+    /* Position label at the bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7em;
+    /* Smaller font for labels */
+    color: #666;
+    /* Darker grey for labels */
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Toolbar Buttons, Selects, and Color Pickers */
+.menuBar button,
+.menuBar select,
+.menuBar input[type="color"] {
+    background-color: #1a1a1a;
+    /* Black background for tools */
+    color: #ffffff;
+    /* White text/icon color */
+    border: 1px solid #000000;
+    /* Black border */
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95em;
+    min-width: 38px;
+    /* Ensure consistent button size */
+    justify-content: center;
+}
+
+.menuBar button:hover,
+.menuBar select:hover,
+.menuBar input[type="color"]:hover {
+    background-color: #333333;
+    /* Darker grey on hover */
+    border-color: #333333;
+}
+
+.menuBar button.active {
+    background-color: #555555;
+    /* Even darker grey for active state */
+    border-color: #555555;
+    color: #ffffff;
+}
+
+/* Specific styles for select elements in the toolbar */
+.menuBar select {
+    -webkit-appearance: none;
+    /* Remove default arrow */
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 25px;
+    /* Space for custom arrow */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    /* White SVG arrow */
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+}
+
+.menuBar select option {
+    background-color: #ffffff;
+    /* White background for dropdown options */
+    color: #333333;
+    /* Black text for dropdown options */
+}
+
+/* Color input special sizing */
+.menuBar input[type="color"] {
+    width: 40px;
+    /* Small fixed width for color picker */
+    height: 38px;
+    /* Match button height */
+    padding: 0;
+    border: none;
+    /* Color picker has its own border styling */
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    /* Hide default color input border */
+}
+
+
+/* Tiptap Editor Content Area */
+.editor {
+    border: 1px solid #e0e0e0;
+    /* Light border around the editor content */
+    min-height: 500px;
+    /* Sufficient height for editing */
+    padding: 25px;
+    border-radius: 6px;
+    background-color: #ffffff;
+    /* White background for the actual editable area */
+    font-size: 1.1em;
+    /* Slightly larger base font size for content */
+    line-height: 1.6;
+    color: #222;
+    /* Dark grey for content text */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+    /* Subtle inner shadow */
+}
+
+/* Styles for elements inside the Tiptap editor */
+.editor p {
+    margin-bottom: 1em;
+    /* Space between paragraphs */
+}
+
+.editor h1,
+.editor h2,
+.editor h3,
+.editor h4,
+.editor h5,
+.editor h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.2;
+    color: #1a1a1a;
+}
+
+.editor h1 {
+    font-size: 2.2em;
+}
+
+.editor h2 {
+    font-size: 1.8em;
+}
+
+.editor h3 {
+    font-size: 1.5em;
+}
+
+.editor h4 {
+    font-size: 1.3em;
+}
+
+.editor strong {
+    font-weight: bold;
+}
+
+.editor em {
+    font-style: italic;
+}
+
+.editor u {
+    text-decoration: underline;
+}
+
+.editor s {
+    text-decoration: line-through;
+}
+
+.editor sub {
+    vertical-align: sub;
+    font-size: 0.75em;
+}
+
+.editor sup {
+    vertical-align: super;
+    font-size: 0.75em;
+}
+
+.editor code {
+    font-family: 'Courier New', monospace;
+    background-color: #f0f0f0;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #c7254e;
+}
+
+.editor pre {
+    background: #2d2d2d;
+    /* Dark background for code blocks */
+    color: #f8f8f2;
+    /* Light text color for code */
+    padding: 1em;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    /* Preferred monospaced font */
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.editor blockquote {
+    border-left: 4px solid #cccccc;
+    margin-left: 0;
+    padding-left: 1em;
+    color: #666;
+    font-style: italic;
+}
+
+.editor ul,
+.editor ol {
+    padding-left: 1.5em;
+    margin-bottom: 1em;
+}
+
+.editor li {
+    margin-bottom: 0.5em;
+}
+
+.editor hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 2em 0;
+}
+
+.editor img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    /* Ensures it takes its own line */
+    margin: 1em 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.editor a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.editor a:hover {
+    text-decoration: underline;
+}
+
+/* Tiptap Table Styles */
+.editor table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    border: 1px solid #ddd;
+}
+
+.editor th,
+.editor td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.editor th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    color: #333;
+}
+
+.editor tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Action Buttons (Save/Export) */
+.actionButtons {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    /* Align buttons to the right */
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    /* Separator line */
+}
+
+.actionButtons button {
+    background-color: #007bff;
+    /* A pleasant blue for actions */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1em;
+}
+
+.actionButtons button:hover {
+    background-color: #0056b3;
+    /* Darker blue on hover */
+    transform: translateY(-1px);
+    /* Slight lift effect */
+}
+
+.actionButtons button:active {
+    background-color: #004085;
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .editorContainer {
+        padding: 20px;
+    }
+
+    .menuBar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .menuGroup {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .menuBar button,
+    .menuBar select,
+    .menuBar input[type="color"] {
+        width: auto;
+        /* Allow buttons to size naturally */
+        flex-grow: 1;
+        /* Allow them to grow if needed */
+    }
+
+    .actionButtons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

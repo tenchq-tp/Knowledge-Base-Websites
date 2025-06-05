@@ -5,7 +5,7 @@ import styles from "../../style/home.module.css";
 import * as FaIcons from "react-icons/fa";
 import "../../../lib/i18n";
 import { useTranslation } from "react-i18next";
-
+import { useRouter } from "next/navigation";
 const spinningEarthGif = "/images/earth.gif";
 
 export default function Homepage() {
@@ -13,7 +13,7 @@ export default function Homepage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const router = useRouter();
   // ลบ state rotationSpeedRef และ requestAnimationFrame ที่หมุนอัตโนมัติออก
 
   const [rotation, setRotation] = useState(0);
@@ -138,7 +138,7 @@ export default function Homepage() {
                 type="text"
                 placeholder=""
                 value={searchTerm}
-                onChange=""
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className={styles.searchInputOverlay}
               />
               <FaIcons.FaSearch className={styles.searchIcon} />
@@ -155,12 +155,16 @@ export default function Homepage() {
               >
                 <button
                   className={styles.createArticleBtn}
-                  type="button"
-                  onClick={() => alert("สร้างบทความ")}
+                  onClick={() => {
+                    router.push(
+                      `/pages/article/create_article?categoryId=${selectedCategory.id}`
+                    );
+                  }}
                 >
                   <FaIcons.FaPlus className={styles.icon} />
-                  {t ? t("actions.createArticle") : "สร้างบทความ"}
+                  {t("actions.createArticle")}
                 </button>
+
                 <button
                   className={styles.readBtn}
                   type="button"
