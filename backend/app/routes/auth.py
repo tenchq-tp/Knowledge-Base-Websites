@@ -52,22 +52,17 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 def get_client_ip(request: Request) -> str:
-    """Get client IP address"""
-    # Check for forwarded IP first (when behind proxy)
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
         return forwarded.split(",")[0].strip()
     
-    # Check for real IP
     real_ip = request.headers.get("X-Real-IP")
     if real_ip:
         return real_ip
     
-    # Fallback to remote address
     return request.client.host
 
 def get_device_info(request: Request) -> dict:
-    """Extract device information from request"""
     user_agent = request.headers.get("User-Agent", "Unknown")
     ip_address = get_client_ip(request)
     
@@ -79,23 +74,19 @@ def get_device_info(request: Request) -> dict:
 
 @router.post("/register", response_model=UserSafeResponse)
 def register_user(user: UserCreate, request: Request, db: Session = Depends(get_db)):
-    """Register a new user with password validation"""
     
-    # Validate password strength
     if not validate_password_strength(user.password):
         raise HTTPException(
             status_code=400,
             detail="Password must be at least 8 characters long and contain at least 3 of: uppercase, lowercase, digits, special characters"
         )
     
-    # Check if user already exists
     if crud_user.get_user_by_email(db, email=user.email):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     if crud_user.get_user_by_username(db, username=user.username):
         raise HTTPException(status_code=400, detail="Username already taken")
     
-    # Create user (profile will be auto-created by trigger)
     new_user = crud_user.create_user(db=db, user=user)
     
     return UserSafeResponse(
@@ -220,7 +211,6 @@ def logout_user(
     session_id = UUID(jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])["session_id"])
     old_session = db.query(UserSession).filter_by(id=session_id).first()
     if old_session:
-        # สร้าง record ใหม่ โดย copy ข้อมูลจาก session เก่า
         new_session = UserSession(
             user_id=old_session.user_id,
             session_token_hash="-",
@@ -230,29 +220,24 @@ def logout_user(
             user_agent=old_session.user_agent,
             expires_at=old_session.expires_at,
             refresh_expires_at=old_session.refresh_expires_at,
-            is_active=False,  # ปิด session ใหม่ (id ใหม่)
+            is_active=False, 
             created_at=datetime.utcnow(),
             modified_at=datetime.utcnow()
         )
         db.add(new_session)
-
-        # ลบ record เก่าที่เป็น is_active=True ทิ้งไปเลย (หรือจะลบก็ได้ตามต้องการ)
         db.delete(old_session)
-
         db.commit()
 
     return {"message": f"User '{current_user.username}' logged out successfully"}
 
 @router.post("/logout-all")
 def logout_all_sessions(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Logout user from all sessions"""
     
     count = crud_user.invalidate_all_user_sessions(db, current_user.id)
     return {"message": f"Logged out from {count} sessions"}
 
 @router.get("/sessions", response_model=list[SessionResponse])
 def get_my_sessions(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Get all active sessions for current user"""
     
     sessions = crud_user.get_user_active_sessions(db, current_user.id)
     return [
@@ -268,9 +253,7 @@ def get_my_sessions(current_user: User = Depends(get_current_user), db: Session 
     ]
 
 @router.post("/verify-email/{user_id}")
-def verify_email(user_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """Verify user email (in production, this would be token-based)"""
-    
+def verify_email(user_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):    
     if not crud_user.verify_user_email(db, user_id):
         raise HTTPException(status_code=404, detail="User not found")
     

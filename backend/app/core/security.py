@@ -8,7 +8,6 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from .config import settings
 
-# Use strong password hashing
 pwd_context = CryptContext(
     schemes=["argon2", "bcrypt"],  # Prefer argon2, fallback to bcrypt
     deprecated="auto",
@@ -19,23 +18,18 @@ pwd_context = CryptContext(
 )
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password against hash"""
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
-    """Hash password using argon2 or bcrypt"""
     return pwd_context.hash(password)
 
 def generate_secure_token(length: int = 32) -> str:
-    """Generate cryptographically secure random token"""
     return secrets.token_urlsafe(length)
 
 def hash_token(token: str) -> str:
-    """Hash token using SHA-256"""
     return hashlib.sha256(token.encode()).hexdigest()
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, session_id: Optional[UUID] = None):
-    """Create JWT access token"""
     to_encode = data.copy()
     
     if expires_delta:
@@ -48,19 +42,16 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, s
         "type": "access",
     })
 
-    # เพิ่ม session_id เข้าไปถ้ามี
     if session_id:
-        to_encode["session_id"] = str(session_id)  # แปลงเป็น str เพื่อใส่ใน JWT
+        to_encode["session_id"] = str(session_id)
 
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """Create refresh token (just a secure random string)"""
     return generate_secure_token(32)
 
 def verify_token(token: str) -> str:
-    """Verify JWT access token"""
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
@@ -79,7 +70,6 @@ def verify_token(token: str) -> str:
         )
 
 def validate_password_strength(password: str) -> bool:
-    """Validate password meets security requirements"""
     if len(password) < 8:
         return False
     if len(password) > 128:

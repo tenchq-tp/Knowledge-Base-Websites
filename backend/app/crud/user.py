@@ -9,15 +9,12 @@ from app.core.security import get_password_hash, verify_password, generate_secur
 from fastapi import HTTPException
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
-    """Get user by email with profile"""
     return db.query(User).options(joinedload(User.profile)).filter(User.email == email).first()
 
 def get_user_by_username(db: Session, username: str) -> Optional[User]:
-    """Get user by username with profile"""
     return db.query(User).options(joinedload(User.profile)).filter(User.username == username).first()
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
-    """Get user by ID with profile"""
     user = db.query(User).options(joinedload(User.profile)).filter(User.id == user_id).first()
     if not user:
         return None
@@ -33,7 +30,6 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
 
 def get_users_list(db: Session, skip: int = 0, limit: int = 100, 
                    role: Optional[str] = None, is_verified: Optional[bool] = None) -> List[User]:
-    """Get list of users with filters"""
     query = db.query(User).options(joinedload(User.profile))
 
     if role:
@@ -87,7 +83,6 @@ def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None)
 
 def update_user_profile(db: Session, user_id: int, profile_update: UserProfileUpdate, 
                        modified_by: Optional[int] = None) -> Optional[UserProfile]:
-    """Update user profile"""
     db_profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
     if not db_profile:
         return None
@@ -102,8 +97,6 @@ def update_user_profile(db: Session, user_id: int, profile_update: UserProfileUp
     return db_profile
 
 def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
-    """Authenticate user with username/email and password"""
-    # Try username first, then email
     user = get_user_by_username(db, username)
     if not user:
         user = get_user_by_email(db, username)
@@ -120,7 +113,6 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
 
 def update_user_password(db: Session, user_id: int, new_password: str, 
                         modified_by: Optional[int] = None) -> bool:
-    """Update user password with proper hashing"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return False
@@ -131,7 +123,6 @@ def update_user_password(db: Session, user_id: int, new_password: str,
     return True
 
 def verify_user_email(db: Session, user_id: int, verified_by: Optional[int] = None) -> bool:
-    """Mark user email as verified"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return False
@@ -143,18 +134,15 @@ def verify_user_email(db: Session, user_id: int, verified_by: Optional[int] = No
 
 def create_user_session(db: Session, user_id: int, device_info: str = None, ip_address: str = None, user_agent: str = None,
                         session_expires_minutes: int = 30, refresh_expires_hours: int = 168):
-    session_token = generate_secure_token()  # สร้าง token ใหม่
-    refresh_token = generate_secure_token()  # สร้าง refresh token ใหม่
+    session_token = generate_secure_token() 
+    refresh_token = generate_secure_token() 
 
-    # หา session เก่า active
     old_session = db.query(UserSession).filter_by(user_id=user_id, is_active=True).first()
 
     if old_session:
-        # ลบ session เก่าออกเลย
         db.delete(old_session)
         db.commit()
 
-    # สร้าง session ใหม่ (id ใหม่)
     session = UserSession.create_session(
         user_id=user_id,
         session_token=session_token,
@@ -172,7 +160,6 @@ def create_user_session(db: Session, user_id: int, device_info: str = None, ip_a
     return session, session_token, refresh_token
 
 def validate_session_token(db: Session, session_token: str) -> Optional[UserSession]:
-    """Validate session token and return session if valid"""
     token_hash = hash_token(session_token)
     session = db.query(UserSession).filter(
         and_(
@@ -185,7 +172,6 @@ def validate_session_token(db: Session, session_token: str) -> Optional[UserSess
     return session
 
 def validate_refresh_token(db: Session, refresh_token: str) -> Optional[UserSession]:
-    """Validate refresh token and return session if valid"""
     token_hash = hash_token(refresh_token)
     session = db.query(UserSession).filter(
         and_(
@@ -202,16 +188,13 @@ def refresh_user_session(db: Session, refresh_token: str) -> Optional[tuple[str,
     if not session:
         return None
     
-    # Revoke old session
     session.is_active = False
-    session.refresh_expires_at = datetime.utcnow()  # หมดอายุ refresh token เดิมทันที
+    session.refresh_expires_at = datetime.utcnow()
     session.modified_at = datetime.utcnow()
     
-    # สร้าง token ใหม่
     new_session_token = generate_secure_token(32)
     new_refresh_token = generate_secure_token(32)
     
-    # สร้าง session ใหม่ใน DB
     new_session = UserSession(
         user_id=session.user_id,
         session_token_hash=hash_token(new_session_token),
@@ -221,7 +204,6 @@ def refresh_user_session(db: Session, refresh_token: str) -> Optional[tuple[str,
         is_active=True,
         created_at=datetime.utcnow(),
         modified_at=datetime.utcnow(),
-        # device_info, ip_address, user_agent ถ้ามี ให้ใส่ตามที่จำเป็น
     )
     db.add(new_session)
     db.commit()
@@ -229,7 +211,6 @@ def refresh_user_session(db: Session, refresh_token: str) -> Optional[tuple[str,
     return new_session_token, new_refresh_token
 
 def invalidate_session(db: Session, session_token: str) -> bool:
-    """Invalidate specific session"""
     token_hash = hash_token(session_token)
     session = db.query(UserSession).filter(UserSession.session_token_hash == token_hash).first()
     
@@ -240,7 +221,6 @@ def invalidate_session(db: Session, session_token: str) -> bool:
     return False
 
 def invalidate_all_user_sessions(db: Session, user_id: int) -> int:
-    """Invalidate all sessions for a user"""
     count = db.query(UserSession).filter(
         and_(
             UserSession.user_id == user_id,
@@ -252,7 +232,6 @@ def invalidate_all_user_sessions(db: Session, user_id: int) -> int:
     return count
 
 def clean_expired_sessions(db: Session) -> int:
-    """Clean expired sessions"""
     count = db.query(UserSession).filter(
         and_(
             UserSession.is_active == True,
@@ -267,7 +246,6 @@ def clean_expired_sessions(db: Session) -> int:
     return count
 
 def get_user_active_sessions(db: Session, user_id: int) -> List[UserSession]:
-    """Get all active sessions for a user"""
     return db.query(UserSession).filter(
         and_(
             UserSession.user_id == user_id,

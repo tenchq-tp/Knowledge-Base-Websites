@@ -120,7 +120,6 @@ def change_password(
     user.modified_by = user.id
     db.commit()
 
-    # Invalidate all user sessions (force logout)
     crud_user.invalidate_all_user_sessions(db, user.id)
 
     return {"message": "Password changed successfully. All sessions invalidated."}
@@ -138,7 +137,6 @@ def reset_user_password(
             detail="User not found"
         )
     
-    # Invalidate all user sessions
     crud_user.invalidate_all_user_sessions(db, user_id)
     
     return {"message": "Password reset successfully. User logged out from all sessions."}
@@ -186,14 +184,7 @@ def create_user_by_authenticated_user(
     user: UserCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-):
-    """
-    Create a new user and user profile, must be logged in.
-    
-    - **Requires authentication**
-    - **Automatically hashes password**
-    - **Creates profile with blank fields**
-    """
+):    
     # Optional: Restrict role (e.g., only admin can create)
     # if current_user.role != "admin":
     #     raise HTTPException(status_code=403, detail="Not authorized to create user")

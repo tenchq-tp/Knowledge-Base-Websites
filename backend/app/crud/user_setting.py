@@ -17,11 +17,9 @@ def upsert_user_setting(db: Session, username: str, setting_data: UserSettingCre
     setting = db.query(UserSetting).filter(UserSetting.user_id == user.id).first()
 
     if setting:
-        # UPDATE
         setting.language = setting_data.language
         setting.theme = setting_data.theme
     else:
-        # INSERT
         setting = UserSetting(user_id=user.id, **setting_data.model_dump())
         db.add(setting)
 

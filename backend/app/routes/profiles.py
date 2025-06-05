@@ -68,9 +68,6 @@ def search_users(
     limit: int = 20,
     db: Session = Depends(get_db)
 ):
-    """Search public user profiles"""
-    # This would implement search functionality
-    # For now, just return verified users
     users = crud_user.get_users_list(db, skip=skip, limit=limit, is_verified=True)
     return [
         UserSafeResponse(
