@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.user import UserResponse, UserUpdate,UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate, ChangePasswordRequest
-from app.models.user import User
+from app.models.user import User, UserSession
 from app.routes.auth import get_current_user
 from app.crud import user as crud_user
 from app.core.security import verify_password, get_password_hash, validate_password_strength
@@ -156,6 +156,17 @@ def delete_user_by_username(
     user = crud_user.get_user_by_username(db, username=username)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    active_session = (
+        db.query(UserSession)
+        .filter(UserSession.user_id == user.id, UserSession.is_active == True)
+        .first()
+    )
+    if active_session:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot delete user with an active session."
+        )
 
     user_data = UserSafeResponse(
         id=user.id,

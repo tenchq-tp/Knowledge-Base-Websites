@@ -18,7 +18,41 @@ def get_user_by_username(db: Session, username: str) -> Optional[User]:
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     """Get user by ID with profile"""
-    return db.query(User).options(joinedload(User.profile)).filter(User.id == user_id).first()
+    user = db.query(User).options(joinedload(User.profile)).filter(User.id == user_id).first()
+    if not user:
+        return None
+
+    active_session = (
+        db.query(UserSession)
+        .filter(UserSession.user_id == user.id, UserSession.is_active == True)
+        .order_by(UserSession.created_at.desc())
+        .first()
+    )
+    setattr(user, "is_active", bool(active_session))
+    return user
+
+def get_users_list(db: Session, skip: int = 0, limit: int = 100, 
+                   role: Optional[str] = None, is_verified: Optional[bool] = None) -> List[User]:
+    """Get list of users with filters"""
+    query = db.query(User).options(joinedload(User.profile))
+
+    if role:
+        query = query.filter(User.role == role)
+    if is_verified is not None:
+        query = query.filter(User.is_verified == is_verified)
+
+    users = query.offset(skip).limit(limit).all()
+
+    for user in users:
+        active_session = (
+            db.query(UserSession)
+            .filter(UserSession.user_id == user.id, UserSession.is_active == True)
+            .order_by(UserSession.created_at.desc())
+            .first()
+        )
+        setattr(user, "is_active", bool(active_session))
+
+    return users
 
 def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None):
     new_user = User(
@@ -83,18 +117,6 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
     db.commit()
     
     return user
-
-def get_users_list(db: Session, skip: int = 0, limit: int = 100, 
-                   role: Optional[str] = None, is_verified: Optional[bool] = None) -> List[User]:
-    """Get list of users with filters"""
-    query = db.query(User).options(joinedload(User.profile))
-    
-    if role:
-        query = query.filter(User.role == role)
-    if is_verified is not None:
-        query = query.filter(User.is_verified == is_verified)
-    
-    return query.offset(skip).limit(limit).all()
 
 def update_user_password(db: Session, user_id: int, new_password: str, 
                         modified_by: Optional[int] = None) -> bool:
