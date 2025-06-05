@@ -7,12 +7,10 @@ router = APIRouter(prefix="/health", tags=["Health Check"])
 
 @router.get("/")
 def health_check():
-    """Basic health check"""
     return {"status": "healthy", "message": "API is running"}
 
 @router.get("/db")
 def database_health_check(db: Session = Depends(get_db)):
-    """Database health check"""
     try:
         # Test database connection
         db.execute("SELECT 1")

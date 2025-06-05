@@ -1,2 +1,39 @@
 2025-05-27 10:06:56,581 - root - ERROR - Error creating database tables: Foreign key associated with column 'user.created_by' could not find table 'users' with which to generate a foreign key to target column 'id'
 2025-05-27 10:07:48,771 - root - ERROR - Error creating database tables: Foreign key associated with column 'user.modified_by' could not find table 'users' with which to generate a foreign key to target column 'id'
+2025-06-05 07:40:40,637 - app.db.session - ERROR - Database session error: [{'type': 'list_type', 'loc': ('body', 'media_files'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7f3249325090>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-05 07:42:04,319 - app.db.session - ERROR - Database session error: app.models.article.Article() argument after ** must be a mapping, not ArticleCreate
+2025-06-05 08:11:17,544 - app.db.session - ERROR - Database session error: 1 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response',), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': None, 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+
+2025-06-05 09:08:32,234 - app.db.session - ERROR - Database session error: 
+2025-06-05 09:15:41,858 - app.db.session - ERROR - Database session error: 
+2025-06-05 09:17:10,290 - app.db.session - ERROR - Database session error: 
+2025-06-05 09:19:29,067 - app.db.session - ERROR - Database session error: 
+2025-06-05 09:21:11,156 - app.db.session - ERROR - Database session error: 
+2025-06-05 09:23:44,088 - app.db.session - ERROR - Database session error: 
+2025-06-05 09:24:58,114 - app.db.session - ERROR - Database session error: object of type 'int' has no len()
+2025-06-05 09:29:55,079 - app.db.session - ERROR - Database session error: (psycopg2.errors.UndefinedColumn) column "updated_at" of relation "media_file" does not exist
+LINE 1: INSERT INTO media_file (filename, file_type, url, updated_at...
+                                                          ^
+
+[SQL: INSERT INTO media_file (filename, file_type, url, updated_at) VALUES (%(filename)s, %(file_type)s, %(url)s, %(updated_at)s) RETURNING media_file.id]
+[parameters: {'filename': 'Screenshot (371).png', 'file_type': 'image/png', 'url': 'http://minio:9000/articles/b339352c-7c60-4ae4-9774-80b7010765bc.png', 'updated_at': datetime.datetime(2025, 6, 5, 9, 29, 55, 76915)}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-05 09:31:08,113 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(ชื่อ-บทความ-สำหรับ-url) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'ชื่อบทความ', 'slug': 'ชื่อ-บทความ-สำหรับ-url', 'content': 'เนื้อหาเริ่มต้น {{media_0}} ต่อเนื้อหา {{media_1}} จบเนื้อหา', 'created_at': datetime.datetime(2025, 6, 5, 9, 31, 8, 111378), 'updated_at': datetime.datetime(2025, 6, 5, 9, 31, 8, 111380)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-05 09:36:14,075 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'positions', 'int'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '"[0, 1]"', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'list_type', 'loc': ('body', 'positions', 'list[int]'), 'msg': 'Input should be a valid list', 'input': '"[0, 1]"', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-05 09:37:05,671 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'positions', 'int'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '"[0, 1]"', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'list_type', 'loc': ('body', 'positions', 'list[int]'), 'msg': 'Input should be a valid list', 'input': '"[0, 1]"', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-05 09:44:50,807 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'positions', 'int'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[0, 1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'list_type', 'loc': ('body', 'positions', 'list[int]'), 'msg': 'Input should be a valid list', 'input': '[0, 1]', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-05 09:58:50,664 - app.db.session - ERROR - Database session error: 
+2025-06-05 10:00:55,278 - app.db.session - ERROR - Database session error: 
+2025-06-05 10:02:55,153 - app.db.session - ERROR - Database session error: 
+2025-06-05 10:05:39,636 - app.db.session - ERROR - Database session error: object of type 'UploadFile' has no len()
+2025-06-05 10:06:32,694 - app.db.session - ERROR - Database session error: object of type 'UploadFile' has no len()
+2025-06-05 10:06:40,642 - app.db.session - ERROR - Database session error: object of type 'UploadFile' has no len()
+2025-06-05 10:08:20,051 - app.db.session - ERROR - Database session error: 
+2025-06-05 10:08:45,987 - app.db.session - ERROR - Database session error: 
+2025-06-05 10:09:10,960 - app.db.session - ERROR - Database session error: 

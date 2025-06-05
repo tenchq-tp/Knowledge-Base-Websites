@@ -24,33 +24,16 @@ export default function UserSettings() {
   const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
-
   const [userFormData, setUserFormData] = useState({
-    username: "",
-    email: "",
-    role: "",
-    profile: {
-      title: "",
-      first_name: "",
-      last_name: "",
-      phone: "",
-      date_of_birth: "",
-      gender: "",
-      country: "",
-      city: "",
-      address: ""
-    }
+    username: "", email: "", role: "",
+    profile: { title: "", first_name: "", last_name: "", phone: "", date_of_birth: "", gender: "", country: "", city: "", address: "" }
   });
 
   // API Functions
   const apiCall = async (endpoint, options = {}) => {
     const token = localStorage.getItem("access_token");
     const response = await fetch(`http://localhost:8000${endpoint}`, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      ...options,
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, }, ...options,
     });
 
     if (!response.ok) {
@@ -72,8 +55,7 @@ export default function UserSettings() {
   const fetchRoles = async () => {
     setIsLoadingRoles(true);
     try {
-      const data = await apiCall("/roles");
-      setRolesList(data);
+      const data = await apiCall("/roles"); setRolesList(data);
     } catch (error) {
       showAlert("error", "Error", "Failed to load roles. Please try again.");
     } finally {
@@ -91,15 +73,11 @@ export default function UserSettings() {
 
       const formattedUsers = users.map(user => {
         return {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role?.name || user.role_name || user.role || 'N/A', // เช็คหลายแบบ
+          id: user.id, username: user.username, email: user.email, role: user.role?.name || user.role_name || user.role || 'N/A', 
           status: user.is_verified ? "active" : "inactive",
-          updatedDate: user.updated_at ?
-            new Date(user.updated_at).toLocaleString('en-GB', {
-              day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-            }).replace(',', '') : 'N/A',
+          updatedDate: user.updated_at ? new Date(user.updated_at).toLocaleString('en-GB', {
+            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+          }).replace(',', '') : 'N/A',
           profile: user.profile || {}
         };
       });
@@ -139,12 +117,7 @@ export default function UserSettings() {
     });
   };
 
-  // Event Handlers
-  const handleCreateUser = () => {
-    setEditingUser(null);
-    resetForm();
-    setIsCreateUserModalOpen(true);
-  };
+  const handleCreateUser = () => { setEditingUser(null); resetForm(); setIsCreateUserModalOpen(true); };
 
   const handleEditUser = (user) => {
     setEditingUser(user);
@@ -167,33 +140,23 @@ export default function UserSettings() {
     setIsCreateUserModalOpen(true);
   };
 
- const handleDeleteUser = async (userId, username) => {
-  const result = await Swal.fire({
-    icon: "warning",
-    title: "Are you sure?",
-    text: `You want to delete user "${username}"?`,
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Yes, delete it!",
-    cancelButtonText: "Cancel"
-  });
+  const handleDeleteUser = async (userId, username) => {
+    const result = await Swal.fire({ icon: "warning", title: "Are you sure?", text: `You want to delete user "${username}"?`, showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "Yes, delete it!", cancelButtonText: "Cancel" });
 
-  if (result.isConfirmed) {
-    try {
-      await apiCall(`/users/${username}`, { method: "DELETE" });
-      setUsersList(prev => prev.filter(user => user.id !== userId));
-      await loadUsers(searchUsername);
-      showAlert("success", "Success", "User deleted successfully!");
-    } catch (error) {
-      const errorMessage = error.message !== "[object Object]" ? error.message : "Failed to delete user.";
-      showAlert("error", "Error", errorMessage);
+    if (result.isConfirmed) {
+      try {
+        await apiCall(`/users/${username}`, { method: "DELETE" });
+        setUsersList(prev => prev.filter(user => user.id !== userId));
+        await loadUsers(searchUsername);
+        showAlert("success", "Success", "User deleted successfully!");
+      } catch (error) {
+        const errorMessage = error.message !== "[object Object]" ? error.message : "Failed to delete user.";
+        showAlert("error", "Error", errorMessage);
+      }
     }
-  }
-};
+  };
 
   const handleSaveUser = async () => {
-    // Validation
     const { username, email, role, profile } = userFormData;
 
     if (!username.trim() || !email.trim() || !role ||
@@ -260,7 +223,6 @@ export default function UserSettings() {
     }
   };
 
-  // Effects
   useEffect(() => {
     loadUsers();
     fetchRoles();
@@ -271,58 +233,34 @@ export default function UserSettings() {
     return () => clearTimeout(timeoutId);
   }, [searchUsername]);
 
-  // Render Helpers
   const renderUserTable = () => (
     <table className="users-table">
       <thead>
-        <tr className="table-header" style={{ backgroundColor: tokens.surfaceAlt }}>
-          {["#", "Username", "Email", "Role", "Status", "Updated date", "Action"].map((header) => (
-            <th key={header} style={{
-              color: tokens.text,
-              borderBottomColor: tokens.border
-            }}>
-              {header}
-            </th>
-          ))}
-        </tr>
+        <tr className="table-header" style={{ backgroundColor: tokens.surfaceAlt }}>{["#", "Username", "Email", "Role", "Status", "Updated date", "Action"].map((header) => (<th key={header} style={{ color: tokens.text, borderBottomColor: tokens.border }}> {header} </th>))}</tr>
       </thead>
       <tbody>
-        {usersList.map((user, index) => (
-          <tr
-            key={user.id}
-            className="table-row"
-            style={{
-              ...getComponentStyle('table-stripe')(index),
-              borderBottomColor: tokens.border
-            }}
-          >
-            <td style={{ color: tokens.text }}>{index + 1}</td>
-            <td style={{ color: tokens.text }}>{user.username}</td>
-            <td style={{ color: tokens.text }}>{user.email}</td>
-            <td style={{ color: tokens.text }}>{user.role}</td>
-            <td>
-              <span className={`status-badge ${user.status === "active" ? "status-active" : "status-inactive"}`}>
-                {user.status}
-              </span>
-            </td>
-            <td style={{ color: tokens.text }}>{user.updatedDate}</td>
-            <td>
-              <div className="action-buttons">
-                <button
-                  onClick={() => handleEditUser(user)}
-                  className="btn btn-edit"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteUser(user.id, user.username)}
-                  className="btn btn-delete"
-                >
-                  Delete
-                </button>
-              </div>
-            </td>
-          </tr>
+        {usersList.map((user, index) => (<tr key={user.id} className="table-row" style={{ ...getComponentStyle('table-stripe')(index), borderBottomColor: tokens.border }}>
+          <td style={{ color: tokens.text }}>{index + 1}</td>
+          <td style={{ color: tokens.text }}>{user.username}</td>
+          <td style={{ color: tokens.text }}>{user.email}</td>
+          <td style={{ color: tokens.text }}>{user.role}</td>
+          <td>
+            <span className={`status-badge ${user.status === "active" ? "status-active" : "status-inactive"}`}>
+              {user.status}
+            </span>
+          </td>
+          <td style={{ color: tokens.text }}>{user.updatedDate}</td>
+          <td>
+            <div className="action-buttons">
+              <button onClick={() => handleEditUser(user)} className="btn btn-edit">
+                Edit
+              </button>
+              <button onClick={() => handleDeleteUser(user.id, user.username)} className="btn btn-delete">
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
         ))}
       </tbody>
     </table>
@@ -367,7 +305,6 @@ export default function UserSettings() {
     </div>
   );
 
-  // Role options
   const roleOptions = [
     { value: "", label: isLoadingRoles ? "Loading roles..." : "Select role" },
     ...rolesList.map(role => ({ value: role.name, label: role.name }))
@@ -375,7 +312,6 @@ export default function UserSettings() {
 
   return (
     <>
-      {/* User Settings Card */}
       <div className="setting-card" style={{ backgroundColor: tokens.surface, borderColor: tokens.border }}>
         <div className="section-header" style={{ borderBottomColor: tokens.border }}>
           <div className="section-info">
@@ -384,25 +320,12 @@ export default function UserSettings() {
               {t("settings.user.title")}
             </h2>
           </div>
-          <button
-            onClick={() => setIsUserModalOpen(true)}
-            className="btn btn-primary"
-          >
-            <FontAwesomeIcon icon={faEdit} />
-            {t("settings.user.edit")}
-          </button>
+          <button onClick={() => setIsUserModalOpen(true)} className="btn btn-primary"><FontAwesomeIcon icon={faEdit} /> Manage </button>
         </div>
       </div>
 
-      {/* User Management Modal */}
-      <Modal
-        isOpen={isUserModalOpen}
-        onClose={() => setIsUserModalOpen(false)}
-        title="User Management"
-        size="large"
-      >
+      <Modal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} title="User Management" size="large">
         <div className="modal-content">
-          {/* Search and Create Button */}
           <div className="search-section">
             <div className="search-input-group">
               <label className="form-label" style={{ color: tokens.text }}>Search:</label>
@@ -424,19 +347,11 @@ export default function UserSettings() {
             </button>
           </div>
 
-          {/* Users Table */}
           <div className="table-container" style={{
             borderColor: tokens.border,
             backgroundColor: tokens.surface
           }}>
-            {loading ? (
-              <div className="loading-state" style={{ color: tokens.textSecondary }}>
-                Loading users...
-              </div>
-            ) : usersList.length === 0 ? (
-              <div className="empty-state" style={{ color: tokens.textSecondary }}>
-                No users found
-              </div>
+            {loading ? (<div className="loading-state" style={{ color: tokens.textSecondary }}>Loading users...</div>) : usersList.length === 0 ? (<div className="empty-state" style={{ color: tokens.textSecondary }}>No users found</div>
             ) : (
               renderUserTable()
             )}
@@ -444,25 +359,11 @@ export default function UserSettings() {
         </div>
       </Modal>
 
-      {/* Create/Edit User Modal */}
-      <Modal
-        isOpen={isCreateUserModalOpen}
-        onClose={() => setIsCreateUserModalOpen(false)}
-        title={editingUser ? "Edit User" : "Create User"}
-        size="large"
-      >
+      <Modal isOpen={isCreateUserModalOpen} onClose={() => setIsCreateUserModalOpen(false)} title={editingUser ? "Edit User" : "Create User"} size="large">
         <div className="modal-content">
           <div className="form-grid">
-            <div className="form-section">
-              <h3 className="form-section-title" style={{
-                color: tokens.text,
-                borderBottomColor: tokens.border
-              }}>
-                Basic Information
-              </h3>
-
+            <div className="form-section"><h3 className="form-section-title" style={{ color: tokens.text, borderBottomColor: tokens.border }}>Basic Information</h3>
               {renderFormField("Username", "username", "text", "Enter username", true)}
-              {/* Email field with auto-generation on focus */}
               <div className="form-group">
                 <label className="form-label" style={{ color: tokens.text }}>
                   Email <span className="required">*</span>
@@ -472,7 +373,6 @@ export default function UserSettings() {
                   value={userFormData.email || ""}
                   onChange={(e) => setUserFormData(prev => ({ ...prev, email: e.target.value }))}
                   onFocus={(e) => {
-                    // Auto-generate email when focus and email is empty
                     if (!userFormData.email && userFormData.username) {
                       setUserFormData(prev => ({
                         ...prev,
@@ -492,7 +392,6 @@ export default function UserSettings() {
               {renderFormField("Role", "role", "text", "", true, roleOptions)}
             </div>
 
-            {/* Right Column - Profile Info */}
             <div className="form-section">
               <h3 className="form-section-title" style={{
                 color: tokens.text,
@@ -577,7 +476,6 @@ export default function UserSettings() {
                   type="tel"
                   value={userFormData.profile.phone || ""}
                   onChange={(e) => {
-                    // Allow only numbers
                     const value = e.target.value.replace(/[^0-9]/g, '');
                     setUserFormData(prev => ({
                       ...prev,
@@ -678,7 +576,6 @@ export default function UserSettings() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="modal-actions" style={{ borderTopColor: tokens.border }}>
             <button
               onClick={() => setIsCreateUserModalOpen(false)}

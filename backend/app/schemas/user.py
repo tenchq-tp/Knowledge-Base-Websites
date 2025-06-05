@@ -31,17 +31,6 @@ class UserCreate(UserBase):
 class UserProfileCreate(UserProfileBase):
     pass
 
-class UserUpdate(BaseModel):
-    username: Optional[str] = None
-    email: Optional[str] = None
-    password: Optional[str] = None
-    role_id: Optional[int] = None
-    role_name: Optional[str] = None
-    is_verified: Optional[bool] = None
-
-    class Config:
-        from_attributes = True
-
 class UserProfileUpdate(UserProfileBase):
     pass
 
@@ -66,6 +55,19 @@ class UserResponse(UserBase):
     last_login: Optional[datetime] = None
     created_at: datetime
     modified_at: Optional[datetime] = None
+    profile: Optional[UserProfileResponse] = None
+    is_active: Optional[bool] = None
+
+    class Config:
+        from_attributes = True
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+    role_id: Optional[int] = None
+    role_name: Optional[str] = None
+    is_verified: Optional[bool] = None
     profile: Optional[UserProfileResponse] = None
 
     class Config:

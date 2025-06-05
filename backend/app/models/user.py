@@ -16,11 +16,9 @@ class GenderType(str, enum.Enum):
     PREFER_NOT_TO_SAY = "prefer_not_to_say"
 
 def generate_user_id():
-    """Generate random 10-digit ID"""
     return random.randint(1000000000, 9999999999)
 
 def hash_token(token: str) -> str:
-    """Hash token using SHA-256"""
     return hashlib.sha256(token.encode()).hexdigest()
 
 class User(Base):
@@ -29,24 +27,21 @@ class User(Base):
     id = Column(BigInteger, primary_key=True, default=generate_user_id)
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
-    password = Column(String(255), nullable=False)  # bcrypt/scrypt/argon2 hashed
+    password = Column(String(255), nullable=False)
     role_id = Column(BigInteger, ForeignKey("roles.id"), index=True) # เพิ่ม nullable=False ให้ role_id ถ้าต้องการบังคับทุก user ต้องมี role
     is_verified = Column(Boolean, default=False, index=True)
     last_login = Column(DateTime(timezone=True), index=True)
     
-    # Audit fields (NULLABLE for first user)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     created_by = Column(BigInteger, ForeignKey('users.id'), nullable=True)
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     modified_by = Column(BigInteger, ForeignKey('users.id'), nullable=True)
     
-    # Relationships
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan", foreign_keys="[UserProfile.user_id]")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     setting = relationship("UserSetting", back_populates="user", uselist=False)
     role = relationship("Role", back_populates="users", foreign_keys=[role_id])
     
-    # Self-referential relationships for audit (nullable)
     creator = relationship("User", foreign_keys=[created_by], remote_side=[id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[id], post_update=True)
     
@@ -67,27 +62,23 @@ class UserProfile(Base):
     __tablename__ = "user_profiles"
 
     user_id = Column(BigInteger,ForeignKey('users.id', ondelete='CASCADE'),primary_key=True)
-    # Personal information
-    title = Column(String(50))  # Mr., Ms., Dr., etc.
+    title = Column(String(50)) 
     first_name = Column(String(50), index=True)
     last_name = Column(String(50), index=True)
     phone = Column(String(20))
     date_of_birth = Column(Date)
-    gender = Column(Enum(GenderType), index=True)  # ENUM for data integrity
+    gender = Column(Enum(GenderType), index=True)  
     role_id = Column(BigInteger, ForeignKey("roles.id"), index=True) # เพิ่ม nullable=False ให้ role_id ถ้าต้องการบังคับทุก user ต้องมี role
     
-    # Location
     country = Column(String(50), index=True)
     city = Column(String(50), index=True)
     address = Column(Text)
     
-    # Audit fields (NULLABLE)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(BigInteger, ForeignKey('users.id'), nullable=True)
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     modified_by = Column(BigInteger, ForeignKey('users.id'), nullable=True)
     
-    # Relationships
     user = relationship("User", back_populates="profile", foreign_keys=[user_id])
     creator = relationship("User", foreign_keys=[created_by], remote_side=[User.id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[User.id], post_update=True)
@@ -123,11 +114,9 @@ class UserSession(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
-    # Hashed tokens (NOT plain JWT!)
-    session_token_hash = Column(String(255), nullable=False, unique=True, index=True)  # SHA-256 hash
-    refresh_token_hash = Column(String(255), nullable=True, unique=True, index=True)   # SHA-256 hash
+    session_token_hash = Column(String(255), nullable=False, unique=True, index=True)  
+    refresh_token_hash = Column(String(255), nullable=True, unique=True, index=True)  
 
-    # Session metadata
     device_info = Column(Text, nullable=True)
     ip_address = Column(INET, nullable=True, index=True)
     user_agent = Column(Text, nullable=True)
@@ -139,14 +128,12 @@ class UserSession(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # Relationship to User
     user = relationship("User", back_populates="sessions")
 
     @classmethod
     def create_session(cls, user_id: int, session_token: str, refresh_token: str = None, 
                        device_info: str = None, ip_address: str = None, user_agent: str = None,
                        session_expires_minutes: int = 30, refresh_expires_hours: int = 168):
-        """Create new session with hashed tokens"""
         from datetime import datetime, timedelta
 
         return cls(
@@ -161,7 +148,6 @@ class UserSession(Base):
         )
 
     def validate_session_token(self, token: str) -> bool:
-        """Validate session token against stored hash"""
         if not self.is_active:
             return False
         from datetime import datetime
@@ -170,7 +156,6 @@ class UserSession(Base):
         return self.session_token_hash == hash_token(token)
 
     def validate_refresh_token(self, token: str) -> bool:
-        """Validate refresh token against stored hash"""
         if not self.is_active or not self.refresh_token_hash:
             return False
         from datetime import datetime
@@ -179,6 +164,5 @@ class UserSession(Base):
         return self.refresh_token_hash == hash_token(token)
 
     def invalidate(self):
-        """Invalidate this session"""
         self.is_active = False
        

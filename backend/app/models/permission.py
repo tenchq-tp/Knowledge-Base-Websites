@@ -6,7 +6,7 @@ class Permission(Base):
     __tablename__ = "permissions"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False)  # เช่น view_user, edit_user
+    name = Column(String, unique=True, nullable=False) 
     description = Column(String, nullable=True)
 
     roles = relationship("RolePermission", back_populates="permission", cascade="all, delete")
