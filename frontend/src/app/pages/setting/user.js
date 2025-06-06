@@ -10,7 +10,6 @@ import Modal from "../../component/setting_modal";
 import { useTheme } from "../../contexts/ThemeContext";
 import "../../style/user_setting.css";
 
-
 export default function UserSettings() {
   const { t } = useTranslation();
   const { tokens, getComponentStyle } = useTheme();
@@ -29,7 +28,6 @@ export default function UserSettings() {
     profile: { title: "", first_name: "", last_name: "", phone: "", date_of_birth: "", gender: "", country: "", city: "", address: "" }
   });
 
-  // API Functions
   const apiCall = async (endpoint, options = {}) => {
     const token = localStorage.getItem("access_token");
     const response = await fetch(`http://localhost:8000${endpoint}`, {
@@ -74,7 +72,8 @@ export default function UserSettings() {
       const formattedUsers = users.map(user => {
         return {
           id: user.id, username: user.username, email: user.email, role: user.role?.name || user.role_name || user.role || 'N/A', 
-          status: user.is_verified ? "active" : "inactive",
+          status: user.is_active ? "active" : "inactive",
+          is_active: user.is_active,
           updatedDate: user.updated_at ? new Date(user.updated_at).toLocaleString('en-GB', {
             day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
           }).replace(',', '') : 'N/A',
@@ -119,7 +118,23 @@ export default function UserSettings() {
 
   const handleCreateUser = () => { setEditingUser(null); resetForm(); setIsCreateUserModalOpen(true); };
 
+
+  const updateUser = async (userId, userData) => {
+  try {
+    await apiCall(`/users/${userId}`, { method: "PUT", body: JSON.stringify(userData) });
+    await loadUsers(searchUsername);
+    showAlert("success", "Success", "User updated successfully!");
+  } catch (error) {
+    console.error("Update user error:", error);
+    throw error; 
+  }
+};
+
   const handleEditUser = (user) => {
+    if (user.is_active) {
+    showAlert("warning", "Cannot Edit", "Active users cannot be edited. Please deactivate the user first.");
+    return;
+  }
     setEditingUser(user);
     setUserFormData({
       username: user.username,
@@ -141,6 +156,11 @@ export default function UserSettings() {
   };
 
   const handleDeleteUser = async (userId, username) => {
+     const user = usersList.find(u => u.id === userId);
+if (user && user.is_active) {
+  showAlert("warning", "Cannot Delete", "Active users cannot be deleted. Please deactivate the user first.");
+  return;
+}
     const result = await Swal.fire({ icon: "warning", title: "Are you sure?", text: `You want to delete user "${username}"?`, showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "Yes, delete it!", cancelButtonText: "Cancel" });
 
     if (result.isConfirmed) {
@@ -156,7 +176,7 @@ export default function UserSettings() {
     }
   };
 
-  const handleSaveUser = async () => {
+ const handleSaveUser = async () => {
     const { username, email, role, profile } = userFormData;
 
     if (!username.trim() || !email.trim() || !role ||
@@ -167,6 +187,31 @@ export default function UserSettings() {
 
     try {
       if (editingUser) {
+        const selectedRole = rolesList.find(r => r.name === userFormData.role.trim());
+        
+        if (!selectedRole) {
+          return showAlert("warning", "Warning", `Role "${userFormData.role}" not found`);
+        }
+
+        const updateData = {
+          username: username.trim(),
+          email: email.trim(),
+          role_id: selectedRole.id,
+          profile: {
+            title: userFormData.profile.title,
+            first_name: userFormData.profile.first_name.trim(),
+            last_name: userFormData.profile.last_name.trim(),
+            phone: userFormData.profile.phone || null,
+            date_of_birth: userFormData.profile.date_of_birth || null,
+            gender: userFormData.profile.gender,
+            country: userFormData.profile.country || null,
+            city: userFormData.profile.city || null,
+            address: userFormData.profile.address || null,
+          }
+        };
+
+        await updateUser(editingUser.id, updateData);
+        
         setUsersList(prev => prev.map(user =>
           user.id === editingUser.id
             ? {
@@ -182,7 +227,7 @@ export default function UserSettings() {
             }
             : user
         ));
-        showAlert("success", "Success", "User updated successfully!");
+        
       } else {
         const selectedRole = rolesList.find(role => role.name === userFormData.role.trim());
 
@@ -195,7 +240,7 @@ export default function UserSettings() {
           email: email.trim(),
           password: "P@ssW0rd",
           role_id: selectedRole.id,
-          is_verified: false,
+          is_active: true,
           profile: {
             title: userFormData.profile.title,
             first_name: userFormData.profile.first_name.trim(),
@@ -214,7 +259,10 @@ export default function UserSettings() {
 
       setIsCreateUserModalOpen(false);
       setEditingUser(null);
+      resetForm();
+      
     } catch (error) {
+      console.error("Save user error:", error);
       const errorMessage = error.message && error.message !== "[object Object]"
         ? error.message
         : "Failed to save user. Please try again.";

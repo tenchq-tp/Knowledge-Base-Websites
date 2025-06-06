@@ -110,6 +110,35 @@
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #218838;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-success:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.save-permissions-section {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  text-align: center !important;
+  border-top: 1px solid var(--theme-border);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
 /* Form Content */
 .form-role-content {
   display: flex;
@@ -527,3 +556,19 @@
   50% { transform: scale(1.2) rotate(45deg); }
   100% { transform: scale(1) rotate(45deg); }
 }
+
+/* FormModal ต้องสูงกว่า Modal */
+.form-role-content,
+.form-role-content * {
+  z-index: 9999 !important;
+}
+
+/* Role Modal ต้องต่ำกว่า */
+.role-modal-content,
+.role-modal-content * {
+  z-index: 1000 !important;
+}
+
+
+
+

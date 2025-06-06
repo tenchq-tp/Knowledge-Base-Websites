@@ -1,9 +1,8 @@
-// components/RoleSettings.js
 "use client";
 
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserTag, faEdit, faChevronDown, faChevronRight, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faUserTag, faEdit, faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import Modal from "../../component/setting_modal";
@@ -27,6 +26,10 @@ export default function RoleSettings() {
   const [formLoading, setFormLoading] = useState(false);
   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState(null);
 
+  const [menuPermissions, setMenuPermissions] = useState({});
+  const [permissionsLoading, setPermissionsLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
   const api = async (url, opts = {}) => {
     const res = await fetch(`http://localhost:8000${url}`, {
       headers: { "Authorization": `Bearer ${localStorage.getItem("access_token")}`, "Content-Type": "application/json" },
@@ -38,11 +41,128 @@ export default function RoleSettings() {
 
   const alert = (type, msg) => Swal.fire({ icon: type, text: msg, timer: 2000, showConfirmButton: false });
 
+  const groupPermissionsByMenu = (permissionsData) => {
+    const grouped = {
+      home: [],
+      dashboard: [],
+      category: [],
+      profile: [],
+      setting: []
+    };
+
+    const permissionColors = {
+      view: "#28a745",
+      add: "#007bff",
+      edit: "#ffc107",
+      delete: "#dc3545",
+      role_setting: "#6f42c1",
+      user_setting: "#20c997"
+    };
+
+    permissionsData.forEach(permission => {
+      const { name, id } = permission; 
+      if (name.includes('_home')) {
+        const action = name.replace('_home', '');
+        grouped.home.push({
+          key: action,
+          id: id,
+          color: permissionColors[action] || "#6c757d",
+          label: action.charAt(0).toUpperCase() + action.slice(1) 
+        });
+      } else if (name.includes('_category')) {
+        const action = name.replace('_category', '');
+        grouped.category.push({
+          key: action,
+          id: id,
+          color: permissionColors[action] || "#6c757d",
+          label: action.charAt(0).toUpperCase() + action.slice(1)
+        });
+      } else if (name.includes('_profile')) {
+        const action = name.replace('_profile', '');
+        grouped.profile.push({
+          key: action,
+          id: id,
+          color: permissionColors[action] || "#6c757d",
+          label: action.charAt(0).toUpperCase() + action.slice(1)
+        });
+      } else if (name === 'role_setting' || name === 'user_setting') {
+        grouped.setting.push({
+          key: name,
+          id: id,
+          color: permissionColors[name] || "#6c757d",
+          label: name.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+        });
+      } else if (name === 'view_dashboard') {
+        grouped.dashboard.push({
+          key: 'view',
+          id: id,
+          color: permissionColors.view,
+          label: 'View'
+        });
+      }
+    });
+
+    return grouped;
+  };
+
   const loadRoles = async () => {
     setLoading(true);
     try { setRoles(await api("/roles")); }
     catch { alert("error", "Failed to load roles"); }
     finally { setLoading(false); }
+  };
+
+  const loadPermissions = async () => {
+    setPermissionsLoading(true);
+    try {
+      const permissionsData = await api("/permissions");
+      const groupedPerms = groupPermissionsByMenu(permissionsData);
+      setMenuPermissions(groupedPerms);
+    } catch (error) {
+      console.error('Load permissions error:', error);
+      setMenuPermissions({});
+    }
+    finally {
+      setPermissionsLoading(false);
+    }
+  };
+
+  const loadRolePermissions = async (roleId) => {
+    try {
+      const rolePermissions = await api(`/role-permissions/role/${roleId}`);
+
+      const permsState = {};
+
+      rolePermissions.forEach(rp => {
+        const permissionName = rp.permission.name;
+
+        if (permissionName.includes('_home')) {
+          const action = permissionName.replace('_home', '');
+          if (!permsState.home) permsState.home = {};
+          permsState.home[action] = true;
+        } else if (permissionName.includes('_category')) {
+          const action = permissionName.replace('_category', '');
+          if (!permsState.category) permsState.category = {};
+          permsState.category[action] = true;
+        } else if (permissionName.includes('_profile')) {
+          const action = permissionName.replace('_profile', '');
+          if (!permsState.profile) permsState.profile = {};
+          permsState.profile[action] = true;
+        } else if (permissionName === 'role_setting' || permissionName === 'user_setting') {
+          if (!permsState.setting) permsState.setting = {};
+          permsState.setting[permissionName] = true;
+        } else if (permissionName === 'view_dashboard') {
+          if (!permsState.dashboard) permsState.dashboard = {};
+          permsState.dashboard.view = true;
+        }
+      });
+
+      setPerms(permsState);
+    } catch (error) {
+      console.error('Load role permissions error:', error);
+      alert("error", "Failed to load role permissions");
+      setPerms({});
+    }
   };
 
   const openCreateModal = () => {
@@ -142,8 +262,8 @@ export default function RoleSettings() {
       });
       if (!confirm.isConfirmed) return;
 
-      
-    const selectedRole = roles.find(r => r.name === role);
+
+      const selectedRole = roles.find(r => r.name === role);
       if (!selectedRole) {
         return alert("error", "Selected role not found");
       }
@@ -152,13 +272,13 @@ export default function RoleSettings() {
         await api(`/roles/${selectedRole.id}`, {
           method: "DELETE"
         });
-        
+
         alert("success", "Role deleted successfully!");
-        setRole(""); 
-        setPerms({}); 
-        setExpanded({}); 
+        setRole("");
+        setPerms({});
+        setExpanded({});
         await loadRoles(); // Reload roles list
-        
+
       } catch (error) {
         console.error("Delete role error:", error);
         alert("error", "Failed to delete role");
@@ -172,18 +292,69 @@ export default function RoleSettings() {
     } catch { alert("error", `Failed to ${action} role`); }
   };
 
+  const handleRoleChange = async (selectedRoleName) => {
+    setRole(selectedRoleName);
+
+    if (selectedRoleName) {
+      const selectedRole = roles.find(r => r.name === selectedRoleName);
+      if (selectedRole) {
+        await loadRolePermissions(selectedRole.id);
+      }
+    } else {
+      setPerms({});
+    }
+  };
+
+  const saveRolePermissions = async () => {
+    if (!role.trim()) {
+      return alert("warning", "Please select a role to save permissions");
+    }
+
+    const selectedRole = roles.find(r => r.name === role);
+    if (!selectedRole) {
+      return alert("error", "Selected role not found");
+    }
+
+    const permissionIds = [];
+
+    Object.keys(perms).forEach(menu => {
+      Object.keys(perms[menu]).forEach(action => {
+        if (perms[menu][action]) {
+          const menuPerms = menuPermissions[menu] || [];
+          const permissionItem = menuPerms.find(p => p.key === action);
+          if (permissionItem && permissionItem.id) {
+            permissionIds.push(permissionItem.id);
+          }
+        }
+      });
+    });
+
+    setSaveLoading(true);
+    try {
+      await api("/role-permissions/role", {
+        method: "PUT",
+        body: JSON.stringify({
+          role_id: selectedRole.id,
+          permission_id: permissionIds
+        })
+      });
+
+      alert("success", "Role permissions updated successfully!");
+    } catch (error) {
+      console.error('Save role permissions error:', error);
+      alert("error", "Failed to update role permissions");
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   const toggle = (menu) => setExpanded(p => ({ ...p, [menu]: !p[menu] }));
   const setPerm = (menu, type, val) => setPerms(p => ({ ...p, [menu]: { ...p[menu], [type]: val } }));
 
-  useEffect(() => { loadRoles(); }, []);
 
-  const menus = ["home", "dashboard", "category", "setting"];
-  const types = [
-    { key: "view", color: "#28a745" },
-    { key: "add", color: "#007bff" },
-    { key: "edit", color: "#ffc107" },
-    { key: "delete", color: "#dc3545" }
-  ];
+  useEffect(() => { loadRoles(); loadPermissions(); }, []);
+
+  const menus = ["home", "dashboard", "category", "profile", "setting"];
 
   return (
     <>
@@ -213,11 +384,7 @@ export default function RoleSettings() {
             placeholder="Role name *"
             className="form-input"
             disabled={formLoading}
-            style={{
-              backgroundColor: tokens.surface,
-              borderColor: tokens.border,
-              color: tokens.text
-            }}
+            style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }}
           />
 
           <textarea
@@ -227,11 +394,7 @@ export default function RoleSettings() {
             rows={2}
             className="form-textarea"
             disabled={formLoading}
-            style={{
-              backgroundColor: tokens.surface,
-              borderColor: tokens.border,
-              color: tokens.text
-            }}
+            style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }}
           />
 
           <div className="modal-actions">
@@ -273,7 +436,7 @@ export default function RoleSettings() {
                 ))}
               </div>
             </div>
-            <select value={role} onChange={(e) => setRole(e.target.value)} disabled={loading} className="role-select"
+            <select value={role} onChange={(e) => handleRoleChange(e.target.value)} disabled={loading} className="role-select"
               style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }}>
               <option value="">{loading ? "Loading..." : "Select role"}</option>
               {roles.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
@@ -281,7 +444,10 @@ export default function RoleSettings() {
           </div>
 
           <div className="permissions-section">
-            <h3 className="permissions-title" style={{ color: tokens.text }}>Permissions</h3>
+            <h3 className="permissions-title" style={{ color: tokens.text }}>
+              Permissions {permissionsLoading && <span className="loading-text">(Loading...)</span>}
+            </h3>
+
             {menus.map(menu => (
               <div key={menu} className="permission-menu">
                 <div className="permission-header" onClick={() => toggle(menu)}>
@@ -291,23 +457,50 @@ export default function RoleSettings() {
                 {expanded[menu] && (
                   <div className="permission-dropdown">
                     <div className="permission-checkboxes">
-                      {types.map(({ key, color }) => (
-                        <label key={key} className="permission-checkbox">
-                          <input type="checkbox" checked={perms[menu]?.[key] || false}
-                            onChange={(e) => setPerm(menu, key, e.target.checked)} />
-                          <div className="permission-checkbox-custom"
-                            style={{ borderColor: color }}>
-                          </div>
-                          <span className="permission-text" style={{ color: tokens.text }}>
-                            {key.charAt(0).toUpperCase() + key.slice(1)}
-                          </span>
-                        </label>
-                      ))}
+                      {menuPermissions[menu]?.length > 0 ? (
+                        menuPermissions[menu].map(({ key, color, label }) => (
+                          <label key={key} className="permission-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={perms[menu]?.[key] || false}
+                              onChange={(e) => setPerm(menu, key, e.target.checked)}
+                            />
+                            <div className="permission-checkbox-custom"
+                              style={{ borderColor: color }}>
+                            </div>
+                            <span className="permission-text" style={{ color: tokens.text }}>
+                              {label}
+                            </span>
+                          </label>
+                        ))
+                      ) : (
+                        <span style={{ color: tokens.text, opacity: 0.6 }}>
+                          No permissions available for {menu}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
             ))}
+            {role && (
+              <div className="save-permissions-section" style={{ marginTop: '20px', textAlign: 'center' }}>
+                <button
+                  onClick={saveRolePermissions}
+                  disabled={saveLoading}
+                  className="btn btn-success"
+                >
+                  {saveLoading ? (
+                    <>
+                      <span className="spinner"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Permissions'
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </Modal>
