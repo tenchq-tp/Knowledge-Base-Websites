@@ -6,7 +6,7 @@ import app.schemas.user_setting as schemas
 from app.routes.auth import get_current_user  # Adjust the import path as needed
 from app.models.user import User  # Adjust the import path as needed
 
-router = APIRouter(prefix="/user-settings", tags=["User Settings"])
+router = APIRouter(prefix="/v1/api/user-settings", tags=["User Settings"])
 
 @router.get("/", response_model=schemas.UserSettingResponse)
 def get_current_user_setting(

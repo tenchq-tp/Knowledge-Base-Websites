@@ -6,7 +6,7 @@ import app.schemas.category as schemas
 from app.routes.auth import get_current_user  # Adjust the import path as needed
 from app.models.user import User
 
-router = APIRouter(prefix="/categories", tags=["Categories"], dependencies=[Depends(get_current_user)])
+router = APIRouter(prefix="/v1/api/categories", tags=["Categories"], dependencies=[Depends(get_current_user)])
 
 @router.get("/", response_model=list[schemas.CategoryResponse])
 def read_categories(

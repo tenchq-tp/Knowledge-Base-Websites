@@ -6,7 +6,7 @@ from app.crud import user as crud_user
 from app.models.user import User
 from app.routes.auth import get_current_user
 
-router = APIRouter(prefix="/profiles", tags=["User Profiles"])
+router = APIRouter(prefix="/v1/api/profiles", tags=["User Profiles"])
 
 @router.get("/me", response_model=UserProfileResponse)
 def get_my_profile(current_user: User = Depends(get_current_user)):

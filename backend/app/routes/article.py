@@ -19,7 +19,7 @@ async def get_current_user_optional(current_user: Optional[User] = Depends(get_c
     except HTTPException:
         return None
 
-router = APIRouter(prefix="/articles", tags=["Articles"], dependencies=[Depends(get_current_user)])
+router = APIRouter(prefix="/vi/api/articles", tags=["Articles"], dependencies=[Depends(get_current_user)])
 
 from fastapi import UploadFile, File
 from typing import Union, List

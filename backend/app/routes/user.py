@@ -8,7 +8,7 @@ from app.routes.auth import get_current_user
 from app.crud import user as crud_user
 from app.core.security import verify_password, get_password_hash, validate_password_strength
 
-router = APIRouter(prefix="/users", tags=["User Management"])
+router = APIRouter(prefix="/v1/api/users", tags=["User Management"])
 
 @router.get("/", response_model=List[UserResponse])
 def list_users(

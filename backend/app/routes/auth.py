@@ -17,8 +17,8 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
 app = FastAPI()
-router = APIRouter(prefix="/auth", tags=["Authentication"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+router = APIRouter(prefix="/v1/api/auth", tags=["Authentication"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/api/auth/login")
 
 def custom_openapi():
     if app.openapi_schema:

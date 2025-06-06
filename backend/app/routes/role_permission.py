@@ -7,7 +7,7 @@ import app.schemas.role_permission as schemas
 from app.routes.auth import get_current_user
 from app.models.user import User
 
-router = APIRouter(prefix="/role-permissions", tags=["RolePermission"])
+router = APIRouter(prefix="/v1/api/role-permissions", tags=["RolePermission"])
 
 @router.get("/", response_model=list[schemas.RolePermissionResponse])
 def get_all_role_permissions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

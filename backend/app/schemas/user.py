@@ -61,13 +61,22 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
 
+class User_ProfileUpdate(BaseModel):
+    title: Optional[str] = Field(None, max_length=50)
+    first_name: Optional[str] = Field(None, max_length=50)
+    last_name: Optional[str] = Field(None, max_length=50)
+    phone: Optional[str] = Field(None, max_length=20)
+    date_of_birth: Optional[date] = None
+    gender: Optional[GenderType] = None
+    country: Optional[str] = Field(None, max_length=50)
+    city: Optional[str] = Field(None, max_length=50)
+    address: Optional[str] = None
+    role_id: Optional[int] = None 
+    
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
-    is_verified: Optional[bool] = None
-    role_id: Optional[int] = None 
-    role_name: Optional[str] = None
-    profile: Optional[UserProfileUpdate] = None
+    profile: Optional[User_ProfileUpdate] = None
     
     class Config:
         from_attributes = True

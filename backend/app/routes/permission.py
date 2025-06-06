@@ -6,7 +6,7 @@ import app.schemas.permission as schemas
 from app.routes.auth import get_current_user
 from app.models.user import User
 
-router = APIRouter(prefix="/permissions", tags=["Permission"])
+router = APIRouter(prefix="/v1/api/permissions", tags=["Permission"])
 
 @router.get("/", response_model=list[schemas.PermissionResponse])
 def get_all_permissions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
