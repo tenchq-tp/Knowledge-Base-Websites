@@ -24,7 +24,6 @@ def list_users(
         db=db, 
         skip=skip, 
         limit=limit, 
-        role=role if role else None,
         is_verified=is_verified
     )
     return users
@@ -55,7 +54,7 @@ def update_user(
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.put("/{user_id}/verify")
+@router.put("/verify/{user_id}")
 def verify_user(
     user_id: int,
     db: Session = Depends(get_db),
@@ -68,35 +67,6 @@ def verify_user(
         )
     
     return {"message": "User verified successfully"}
-
-@router.put("/{user_id}/profile", response_model=UserProfileResponse)
-def update_user_profile(
-    user_id: int,
-    profile_update: UserProfileUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    user = crud_user.get_user_by_id(db, user_id=user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    updated_profile = crud_user.update_user_profile(
-        db=db,
-        user_id=user_id,
-        profile_update=profile_update,
-        modified_by=current_user.id
-    )
-    
-    if not updated_profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Profile not found"
-        )
-    
-    return updated_profile
 
 @router.post("/change-password", summary="Change password without login")
 def change_password(
@@ -201,8 +171,8 @@ def create_user_by_authenticated_user(
     return UserSafeResponse(
         id=new_user.id,
         username=new_user.username,
-        role_id=new_user.role_id,
-        role_name=new_user.role_name,
+        role_id=new_user.profile.role_id,
+        role_name=new_user.profile.role_name,
         is_verified=new_user.is_verified,
         profile=new_user.profile,
         session_id=None

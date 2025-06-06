@@ -7,10 +7,6 @@ class UserBase(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
    
-class UserLogin(BaseModel):
-    username: str
-    password: str
-
 class UserProfileBase(BaseModel):
     title: Optional[str] = Field(None, max_length=50)
     first_name: Optional[str] = Field(None, max_length=50)
@@ -21,22 +17,28 @@ class UserProfileBase(BaseModel):
     country: Optional[str] = Field(None, max_length=50)
     city: Optional[str] = Field(None, max_length=50)
     address: Optional[str] = None
+    role_id: Optional[int] = None
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=128)
-    role_id: Optional[int] = None
     is_verified: Optional[bool] = False
     profile: Optional[UserProfileBase] = None
  
 class UserProfileCreate(UserProfileBase):
     pass
 
-class UserProfileUpdate(UserProfileBase):
-    pass
+class UserProfileUpdate(BaseModel):
+    title: Optional[str] = Field(None, max_length=50)
+    first_name: Optional[str] = Field(None, max_length=50)
+    last_name: Optional[str] = Field(None, max_length=50)
+    phone: Optional[str] = Field(None, max_length=20)
+    date_of_birth: Optional[date] = None
+    gender: Optional[GenderType] = None
+    country: Optional[str] = Field(None, max_length=50)
+    city: Optional[str] = Field(None, max_length=50)
+    address: Optional[str] = None
 
 class UserProfileResponse(UserProfileBase):
-    # id: int
-    # user_id: int
     role_id: Optional[int] = None 
     role_name: Optional[str] = None
     full_name: str
@@ -49,8 +51,6 @@ class UserProfileResponse(UserProfileBase):
 
 class UserResponse(UserBase):
     id: int
-    role_id: Optional[int] = None
-    role_name: Optional[str] = None
     is_verified: bool
     last_login: Optional[datetime] = None
     created_at: datetime
@@ -64,12 +64,11 @@ class UserResponse(UserBase):
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
-    password: Optional[str] = None
-    role_id: Optional[int] = None
-    role_name: Optional[str] = None
     is_verified: Optional[bool] = None
-    profile: Optional[UserProfileResponse] = None
-
+    role_id: Optional[int] = None 
+    role_name: Optional[str] = None
+    profile: Optional[UserProfileUpdate] = None
+    
     class Config:
         from_attributes = True
 
@@ -107,8 +106,6 @@ class Token(BaseModel):
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
     
-class LogoutRequest(BaseModel):
-    username: str
 
 class ChangePasswordRequest(BaseModel):
     username: str = Field(...,min_length=3, max_length=50)

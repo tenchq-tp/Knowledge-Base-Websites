@@ -1,17 +1,16 @@
 from datetime import timedelta, datetime
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
-from fastapi.security import HTTPBasic, HTTPBasicCredentials, OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.user import (
-    UserCreate, UserLogin, Token, UserResponse, UserSafeResponse, 
-    RefreshTokenRequest, SessionResponse, LogoutRequest
+    UserCreate, Token, UserSafeResponse, 
+    RefreshTokenRequest, SessionResponse, 
 )
 from app.crud import user as crud_user
-from app.core.security import create_access_token, verify_token, validate_password_strength
+from app.core.security import create_access_token, validate_password_strength
 from app.core.config import settings
 from app.models.user import User, UserSession
-import ipaddress
 from jose import jwt, JWTError
 from uuid import UUID
 from fastapi import FastAPI
@@ -92,7 +91,6 @@ def register_user(user: UserCreate, request: Request, db: Session = Depends(get_
     return UserSafeResponse(
         id=new_user.id,
         username=new_user.username,
-        role_id=new_user.role_id,
         is_verified=new_user.is_verified,
         profile=new_user.profile
     )
@@ -126,7 +124,8 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), request: Reques
     user_safe = UserSafeResponse(
         id=user.id,
         username=user.username,
-        role_id=user.role_id,
+        role_id=user.profile.role_id if user.profile else None,
+        role_name=user.profile.role_name if user.profile else None,
         is_verified=user.is_verified,
         session_id=str(session.id),
     )
@@ -172,7 +171,7 @@ def refresh_token(refresh_request: RefreshTokenRequest, request: Request, db: Se
         user=UserSafeResponse(
             id=user.id,
             username=user.username,
-            role_id=user.role_id,
+            role_id=user.profile.role_id if user.profile else None,
             is_verified=user.is_verified,
             profile=user.profile
         )

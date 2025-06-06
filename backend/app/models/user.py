@@ -28,7 +28,6 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password = Column(String(255), nullable=False)
-    role_id = Column(BigInteger, ForeignKey("roles.id"), index=True) # เพิ่ม nullable=False ให้ role_id ถ้าต้องการบังคับทุก user ต้องมี role
     is_verified = Column(Boolean, default=False, index=True)
     last_login = Column(DateTime(timezone=True), index=True)
     
@@ -40,7 +39,6 @@ class User(Base):
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan", foreign_keys="[UserProfile.user_id]")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     setting = relationship("UserSetting", back_populates="user", uselist=False)
-    role = relationship("Role", back_populates="users", foreign_keys=[role_id])
     
     creator = relationship("User", foreign_keys=[created_by], remote_side=[id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[id], post_update=True)

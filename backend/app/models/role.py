@@ -9,5 +9,5 @@ class Role(Base):
     name = Column(String, unique=True, nullable=False)
     description = Column(String, nullable=True)
 
-    users = relationship("User", back_populates="role", cascade="all, delete")
+    user_profile = relationship("UserProfile", back_populates="role", cascade="all, delete")
     permissions = relationship("RolePermission", back_populates="role", cascade="all, delete")

@@ -3,10 +3,9 @@ from sqlalchemy import and_, or_
 from typing import Optional, List
 from datetime import datetime, timedelta
 from app.models.user import User, UserProfile, UserSession
-from app.models.role import Role
-from app.schemas.user import UserCreate, UserProfileCreate, UserProfileUpdate, UserResponse
+from app.models.user_setting import UserSetting
+from app.schemas.user import UserCreate, UserProfileUpdate, UserUpdate
 from app.core.security import get_password_hash, verify_password, generate_secure_token, hash_token
-from fastapi import HTTPException
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).options(joinedload(User.profile)).filter(User.email == email).first()
@@ -55,7 +54,6 @@ def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None)
         username=user.username,
         email=user.email,
         password=get_password_hash(user.password),
-        role_id=user.role_id,
         is_verified=user.is_verified,
         created_by=created_by
     )
@@ -71,10 +69,10 @@ def create_user(db: Session, user: UserCreate, created_by: Optional[int] = None)
         phone=user.profile.phone,
         date_of_birth=user.profile.date_of_birth,
         gender=user.profile.gender,
+        role_id=user.profile.role_id,
         country=user.profile.country,
         city=user.profile.city,
         address=user.profile.address,
-        role_id=new_user.role_id 
     )
     db.add(profile)
     db.commit()
@@ -259,24 +257,42 @@ def delete_user(db: Session, user: User) -> User:
     db.commit()
     return user
 
-def update_user(db: Session, user_id: int, user_update: UserResponse, modified_by: Optional[int] = None) -> Optional[User]:
+def update_user(db: Session, user_id: int, user_update: UserUpdate, modified_by: Optional[int] = None) -> Optional[User]:
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return None
 
     update_data = user_update.model_dump(exclude_unset=True)
-    
-    if "password" in update_data:
-        user.password = get_password_hash(update_data.pop("password"))
+    profile_data = update_data.pop("profile", None)
+    setting_data = update_data.pop("setting", None)
+    password = update_data.pop("password", None)
+
+    # ✅ อัปเดตฟิลด์ใน user.profile ถ้ามี profile_data
+    if profile_data:
+        if user.profile:
+            for key, value in profile_data.items():
+                attr = getattr(UserProfile, key, None)
+                if attr is None or not isinstance(attr, property) or attr.fset is not None:
+                    setattr(user.profile, key, value)
+        else:
+            user.profile = UserProfile(**profile_data, user_id=user.id)
+
+    # ✅ อัปเดตฟิลด์ใน user.setting
+    if setting_data:
+        if user.setting:
+            for key, value in setting_data.items():
+                setattr(user.setting, key, value)
+        else:
+            user.setting = UserSetting(**setting_data, user_id=user.id)
+
+    if password:
+        user.password = get_password_hash(password)
 
     for key, value in update_data.items():
         setattr(user, key, value)
 
-    if "role_id" in update_data and user.profile:
-        user.profile.role_id = update_data["role_id"]
-
     user.modified_by = modified_by
+    db.add(user)
     db.commit()
     db.refresh(user)
     return user
-

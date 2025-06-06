@@ -13,14 +13,6 @@ router = APIRouter(prefix="/role-permissions", tags=["RolePermission"])
 def get_all_role_permissions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return crud.get_all_role_permissions(db)
 
-@router.post("/", response_model=Union[schemas.RolePermissionResponse, List[schemas.RolePermissionResponse]])
-def create_role_permission(
-    rp: schemas.RolePermissionCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return crud.create_role_permission(db, rp)
-
 @router.get("/{rp_id}", response_model=schemas.RolePermissionResponse)
 def get_role_permission(rp_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     rp = crud.get_role_permission_by_id(db, rp_id)
@@ -46,9 +38,6 @@ def update_role_permission(
     permission_ids = (
         [data.permission_id] if isinstance(data.permission_id, int) else data.permission_id
     )
-
-    if not permission_ids:
-        raise HTTPException(status_code=400, detail="permission_id list cannot be empty")
 
     updated = crud.update_role_permission(db, data.role_id, permission_ids)
     return updated
