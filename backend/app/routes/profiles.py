@@ -54,3 +54,29 @@ def get_user_profile(user_id: int, db: Session = Depends(get_db)):
         )
     
     return user.profile
+
+@router.put("/{user_id}", response_model=UserProfileResponse)
+def update_user_profile_by_id(
+    user_id: int,
+    profile_update: UserProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # ถ้าคุณต้องการจำกัดเฉพาะ admin หรือบาง role เท่านั้น ให้เช็คสิทธิ์ตรงนี้
+    # if current_user.role != "admin":
+    #     raise HTTPException(status_code=403, detail="Not authorized")
+
+    updated_profile = crud_user.update_user_profile(
+        db=db,
+        user_id=user_id,
+        profile_update=profile_update,
+        modified_by=current_user.id
+    )
+
+    if not updated_profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User profile not found"
+        )
+
+    return updated_profile
