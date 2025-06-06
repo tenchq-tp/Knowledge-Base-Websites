@@ -37,3 +37,44 @@ DETAIL:  Key (slug)=(ชื่อ-บทความ-สำหรับ-url) alr
 2025-06-05 10:08:20,051 - app.db.session - ERROR - Database session error: 
 2025-06-05 10:08:45,987 - app.db.session - ERROR - Database session error: 
 2025-06-05 10:09:10,960 - app.db.session - ERROR - Database session error: 
+2025-06-05 10:37:46,160 - app.db.session - ERROR - Database session error: 
+2025-06-05 10:37:52,058 - app.db.session - ERROR - Database session error: 
+2025-06-06 03:35:10,661 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:35:20,905 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:35:27,047 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:35:53,461 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:37:58,092 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:38:22,108 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:39:43,476 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:39:53,019 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 03:41:28,198 - app.db.session - ERROR - Database session error: [{'type': 'list_type', 'loc': ('body', 'media_files'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7f40c2966e50>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-06 03:44:43,880 - app.db.session - ERROR - Database session error: object of type 'UploadFile' has no len()
+2025-06-06 03:48:24,208 - app.db.session - ERROR - Database session error: 'UploadFile' object is not iterable
+2025-06-06 03:48:27,751 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(ttttt2) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'tttt2', 'slug': 'ttttt2', 'content': 'tttt2', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 6, 3, 48, 27, 749768), 'updated_at': datetime.datetime(2025, 6, 6, 3, 48, 27, 749771)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-06 03:49:02,752 - app.db.session - ERROR - Database session error: 'UploadFile' object is not iterable
+2025-06-06 03:50:17,388 - app.db.session - ERROR - Database session error: 'UploadFile' object is not iterable
+2025-06-06 04:02:05,429 - app.db.session - ERROR - Database session error: 'UploadFile' object is not iterable
+2025-06-06 04:03:13,622 - app.db.session - ERROR - Database session error: 'UploadFile' object is not iterable
+2025-06-06 04:04:51,527 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 04:07:26,604 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 04:08:39,186 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 04:08:53,904 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-06 04:10:47,135 - app.db.session - ERROR - Database session error: (psycopg2.errors.NotNullViolation) null value in column "user_id" of relation "article_view_log" violates not-null constraint
+DETAIL:  Failing row contains (1, 2, null, null, 172.24.0.1, 2025-06-06 04:10:47.128187).
+
+[SQL: INSERT INTO article_view_log (article_id, user_id, user_session_id, ip_address, viewed_at) VALUES (%(article_id)s, %(user_id)s, %(user_session_id)s::UUID, %(ip_address)s, %(viewed_at)s) RETURNING article_view_log.id]
+[parameters: {'article_id': 2, 'user_id': None, 'user_session_id': None, 'ip_address': '172.24.0.1', 'viewed_at': datetime.datetime(2025, 6, 6, 4, 10, 47, 128187)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-06 04:12:03,035 - app.db.session - ERROR - Database session error: (psycopg2.errors.NotNullViolation) null value in column "user_id" of relation "article_view_log" violates not-null constraint
+DETAIL:  Failing row contains (2, 2, null, null, 172.24.0.1, 2025-06-06 04:12:03.029236).
+
+[SQL: INSERT INTO article_view_log (article_id, user_id, user_session_id, ip_address, viewed_at) VALUES (%(article_id)s, %(user_id)s, %(user_session_id)s::UUID, %(ip_address)s, %(viewed_at)s) RETURNING article_view_log.id]
+[parameters: {'article_id': 2, 'user_id': None, 'user_session_id': None, 'ip_address': '172.24.0.1', 'viewed_at': datetime.datetime(2025, 6, 6, 4, 12, 3, 29236)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-06 04:22:10,325 - app.db.session - ERROR - Database session error: 
+2025-06-06 04:22:24,974 - app.db.session - ERROR - Database session error: 

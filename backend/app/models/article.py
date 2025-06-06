@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, BigInteger
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID, INET
 from datetime import datetime
 from app.db.database import Base
 
@@ -9,11 +10,12 @@ class Article(Base):
     title = Column(Text, nullable=False)
     slug = Column(String, unique=True, nullable=False)
     content = Column(Text)
+    view_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
     media_links = relationship("ArticleMedia", back_populates="article")
-
+    view_logs = relationship("ArticleViewLog", back_populates="article", cascade="all, delete-orphan")
 
 class MediaFile(Base):
     __tablename__ = "media_file"
@@ -35,3 +37,14 @@ class ArticleMedia(Base):
 
     article = relationship("Article", back_populates="media_links")
     media = relationship("MediaFile", back_populates="article_links")
+
+class ArticleViewLog(Base):
+    __tablename__ = "article_view_log"
+
+    id = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    ip_address = Column(INET, nullable=False, index=True)
+    viewed_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    article = relationship("Article", back_populates="view_logs")

@@ -39,6 +39,7 @@ class ArticleOut(ArticleCreate):
     id: int
     created_at: datetime
     updated_at: datetime
+    view_count: int
     media_links: List[ArticleMediaOut] = []
     class Config:
         orm_mode = True
@@ -47,8 +48,8 @@ class ArticleFormIn(BaseModel):
     title: str = Form(...)
     slug: str = Form(...)
     content: Optional[str] = Form(None)
-    media_files: List[str]
-    positions: Union[str, List[int]]
+    media_files: List[str] = Form(...)
+    positions: Union[str, List[int]] = Form(...)
 
     @validator("positions", pre=True)
     def parse_positions(cls, v):
