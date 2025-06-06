@@ -1,5 +1,8 @@
 "use client";
 
+// เพิ่มบรรทัดนี้:
+import dynamic from "next/dynamic"; // <-- เพิ่มบรรทัดนี้เข้าไป
+
 import { useEditor, EditorContent } from "@tiptap/react";
 import {
   faBold,
@@ -31,12 +34,13 @@ import {
   faFileExport,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import ResizableImage from "tiptap-extension-resizable-image";
+
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
+import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Highlight from "@tiptap/extension-highlight";
 import Superscript from "@tiptap/extension-superscript";
@@ -57,11 +61,12 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 
 import { useState, useCallback } from "react";
-import dynamic from "next/dynamic";
 
 import Navbar from "../../../component/Navbar";
 import styles from "../../../style/create_article.module.css";
 
+// Dynamic import for html2pdf.js to ensure it's only loaded on the client-side.
+// บรรทัดนี้ถูกต้องแล้วหลังจาก import dynamic เข้ามา
 const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
 
 // Custom Font Size Extension for Tiptap
@@ -110,23 +115,6 @@ const FONT_SIZES = [
   "72px",
 ];
 
-// กำหนด Font ที่จะใช้ใน dropdown
-// ควรเป็น Font ที่มีในระบบของผู้ใช้หรือคุณได้โหลดไว้ใน CSS แล้ว
-const FONT_FAMILIES = [
-  "Arial",
-  "Verdana",
-  "Tahoma",
-  "Times New Roman",
-  "Courier New",
-  "Georgia",
-  "Palatino Linotype",
-  "Segoe UI",
-  "sans-serif", // generic family
-  "serif", // generic family
-  "monospace", // generic family
-  // เพิ่ม Font อื่นๆ ที่ต้องการและได้โหลดไว้ใน CSS แล้ว
-];
-
 export default function CreateArticlePage() {
   const [activeTab, setActiveTab] = useState("Home");
   const [articleTitle, setArticleTitle] = useState("");
@@ -134,29 +122,24 @@ export default function CreateArticlePage() {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        textStyle: false, // ปิด default textStyle เพื่อใช้ CustomFontSize
+        textStyle: false, // Disable default textStyle to use our custom one
       }),
       Underline,
-      CustomFontSize, // ใช้ CustomFontSize ของเรา
+      CustomFontSize, // Use CustomFontSize instead of TextStyle directly
       Color,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      // ตั้งค่า FontFamily Extension ให้ถูกต้อง
-      FontFamily.configure({
-        // ระบุชนิดของ Node ที่สามารถเปลี่ยน Font ได้ (เช่น textStyle, paragraph, heading)
-        // ถ้าไม่ระบุ, โดย default จะใช้กับ `textStyle` ซึ่ง CustomFontSize ของเราก็ใช้ `textStyle`
-        // types: ['textStyle'], // ตัวอย่าง: ถ้าต้องการให้มีผลกับ textStyle เท่านั้น
-      }),
+      FontFamily,
       Highlight.configure({ multicolor: true }),
       Superscript,
       Subscript,
       Placeholder.configure({ placeholder: "เริ่มพิมพ์บทความของคุณ..." }),
-      //   ResizableImage.configure({
-      //     inline: true,
-      //     allowBase64: true,
-      //   }),
+      Image.configure({
+        inline: true, // Allows images to be inline with text
+        allowBase64: true, // Consider carefully for production as it increases document size
+      }),
       Link.configure({
-        openOnClick: true,
-        autolink: true,
+        openOnClick: true, // Open links on click
+        autolink: true, // Automatically turn pasted URLs into links
       }),
       HorizontalRule,
       CodeBlock,
@@ -171,20 +154,21 @@ export default function CreateArticlePage() {
       TableHeader,
       TableCell,
     ],
-    content: "<p>เริ่มต้นพิมพ์บทความของคุณที่นี่...</p>",
+    content: "<p>เริ่มต้นพิมพ์บทความของคุณที่นี่...</p>", // Add initial content
   });
 
   const setFontSize = useCallback(
     (size) => {
       if (editor) {
+        // ตรวจสอบว่า editor พร้อมใช้งานแล้ว
         editor.chain().focus().setFontSize(size).run();
       }
     },
     [editor]
-  );
+  ); // editor เป็น dependency เพราะใช้ editor ภายในฟังก์ชัน
 
   const addImage = useCallback(() => {
-    if (!editor) return;
+    if (!editor) return; // ถ้า editor ยังไม่พร้อม ให้หยุดการทำงาน
 
     const url = window.prompt("URL รูปภาพ:");
     if (url) {
@@ -198,14 +182,14 @@ export default function CreateArticlePage() {
         alert("URL รูปภาพไม่ถูกต้อง");
       }
     }
-  }, [editor]);
+  }, [editor]); // editor เป็น dependency
 
   const addFile = useCallback(() => {
-    if (!editor) return;
+    if (!editor) return; // ถ้า editor ยังไม่พร้อม ให้หยุดการทำงาน
 
     const url = window.prompt("URL ไฟล์:");
     if (url) {
-      const fileName = url.substring(url.lastIndexOf("/") + 1);
+      const fileName = url.substring(url.lastIndexOf("/") + 1); // Extract file name from URL
       editor
         .chain()
         .focus()
@@ -362,22 +346,22 @@ export default function CreateArticlePage() {
               <div className={styles.menuGroup}>
                 <select
                   onChange={(e) =>
-                    // เรียกใช้คำสั่ง setFontFamily ที่มากับ FontFamily Extension
                     editor.chain().focus().setFontFamily(e.target.value).run()
                   }
-                  // ดึงค่า fontFamily ปัจจุบันจาก editor.getAttributes("textStyle").fontFamily
-                  // หรือจาก editor.getAttributes("fontFamily") หากมี
-                  // หากไม่มีค่า ให้ใช้ค่าเริ่มต้น เช่น "Arial"
                   value={
                     editor.getAttributes("textStyle").fontFamily || "Arial"
                   }
                   title="Font Family"
                 >
-                  {FONT_FAMILIES.map((font) => (
-                    <option key={font} value={font}>
-                      {font}
-                    </option>
-                  ))}
+                  <option value="Arial">Arial</option>
+                  <option value="Verdana">Verdana</option>
+                  <option value="Tahoma">Tahoma</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                  <option value="Courier New">Courier New</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Palatino Linotype">Palatino Linotype</option>
+                  <option value="Segoe UI">Segoe UI</option>
+                  {/* เพิ่ม Font อื่นๆ ที่ต้องการ */}
                 </select>
 
                 <select

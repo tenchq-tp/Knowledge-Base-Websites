@@ -5,12 +5,7 @@ import { useRouter } from "next/navigation";
 
 import "../../style/login.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUser,
-  faLock,
-  faEarthAmericas,
-  faGlobe,
-} from "@fortawesome/free-solid-svg-icons";
+import { faUser, faLock, faGlobe } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 
 export default function Login() {
@@ -144,7 +139,7 @@ export default function Login() {
           />
         </div>
         <div className="ChangePassword">
-          <Link href="/reset-password" className="forgot-link">
+          <Link href="/pages/login/change_password" className="forgot-link">
             Change Password?
           </Link>
         </div>
