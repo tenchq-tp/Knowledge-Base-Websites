@@ -112,7 +112,7 @@ class UserSession(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
-    session_token_hash = Column(String(255), nullable=False, unique=True, index=True)  
+    session_token_hash = Column(String(255), nullable=True, unique=True, index=True)  
     refresh_token_hash = Column(String(255), nullable=True, unique=True, index=True)  
 
     device_info = Column(Text, nullable=True)

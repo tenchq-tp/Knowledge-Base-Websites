@@ -208,26 +208,17 @@ def logout_user(
     db: Session = Depends(get_db)
 ):
     session_id = UUID(jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])["session_id"])
-    old_session = db.query(UserSession).filter_by(id=session_id).first()
-    if old_session:
-        new_session = UserSession(
-            user_id=old_session.user_id,
-            session_token_hash="-",
-            refresh_token_hash=None,
-            device_info=old_session.device_info,
-            ip_address=old_session.ip_address,
-            user_agent=old_session.user_agent,
-            expires_at=old_session.expires_at,
-            refresh_expires_at=old_session.refresh_expires_at,
-            is_active=False, 
-            created_at=datetime.utcnow(),
-            modified_at=datetime.utcnow()
-        )
-        db.add(new_session)
-        db.delete(old_session)
+    session = db.query(UserSession).filter_by(id=session_id).first()
+
+    if session:
+        session.session_token_hash = None 
+        session.refresh_token_hash = None
+        session.is_active = False
+        session.modified_at = datetime.utcnow()
         db.commit()
 
     return {"message": f"User '{current_user.username}' logged out successfully"}
+
 
 @router.post("/logout-all")
 def logout_all_sessions(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
