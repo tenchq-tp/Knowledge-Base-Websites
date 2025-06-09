@@ -9,14 +9,17 @@ import Swal from "sweetalert2";
 import { useTheme } from "../../contexts/ThemeContext";
 import "../../style/language_setting.css";
 
-
 export default function LanguageSettings() {
   const { t, i18n } = useTranslation();
   const { tokens } = useTheme();
 
-
-  const [userSettings, setUserSettings] = useState({ 
-    language: localStorage.getItem("language") || "th" 
+  const [userSettings, setUserSettings] = useState(() => {
+    try {
+      const lang = localStorage.getItem("language");
+      return { language: lang || "th" };
+    } catch (error) {
+      return { language: "th" };
+    }
   });
 
   const handleInputChange = async (field, value) => {
@@ -43,18 +46,10 @@ export default function LanguageSettings() {
         // แสดงข้อความสำเร็จ
         await Swal.fire({
           icon: "success",
-          title: "Success",
-          text: `Language changed to ${
-            value === "th"
-              ? "Thai"
-              : value === "en"
-              ? "English"
-              : value === "zh"
-              ? "Chinese"
-              : value === "ja"
-              ? "Japanese"
-              : "Korean"
-          }`,
+          title: t("settings.language.successTitle"),
+          text: `${t("settings.language.successText", {
+            language: t(`settings.language.languageNames.${value}`),
+          })}`,
           timer: 2000,
           timerProgressBar: true,
           showConfirmButton: false,
@@ -71,9 +66,15 @@ export default function LanguageSettings() {
     }
   };
 
- return (
-    <div className="language-setting-card" style={{ backgroundColor: tokens.surface, borderColor: tokens.border }}>
-      <div className="section-header" style={{ borderBottomColor: tokens.borderLight }}>
+  return (
+    <div
+      className="language-setting-card"
+      style={{ backgroundColor: tokens.surface, borderColor: tokens.border }}
+    >
+      <div
+        className="section-header"
+        style={{ borderBottomColor: tokens.borderLight }}
+      >
         <FontAwesomeIcon icon={faLanguage} className="section-icon" />
         <h2 className="section-title" style={{ color: tokens.text }}>
           {t("settings.language.title")}
@@ -82,21 +83,25 @@ export default function LanguageSettings() {
 
       <div className="language-content">
         <div className="language-selector-group">
-        <label className="language-label" style={{ color: tokens.text }}>
-          {t("settings.language.select")}
-        </label>
-        <select
-          value={userSettings.language}
-          onChange={(e) => handleInputChange("language", e.target.value)}
-          className="language-select"
-          style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }}
-        >
-          <option value="th">Thai</option>
-          <option value="en">English</option>
-          <option value="zh">中文 (Chinese)</option>
-          <option value="ja">日本語 (Japanese)</option>
-          <option value="ko">🇰🇷 한국어 (Korean)</option>
-        </select>
+          <label className="language-label" style={{ color: tokens.text }}>
+            {t("settings.language.select")}
+          </label>
+          <select
+            value={userSettings.language}
+            onChange={(e) => handleInputChange("language", e.target.value)}
+            className="language-select"
+            style={{
+              backgroundColor: tokens.surface,
+              borderColor: tokens.border,
+              color: tokens.text,
+            }}
+          >
+            <option value="th">ไทย</option>
+            <option value="en">English</option>
+            <option value="zh">中文 (Chinese)</option>
+            <option value="ja">日本語 (Japanese)</option>
+            <option value="ko">🇰🇷 한국어 (Korean)</option>
+          </select>
         </div>
       </div>
     </div>

@@ -10,35 +10,39 @@ import {
   faUser,
   faCogs,
   faSignOutAlt,
+  faSignInAlt,
   faGlobe,
   faTachometerAlt,
   faNewspaper,
+  faChevronDown,
+  faChevronUp,
+  faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
-import "@/lib/i18n"; // Import i18n configuration (absolute path)
+import "@/lib/i18n";
 
 export default function Navbar() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const [forceUpdate, setForceUpdate] = useState(0);
+  const [username, setUsername] = useState(null);
 
-  // Load language setting on component mount
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
+
   useEffect(() => {
     const savedLanguage = localStorage.getItem("language") || "th";
-
-    // Set language if different from current
     if (i18n.language !== savedLanguage) {
       i18n.changeLanguage(savedLanguage);
     }
+
+    const storedUsername = localStorage.getItem("username") || "";
+    setUsername(storedUsername);
   }, [i18n]);
 
-  // Listen for language changes from Settings page
   useEffect(() => {
     const handleLanguageChanged = (event) => {
-      console.log("Navbar: Language change event received:", event.detail);
       if (event.detail && event.detail.language) {
         i18n.changeLanguage(event.detail.language);
-        // Force component re-render
         setForceUpdate((prev) => prev + 1);
       }
     };
@@ -46,15 +50,12 @@ export default function Navbar() {
     const handleStorageChange = (event) => {
       if (event.key === "language") {
         const newLanguage = event.newValue || "th";
-        console.log("Navbar: Storage change detected:", newLanguage);
         i18n.changeLanguage(newLanguage);
         setForceUpdate((prev) => prev + 1);
       }
     };
 
-    // Listen for custom language change events
     window.addEventListener("languageChanged", handleLanguageChanged);
-    // Listen for localStorage changes from other tabs
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
@@ -63,7 +64,6 @@ export default function Navbar() {
     };
   }, [i18n]);
 
-  // Logout function ที่เรียก API /auth/logout
   const handleLogout = async () => {
     try {
       const result = await Swal.fire({
@@ -163,55 +163,89 @@ export default function Navbar() {
         <FontAwesomeIcon icon={faGlobe} className={styles.logoIcon} />
         <span className={styles.logoText}>{t("navbar.welcome")}</span>
       </div>
+
       <ul className={styles.navLinks}>
         <li
           onClick={() => router.push("/pages/home")}
           className={styles.navItem}
         >
           <FontAwesomeIcon icon={faHome} className={styles.icon} />
-          <span className={styles.navText}>&nbsp;&nbsp;{t("navbar.home")}</span>
+          <span className={styles.navText}>{t("navbar.home")}</span>
         </li>
         <li
           onClick={() => router.push("/pages/dashboard")}
           className={styles.navItem}
         >
           <FontAwesomeIcon icon={faTachometerAlt} className={styles.icon} />
-          <span className={styles.navText}>
-            &nbsp;&nbsp;{t("navbar.dashboard")}
-          </span>
+          <span className={styles.navText}>{t("navbar.dashboard")}</span>
         </li>
         <li
           onClick={() => router.push("/pages/category")}
           className={styles.navItem}
         >
           <FontAwesomeIcon icon={faNewspaper} className={styles.icon} />
-          <span className={styles.navText}>
-            &nbsp;&nbsp;{t("navbar.category")}
-          </span>
+          <span className={styles.navText}>{t("navbar.category")}</span>
         </li>
         <li
           onClick={() => router.push("/pages/profile")}
           className={styles.navItem}
         >
           <FontAwesomeIcon icon={faUser} className={styles.icon} />
-          <span className={styles.navText}>
-            &nbsp;&nbsp;{t("navbar.profile")}
-          </span>
+          <span className={styles.navText}>{t("navbar.profile")}</span>
         </li>
         <li
           onClick={() => router.push("/pages/setting")}
           className={styles.navItem}
         >
           <FontAwesomeIcon icon={faCogs} className={styles.icon} />
-          <span className={styles.navText}>
-            &nbsp;&nbsp;{t("navbar.settings")}
-          </span>
+          <span className={styles.navText}>{t("navbar.settings")}</span>
         </li>
-        <li onClick={handleLogout} className={styles.navItem}>
-          <FontAwesomeIcon icon={faSignOutAlt} className={styles.icon} />
-          <span className={styles.navText}>
-            &nbsp;&nbsp;{t("navbar.logout")}
-          </span>
+
+        {/* Username with toggleable Logout */}
+        <li className={`${styles.navItem} ${styles.userMenu}`}>
+          {!username ? (
+            // ถ้ายังไม่ล็อกอิน ให้แสดงปุ่ม Sign In
+            <span
+              className={styles.navText}
+              onClick={() => router.push("/pages/login")}
+            >
+              <FontAwesomeIcon icon={faSignInAlt} className={styles.authIcon} />{" "}
+              Sign In
+            </span>
+          ) : (
+            // ถ้าล็อกอินแล้ว ให้แสดง username พร้อม dropdown toggle
+            <span
+              className={styles.navText}
+              onClick={() => setShowLogoutMenu((prev) => !prev)}
+            >
+              <FontAwesomeIcon
+                icon={faUserCircle}
+                className={styles.authIcon}
+              />{" "}
+              {username}{" "}
+              <FontAwesomeIcon
+                icon={showLogoutMenu ? faChevronUp : faChevronDown}
+                className={styles.chevron}
+              />
+            </span>
+          )}
+
+          {/* เมนู Logout */}
+          {username && (
+            <div
+              className={`${styles.logoutDropdown} ${
+                showLogoutMenu ? styles.show : ""
+              }`}
+            >
+              <button className={styles.logoutButton} onClick={handleLogout}>
+                <FontAwesomeIcon
+                  icon={faSignOutAlt}
+                  className={styles.logoutIcon}
+                />
+                {t("navbar.logout")}
+              </button>
+            </div>
+          )}
         </li>
       </ul>
     </nav>

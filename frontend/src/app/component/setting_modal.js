@@ -4,13 +4,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useTheme } from "../contexts/ThemeContext";
 
-const Modal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
   size = "default", // "small", "default", "large"
-  showCloseButton = true 
+  showCloseButton = true,
 }) => {
   const { isDark } = useTheme();
 
@@ -53,7 +53,7 @@ const Modal = ({
       },
       modalContent: {
         padding: "1rem 0",
-      }
+      },
     };
 
     // ⭐ Modal sizes
@@ -93,12 +93,12 @@ const Modal = ({
         boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
         position: "relative",
         color: isDark ? "#ffffff" : "#333333",
-      }
+      },
     };
 
     return {
       ...baseStyles,
-      modal: modalSizes[size] || modalSizes.default
+      modal: modalSizes[size] || modalSizes.default,
     };
   };
 
@@ -111,26 +111,20 @@ const Modal = ({
           <button
             style={styles.closeButton}
             onClick={onClose}
-            onMouseEnter={(e) => 
-              e.target.style.backgroundColor = isDark ? "#4a5568" : "#f7fafc"
+            onMouseEnter={(e) =>
+              (e.target.style.backgroundColor = isDark ? "#4a5568" : "#f7fafc")
             }
-            onMouseLeave={(e) => 
-              e.target.style.backgroundColor = "transparent"
+            onMouseLeave={(e) =>
+              (e.target.style.backgroundColor = "transparent")
             }
           >
             <FontAwesomeIcon icon={faTimes} />
           </button>
         )}
-        
-        {title && (
-          <h2 style={styles.modalTitle}>
-            {title}
-          </h2>
-        )}
-        
-        <div style={styles.modalContent}>
-          {children}
-        </div>
+
+        {title && <h2 style={styles.modalTitle}>{title}</h2>}
+
+        <div style={styles.modalContent}>{children}</div>
       </div>
     </div>
   );

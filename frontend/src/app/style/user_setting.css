@@ -12,7 +12,9 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid; /* ลบ var(--theme-borderLight) ออก */
+  border-bottom: 1px solid;
+
+  /* ลบ var(--theme-borderLight) ออก */
 }
 
 .section-info {
@@ -67,25 +69,25 @@
 }
 
 .btn-edit {
-  background: #007bff;
+  background: #f39c12;
   color: white;
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
 }
 
 .btn-edit:hover {
-  background: #0056b3;
+  background: #b9770e;
 }
 
 .btn-delete {
-  background: #dc3545;
+  background: #e74c3c;
   color: white;
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
 }
 
 .btn-delete:hover {
-  background: #c82333;
+  background: #c0392b;
 }
 
 .btn-secondary {
@@ -112,6 +114,7 @@
 
 .modal-content {
   padding: 1rem;
+
 }
 
 .search-section {
@@ -150,7 +153,7 @@
 
 .table-header th {
   padding: 0.75rem 0.5rem;
-  text-align: left;
+  text-align: center;
   font-size: 0.9rem;
   font-weight: 600;
   border-bottom: 1px solid;
@@ -160,6 +163,15 @@
   padding: 0.75rem 0.5rem;
   font-size: 0.9rem;
   border-bottom: 1px solid;
+
+  white-space: nowrap;
+  /* ห้ามขึ้นบรรทัดใหม่ */
+  overflow: hidden;
+  /* ซ่อนข้อความที่เกิน */
+  text-overflow: ellipsis;
+  /* ใส่ ... หากยาวเกิน */
+  max-width: 200px;
+  /* หรือใช้ min-width ก็ได้ */
 }
 
 .status-badge {
@@ -181,16 +193,51 @@
 .action-buttons {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: nowrap; 
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  min-width: 100px;
+  /* ป้องกันปุ่มซ้อน */
 }
 
-.action-buttons .btn {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  white-space: nowrap; /* ป้องกันข้อความตัด */
-  min-width: auto;
+.btn-icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+/* ปุ่มแก้ไข */
+.btn-icon.edit {
+  background-color: #fbbf24;
+  /* สีส้มอ่อน (yellow-400 / amber) */
+  color: white;
+}
+
+.btn-icon.edit:hover {
+  background-color: #f59e0b;
+  /* ส้มกลาง (amber-500) */
+}
+
+/* ปุ่มลบ */
+.btn-icon.delete {
+  background-color: #ef4444;
+  /* red */
+  color: white;
+}
+
+.btn-icon.delete:hover {
+  background-color: #b91c1c;
+}
+
+.table-row td:last-child {
+  text-align: center;
+  vertical-align: middle;
 }
 
 .form-grid {
@@ -209,6 +256,7 @@
   margin-bottom: 0.5rem;
   border-bottom: 1px solid;
   padding-bottom: 0.5rem;
+  font-weight: bold;
 }
 
 .form-group {
@@ -220,7 +268,8 @@
   display: block;
   font-size: 0.9rem;
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  font-weight: bold;
+
 }
 
 .required {
@@ -269,25 +318,26 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+
   .form-grid,
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .search-section {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .search-input-group {
     min-width: auto;
   }
 
-    .action-buttons .btn {
+  .action-buttons .btn {
     font-size: 0.7rem;
     padding: 0.2rem 0.4rem;
   }
-  
+
   .action-buttons {
     gap: 0.25rem;
   }

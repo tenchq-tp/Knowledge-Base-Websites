@@ -9,7 +9,7 @@ import Swal from "sweetalert2";
 import Modal from "../../component/setting_modal";
 import { useTheme } from "../../contexts/ThemeContext";
 import "../../style/user_setting.css";
-
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 export default function UserSettings() {
   const { t } = useTranslation();
   const { tokens, getComponentStyle } = useTheme();
@@ -24,14 +24,30 @@ export default function UserSettings() {
   const [loading, setLoading] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const [userFormData, setUserFormData] = useState({
-    username: "", email: "", role: "",
-    profile: { title: "", first_name: "", last_name: "", phone: "", date_of_birth: "", gender: "", country: "", city: "", address: "" }
+    username: "",
+    email: "",
+    role: "",
+    profile: {
+      title: "",
+      first_name: "",
+      last_name: "",
+      phone: "",
+      date_of_birth: "",
+      gender: "",
+      country: "",
+      city: "",
+      address: "",
+    },
   });
-
+  const API_BASE = process.env.NEXT_PUBLIC_API;
   const apiCall = async (endpoint, options = {}) => {
     const token = localStorage.getItem("access_token");
-    const response = await fetch(`http://localhost:8000${endpoint}`, {
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}`, }, ...options,
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      ...options,
     });
 
     if (!response.ok) {
@@ -40,7 +56,9 @@ export default function UserSettings() {
 
       if (errorData.detail) {
         errorMessage = Array.isArray(errorData.detail)
-          ? errorData.detail.map(err => `${err.loc?.slice(-1)[0] || 'field'}: ${err.msg}`).join(', ')
+          ? errorData.detail
+              .map((err) => `${err.loc?.slice(-1)[0] || "field"}: ${err.msg}`)
+              .join(", ")
           : errorData.detail;
       }
 
@@ -53,7 +71,8 @@ export default function UserSettings() {
   const fetchRoles = async () => {
     setIsLoadingRoles(true);
     try {
-      const data = await apiCall("/roles"); setRolesList(data);
+      const data = await apiCall("/roles");
+      setRolesList(data);
     } catch (error) {
       showAlert("error", "Error", "Failed to load roles. Please try again.");
     } finally {
@@ -65,43 +84,101 @@ export default function UserSettings() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ skip: 0, limit: 100 });
-      if (searchTerm) params.append('search', searchTerm);
-
       const users = await apiCall(`/users/?${params.toString()}`);
 
-      const formattedUsers = users.map(user => {
-        return {
-          id: user.id, username: user.username, email: user.email, role: user.role?.name || user.role_name || user.role || 'N/A', 
-          status: user.is_active ? "active" : "inactive",
-          is_active: user.is_active,
-          updatedDate: user.updated_at ? new Date(user.updated_at).toLocaleString('en-GB', {
-            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-          }).replace(',', '') : 'N/A',
-          profile: user.profile || {}
-        };
-      });
+      const term = searchTerm.toLowerCase();
+
+      // ฟังก์ชันคำนวณคะแนนความตรง (simple)
+      const getMatchScore = (user, term) => {
+        let score = 0;
+        const username = user.username?.toLowerCase() || "";
+        const email = user.email?.toLowerCase() || "";
+        const role = (
+          user.role?.name ||
+          user.profile?.role_name ||
+          user.role_name ||
+          user.role ||
+          ""
+        ).toLowerCase();
+
+        // ให้คะแนนเต็ม 3 ถ้าเท่ากับคำค้น (exact match)
+        if (username === term) score += 3;
+        else if (username.includes(term)) score += 2;
+
+        if (email === term) score += 3;
+        else if (email.includes(term)) score += 2;
+
+        if (role === term) score += 3;
+        else if (role.includes(term)) score += 2;
+
+        return score;
+      };
+
+      // เพิ่มคะแนนให้แต่ละ user
+      const usersWithScore = users
+        .map((user) => ({
+          ...user,
+          matchScore: getMatchScore(user, term),
+        }))
+        // กรองเอาเฉพาะที่มีคะแนน > 0
+        .filter((user) => user.matchScore > 0)
+        // เรียงลำดับจากคะแนนสูงสุดไปต่ำสุด
+        .sort((a, b) => b.matchScore - a.matchScore);
+
+      // แปลงข้อมูลตาม format ที่ต้องการ
+      const formattedUsers = usersWithScore.map((user) => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role?.name || user.role_name || user.role || "N/A",
+        status: user.is_active ? "active" : "inactive",
+        is_active: user.is_active,
+        updatedDate: user.updated_at
+          ? new Date(user.updated_at)
+              .toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+              .replace(",", "")
+          : "N/A",
+        profile: user.profile || {},
+      }));
 
       setUsersList(formattedUsers);
     } catch (error) {
       console.error("Load users error:", error);
-      showAlert("error", "Error", "Failed to load users. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const createUser = async (userData) => {
-    await apiCall("/users/create", { method: "POST", body: JSON.stringify(userData) });
+    await apiCall("/users/create", {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
     await loadUsers(searchUsername);
     showAlert("success", "Success", "User created successfully!");
   };
 
   const showAlert = (type, title, text, timer = 2000) =>
-    Swal.fire({ icon: type, title, text, timer, timerProgressBar: true, showConfirmButton: false });
+    Swal.fire({
+      icon: type,
+      title,
+      text,
+      timer,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
 
   const resetForm = () => {
     setUserFormData({
-      username: "", email: "", role: "",
+      username: "",
+      email: "",
+      role: "",
       profile: {
         title: "",
         first_name: "",
@@ -111,30 +188,40 @@ export default function UserSettings() {
         gender: "",
         country: "",
         city: "",
-        address: ""
-      }
+        address: "",
+      },
     });
   };
 
-  const handleCreateUser = () => { setEditingUser(null); resetForm(); setIsCreateUserModalOpen(true); };
-
+  const handleCreateUser = () => {
+    setEditingUser(null);
+    resetForm();
+    setIsCreateUserModalOpen(true);
+  };
 
   const updateUser = async (userId, userData) => {
-  try {
-    await apiCall(`/users/${userId}`, { method: "PUT", body: JSON.stringify(userData) });
-    await loadUsers(searchUsername);
-    showAlert("success", "Success", "User updated successfully!");
-  } catch (error) {
-    console.error("Update user error:", error);
-    throw error; 
-  }
-};
+    try {
+      await apiCall(`/users/${userId}`, {
+        method: "PUT",
+        body: JSON.stringify(userData),
+      });
+      await loadUsers(searchUsername);
+      showAlert("success", "Success", "User updated successfully!");
+    } catch (error) {
+      console.error("Update user error:", error);
+      throw error;
+    }
+  };
 
   const handleEditUser = (user) => {
     if (user.is_active) {
-    showAlert("warning", "Cannot Edit", "Active users cannot be edited. Please deactivate the user first.");
-    return;
-  }
+      showAlert(
+        "warning",
+        "Cannot Edit",
+        "Active users cannot be edited. Please deactivate the user first."
+      );
+      return;
+    }
     setEditingUser(user);
     setUserFormData({
       username: user.username,
@@ -149,54 +236,87 @@ export default function UserSettings() {
         gender: user.profile?.gender || "",
         country: user.profile?.country || "",
         city: user.profile?.city || "",
-        address: user.profile?.address || ""
-      }
+        address: user.profile?.address || "",
+        role: user.profile?.role_id,
+      },
     });
     setIsCreateUserModalOpen(true);
   };
 
   const handleDeleteUser = async (userId, username) => {
-     const user = usersList.find(u => u.id === userId);
-if (user && user.is_active) {
-  showAlert("warning", "Cannot Delete", "Active users cannot be deleted. Please deactivate the user first.");
-  return;
-}
-    const result = await Swal.fire({ icon: "warning", title: "Are you sure?", text: `You want to delete user "${username}"?`, showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "Yes, delete it!", cancelButtonText: "Cancel" });
+    const user = usersList.find((u) => u.id === userId);
+    if (user && user.is_active) {
+      showAlert(
+        "warning",
+        "Cannot Delete",
+        "Active users cannot be deleted. Please deactivate the user first."
+      );
+      return;
+    }
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      text: `You want to delete user "${username}"?`,
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
 
     if (result.isConfirmed) {
       try {
         await apiCall(`/users/${username}`, { method: "DELETE" });
-        setUsersList(prev => prev.filter(user => user.id !== userId));
+        setUsersList((prev) => prev.filter((user) => user.id !== userId));
         await loadUsers(searchUsername);
         showAlert("success", "Success", "User deleted successfully!");
       } catch (error) {
-        const errorMessage = error.message !== "[object Object]" ? error.message : "Failed to delete user.";
+        const errorMessage =
+          error.message !== "[object Object]"
+            ? error.message
+            : "Failed to delete user.";
         showAlert("error", "Error", errorMessage);
       }
     }
   };
 
- const handleSaveUser = async () => {
+  const handleSaveUser = async () => {
     const { username, email, role, profile } = userFormData;
 
-    if (!username.trim() || !email.trim() || !role ||
-      !profile.title || !profile.first_name?.trim() ||
-      !profile.last_name?.trim() || !profile.gender) {
-      return showAlert("warning", "Warning", "Please fill in all required fields");
+    if (
+      !username.trim() ||
+      !email.trim() ||
+      !role ||
+      !profile.title ||
+      !profile.first_name?.trim() ||
+      !profile.last_name?.trim() ||
+      !profile.gender
+    ) {
+      return showAlert(
+        "warning",
+        "Warning",
+        "Please fill in all required fields"
+      );
     }
 
     try {
       if (editingUser) {
-        const selectedRole = rolesList.find(r => r.name === userFormData.role.trim());
-        
+        const selectedRole = rolesList.find(
+          (r) => r.name === userFormData.role.trim()
+        );
+
         if (!selectedRole) {
-          return showAlert("warning", "Warning", `Role "${userFormData.role}" not found`);
+          return showAlert(
+            "warning",
+            "Warning",
+            `Role "${userFormData.role}" not found`
+          );
         }
 
         const updateData = {
           username: username.trim(),
           email: email.trim(),
-          role_id: selectedRole.id,
+
           profile: {
             title: userFormData.profile.title,
             first_name: userFormData.profile.first_name.trim(),
@@ -207,39 +327,52 @@ if (user && user.is_active) {
             country: userFormData.profile.country || null,
             city: userFormData.profile.city || null,
             address: userFormData.profile.address || null,
-          }
+            role_id: selectedRole.id || null,
+          },
         };
 
         await updateUser(editingUser.id, updateData);
-        
-        setUsersList(prev => prev.map(user =>
-          user.id === editingUser.id
-            ? {
-              ...user,
-              username: userFormData.username,
-              email: userFormData.email,
-              role: userFormData.role,
-              profile: userFormData.profile,
-              updatedDate: new Date().toLocaleString('en-GB', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-              }).replace(',', '')
-            }
-            : user
-        ));
-        
+
+        setUsersList((prev) =>
+          prev.map((user) =>
+            user.id === editingUser.id
+              ? {
+                  ...user,
+                  username: userFormData.username,
+                  email: userFormData.email,
+                  role: userFormData.role,
+                  profile: userFormData.profile,
+                  updatedDate: new Date()
+                    .toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                    .replace(",", ""),
+                }
+              : user
+          )
+        );
       } else {
-        const selectedRole = rolesList.find(role => role.name === userFormData.role.trim());
+        const selectedRole = rolesList.find(
+          (role) => role.name === userFormData.role.trim()
+        );
 
         if (!selectedRole) {
-          return showAlert("warning", "Warning", `Role "${userFormData.role}" not found`);
+          return showAlert(
+            "warning",
+            "Warning",
+            `Role "${userFormData.role}" not found`
+          );
         }
 
         const apiData = {
           username: username.trim(),
           email: email.trim(),
           password: "P@ssW0rd",
-          role_id: selectedRole.id,
+
           is_active: true,
           profile: {
             title: userFormData.profile.title,
@@ -251,7 +384,8 @@ if (user && user.is_active) {
             country: userFormData.profile.country || null,
             city: userFormData.profile.city || null,
             address: userFormData.profile.address || null,
-          }
+            role_id: selectedRole.id || null,
+          },
         };
 
         await createUser(apiData);
@@ -260,12 +394,12 @@ if (user && user.is_active) {
       setIsCreateUserModalOpen(false);
       setEditingUser(null);
       resetForm();
-      
     } catch (error) {
       console.error("Save user error:", error);
-      const errorMessage = error.message && error.message !== "[object Object]"
-        ? error.message
-        : "Failed to save user. Please try again.";
+      const errorMessage =
+        error.message && error.message !== "[object Object]"
+          ? error.message
+          : "Failed to save user. Please try again.";
 
       showAlert("error", "Error", errorMessage);
     }
@@ -284,37 +418,96 @@ if (user && user.is_active) {
   const renderUserTable = () => (
     <table className="users-table">
       <thead>
-        <tr className="table-header" style={{ backgroundColor: tokens.surfaceAlt }}>{["#", "Username", "Email", "Role", "Status", "Updated date", "Action"].map((header) => (<th key={header} style={{ color: tokens.text, borderBottomColor: tokens.border }}> {header} </th>))}</tr>
+        <tr
+          className="table-header"
+          style={{ backgroundColor: tokens.surfaceAlt }}
+        >
+          {[
+            { key: "#", i18nKey: "settings.user.table.no" },
+            { key: "Username", i18nKey: "settings.user.table.username" },
+            { key: "Email", i18nKey: "settings.user.table.email" },
+            { key: "Role", i18nKey: "settings.user.table.role" },
+            { key: "Status", i18nKey: "settings.user.table.status" },
+            { key: "Updated date", i18nKey: "settings.user.table.updated" },
+            { key: "Action", i18nKey: "settings.user.table.action" },
+          ].map(({ key, i18nKey }) => (
+            <th
+              key={key}
+              style={{
+                color: tokens.text,
+                borderBottomColor: tokens.border,
+                textAlign: "center",
+              }}
+            >
+              {t(i18nKey)}
+            </th>
+          ))}
+        </tr>
       </thead>
       <tbody>
-        {usersList.map((user, index) => (<tr key={user.id} className="table-row" style={{ ...getComponentStyle('table-stripe')(index), borderBottomColor: tokens.border }}>
-          <td style={{ color: tokens.text }}>{index + 1}</td>
-          <td style={{ color: tokens.text }}>{user.username}</td>
-          <td style={{ color: tokens.text }}>{user.email}</td>
-          <td style={{ color: tokens.text }}>{user.role}</td>
-          <td>
-            <span className={`status-badge ${user.status === "active" ? "status-active" : "status-inactive"}`}>
-              {user.status}
-            </span>
-          </td>
-          <td style={{ color: tokens.text }}>{user.updatedDate}</td>
-          <td>
-            <div className="action-buttons">
-              <button onClick={() => handleEditUser(user)} className="btn btn-edit">
-                Edit
-              </button>
-              <button onClick={() => handleDeleteUser(user.id, user.username)} className="btn btn-delete">
-                Delete
-              </button>
-            </div>
-          </td>
-        </tr>
+        {usersList.map((user, index) => (
+          <tr
+            key={user.id}
+            className="table-row"
+            style={{
+              ...getComponentStyle("table-stripe")(index),
+              borderBottomColor: tokens.border,
+            }}
+          >
+            <td style={{ color: tokens.text }}>{index + 1}</td>
+            <td style={{ color: tokens.text }}>{user.username}</td>
+            <td style={{ color: tokens.text }}>{user.email}</td>
+
+            <td style={{ color: tokens.text, textAlign: "center" }}>
+              {user.profile?.role_name}
+            </td>
+
+            <td style={{ textAlign: "center" }}>
+              <span
+                className={`status-badge ${
+                  user.status === "active" ? "status-active" : "status-inactive"
+                }`}
+              >
+                {user.status}
+              </span>
+            </td>
+
+            <td style={{ color: tokens.text }}>
+              {new Date(user.profile?.modified_at).toLocaleString()}
+            </td>
+
+            <td style={{ textAlign: "center" }}>
+              <div className="action-buttons">
+                <button
+                  onClick={() => handleEditUser(user)}
+                  className="btn-icon edit"
+                  aria-label="Edit User"
+                >
+                  <FontAwesomeIcon icon={faEdit} />
+                </button>
+                <button
+                  onClick={() => handleDeleteUser(user.id, user.username)}
+                  className="btn-icon delete"
+                  aria-label="Delete User"
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </button>
+              </div>
+            </td>
+          </tr>
         ))}
       </tbody>
     </table>
   );
 
-  const renderFormField = (label, name, type = "text", placeholder = "", required = false, options = null) => (
+  const renderFormField = (
+    label,
+    name,
+    type = "text",
+    placeholder = "",
+    required = false,
+    options = null
+  ) => (
     <div className="form-group">
       <label className="form-label" style={{ color: tokens.text }}>
         {label} {required && <span className="required">*</span>}
@@ -322,30 +515,36 @@ if (user && user.is_active) {
       {options ? (
         <select
           value={userFormData[name] || ""}
-          onChange={(e) => setUserFormData(prev => ({ ...prev, [name]: e.target.value }))}
-          disabled={name === 'role' && isLoadingRoles}
+          onChange={(e) =>
+            setUserFormData((prev) => ({ ...prev, [name]: e.target.value }))
+          }
+          disabled={name === "role" && isLoadingRoles}
           className="form-field form-select"
           style={{
             backgroundColor: tokens.surface,
             borderColor: tokens.border,
             color: tokens.text,
-            opacity: (name === 'role' && isLoadingRoles) ? 0.6 : 1,
+            opacity: name === "role" && isLoadingRoles ? 0.6 : 1,
           }}
         >
-          {options.map(option => (
-            <option key={option.value} value={option.value}>{option.label}</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
           ))}
         </select>
       ) : (
         <input
           type={type}
           value={userFormData[name] || ""}
-          onChange={(e) => setUserFormData(prev => ({ ...prev, [name]: e.target.value }))}
+          onChange={(e) =>
+            setUserFormData((prev) => ({ ...prev, [name]: e.target.value }))
+          }
           className="form-field"
           style={{
             backgroundColor: tokens.surface,
             borderColor: tokens.border,
-            color: tokens.text
+            color: tokens.text,
           }}
           placeholder={placeholder}
         />
@@ -355,76 +554,141 @@ if (user && user.is_active) {
 
   const roleOptions = [
     { value: "", label: isLoadingRoles ? "Loading roles..." : "Select role" },
-    ...rolesList.map(role => ({ value: role.name, label: role.name }))
+    ...rolesList.map((role) => ({ value: role.name, label: role.name })),
   ];
 
   return (
     <>
-      <div className="setting-card" style={{ backgroundColor: tokens.surface, borderColor: tokens.border }}>
-        <div className="section-header" style={{ borderBottomColor: tokens.border }}>
+      <div
+        className="setting-card"
+        style={{ backgroundColor: tokens.surface, borderColor: tokens.border }}
+      >
+        <div
+          className="section-header"
+          style={{ borderBottomColor: tokens.border }}
+        >
           <div className="section-info">
             <FontAwesomeIcon icon={faUser} className="section-icon" />
             <h2 className="section-title" style={{ color: tokens.text }}>
               {t("settings.user.title")}
             </h2>
           </div>
-          <button onClick={() => setIsUserModalOpen(true)} className="btn btn-primary"><FontAwesomeIcon icon={faEdit} /> Manage </button>
+          <button
+            onClick={() => setIsUserModalOpen(true)}
+            className="btn btn-primary"
+          >
+            <FontAwesomeIcon icon={faEdit} /> {t("settings.user.manage")}{" "}
+          </button>
         </div>
       </div>
-
-      <Modal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} title="User Management" size="large">
-        <div className="modal-content">
-          <div className="search-section">
-            <div className="search-input-group">
-              <label className="form-label" style={{ color: tokens.text }}>Search:</label>
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchUsername}
-                onChange={(e) => setSearchUsername(e.target.value)}
-                className="form-field search-input"
-                style={{
-                  backgroundColor: tokens.surface,
-                  borderColor: tokens.border,
-                  color: tokens.text
-                }}
-              />
+      <Modal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        title={t("settings.user.manage")}
+        size="large"
+      >
+        <div className="modal-container">
+          <div className="modal-content">
+            <div className="search-section">
+              <div className="search-input-group">
+                <label className="form-label" style={{ color: tokens.text }}>
+                  {t("settings.user.search")}
+                </label>
+                <input
+                  type="text"
+                  placeholder={`${t("settings.user.username")}, ${t(
+                    "settings.user.email"
+                  )}, ${t("settings.user.modal.role")}`}
+                  value={searchUsername}
+                  onChange={(e) => setSearchUsername(e.target.value)}
+                  className="form-field search-input"
+                  style={{
+                    backgroundColor: tokens.surface,
+                    borderColor: tokens.border,
+                    color: tokens.text,
+                  }}
+                />
+              </div>
+              <button onClick={handleCreateUser} className="btn btn-create">
+                {t("settings.user.create")}
+              </button>
             </div>
-            <button onClick={handleCreateUser} className="btn btn-create">
-              Create User
-            </button>
-          </div>
 
-          <div className="table-container" style={{
-            borderColor: tokens.border,
-            backgroundColor: tokens.surface
-          }}>
-            {loading ? (<div className="loading-state" style={{ color: tokens.textSecondary }}>Loading users...</div>) : usersList.length === 0 ? (<div className="empty-state" style={{ color: tokens.textSecondary }}>No users found</div>
-            ) : (
-              renderUserTable()
-            )}
+            <div
+              className="table-container"
+              style={{
+                borderColor: tokens.border,
+                backgroundColor: tokens.surface,
+              }}
+            >
+              {loading ? (
+                <div
+                  className="loading-state"
+                  style={{ color: tokens.textSecondary }}
+                >
+                  Loading users...
+                </div>
+              ) : usersList.length === 0 ? (
+                <div
+                  className="empty-state"
+                  style={{ color: tokens.textSecondary }}
+                >
+                  No users found
+                </div>
+              ) : (
+                renderUserTable()
+              )}
+            </div>
           </div>
         </div>
       </Modal>
-
-      <Modal isOpen={isCreateUserModalOpen} onClose={() => setIsCreateUserModalOpen(false)} title={editingUser ? "Edit User" : "Create User"} size="large">
+      <Modal
+        isOpen={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
+        title={
+          editingUser
+            ? t("settings.user.modal.edit")
+            : t("settings.user.modal.create")
+        }
+        size="large"
+      >
         <div className="modal-content">
           <div className="form-grid">
-            <div className="form-section"><h3 className="form-section-title" style={{ color: tokens.text, borderBottomColor: tokens.border }}>Basic Information</h3>
-              {renderFormField("Username", "username", "text", "Enter username", true)}
+            <div className="form-section">
+              <h3
+                className="form-section-title"
+                style={{ color: tokens.text, borderBottomColor: tokens.border }}
+              >
+                {t("settings.user.modal.basicinformation")}
+              </h3>
+
+              {renderFormField(
+                t("settings.user.modal.username"),
+                "username",
+                "text",
+                t("settings.user.modal.username"),
+                true
+              )}
+
               <div className="form-group">
                 <label className="form-label" style={{ color: tokens.text }}>
-                  Email <span className="required">*</span>
+                  {t("settings.user.modal.email")}{" "}
+                  <span className="required">*</span>
                 </label>
                 <input
                   type="email"
                   value={userFormData.email || ""}
-                  onChange={(e) => setUserFormData(prev => ({ ...prev, email: e.target.value }))}
-                  onFocus={(e) => {
+                  onChange={(e) =>
+                    setUserFormData((prev) => ({
+                      ...prev,
+                      email: e.target.value,
+                    }))
+                  }
+                  onFocus={() => {
                     if (!userFormData.email && userFormData.username) {
-                      setUserFormData(prev => ({
+                      setUserFormData((prev) => ({
                         ...prev,
-                        email: `${prev.username}@company.com`
+                        email: `${prev.username}@company.com`,
                       }));
                     }
                   }}
@@ -432,210 +696,290 @@ if (user && user.is_active) {
                   style={{
                     backgroundColor: tokens.surface,
                     borderColor: tokens.border,
-                    color: tokens.text
+                    color: tokens.text,
                   }}
-                  placeholder="Enter email"
+                  placeholder={t("settings.user.modal.email")}
                 />
               </div>
-              {renderFormField("Role", "role", "text", "", true, roleOptions)}
+
+              {renderFormField(
+                t("settings.user.modal.role"),
+                "role",
+                "text",
+                "",
+                true,
+                roleOptions
+              )}
             </div>
 
             <div className="form-section">
-              <h3 className="form-section-title" style={{
-                color: tokens.text,
-                borderBottomColor: tokens.border
-              }}>
-                Profile Information
+              <h3
+                className="form-section-title"
+                style={{ color: tokens.text, borderBottomColor: tokens.border }}
+              >
+                {t("settings.user.modal.profileinformation")}
               </h3>
 
+              {/* Title */}
               <div className="form-group">
                 <label className="form-label" style={{ color: tokens.text }}>
-                  Title <span className="required">*</span>
+                  {t("settings.user.modal.title")}{" "}
+                  <span className="required">*</span>
                 </label>
                 <select
                   value={userFormData.profile.title || ""}
-                  onChange={(e) => setUserFormData(prev => ({
-                    ...prev,
-                    profile: { ...prev.profile, title: e.target.value }
-                  }))}
+                  onChange={(e) =>
+                    setUserFormData((prev) => ({
+                      ...prev,
+                      profile: { ...prev.profile, title: e.target.value },
+                    }))
+                  }
                   className="form-field form-select"
                   style={{
                     backgroundColor: tokens.surface,
                     borderColor: tokens.border,
-                    color: tokens.text
+                    color: tokens.text,
                   }}
                 >
-                  <option value="">Select title</option>
-                  <option value="Mr.">Mr.</option>
-                  <option value="Ms.">Ms.</option>
-                  <option value="Mrs.">Mrs.</option>
-                  <option value="Dr.">Dr.</option>
+                  <option value="">
+                    {t("settings.user.modal.select_title")}
+                  </option>
+                  <option value="Mr.">{t("settings.user.modal.mr")}</option>
+                  <option value="Ms.">{t("settings.user.modal.ms")}</option>
+                  <option value="Mrs.">{t("settings.user.modal.mrs")}</option>
+                  <option value="Dr.">{t("settings.user.modal.dr")}</option>
                 </select>
               </div>
 
+              {/* First/Last Name */}
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label" style={{ color: tokens.text }}>
-                    First Name <span className="required">*</span>
+                    {t("settings.user.modal.firstname")}{" "}
+                    <span className="required">*</span>
                   </label>
                   <input
                     type="text"
                     value={userFormData.profile.first_name || ""}
-                    onChange={(e) => setUserFormData(prev => ({
-                      ...prev,
-                      profile: { ...prev.profile, first_name: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setUserFormData((prev) => ({
+                        ...prev,
+                        profile: {
+                          ...prev.profile,
+                          first_name: e.target.value,
+                        },
+                      }))
+                    }
                     className="form-field"
                     style={{
                       backgroundColor: tokens.surface,
                       borderColor: tokens.border,
-                      color: tokens.text
+                      color: tokens.text,
                     }}
-                    placeholder="First name"
+                    placeholder={t("settings.user.modal.firstname")}
                   />
                 </div>
                 <div className="form-group">
                   <label className="form-label" style={{ color: tokens.text }}>
-                    Last Name <span className="required">*</span>
+                    {t("settings.user.modal.lastname")}{" "}
+                    <span className="required">*</span>
                   </label>
                   <input
                     type="text"
                     value={userFormData.profile.last_name || ""}
-                    onChange={(e) => setUserFormData(prev => ({
-                      ...prev,
-                      profile: { ...prev.profile, last_name: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setUserFormData((prev) => ({
+                        ...prev,
+                        profile: { ...prev.profile, last_name: e.target.value },
+                      }))
+                    }
                     className="form-field"
                     style={{
                       backgroundColor: tokens.surface,
                       borderColor: tokens.border,
-                      color: tokens.text
+                      color: tokens.text,
                     }}
-                    placeholder="Last name"
+                    placeholder={t("settings.user.modal.lastname")}
                   />
                 </div>
               </div>
 
+              {/* Phone */}
               <div className="form-group">
                 <label className="form-label" style={{ color: tokens.text }}>
-                  Phone
+                  {t("settings.user.modal.phone")}
                 </label>
                 <input
                   type="tel"
                   value={userFormData.profile.phone || ""}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9]/g, '');
-                    setUserFormData(prev => ({
+                    const value = e.target.value.replace(/[^0-9]/g, "");
+                    setUserFormData((prev) => ({
                       ...prev,
-                      profile: { ...prev.profile, phone: value }
+                      profile: { ...prev.profile, phone: value },
                     }));
                   }}
                   className="form-field"
                   style={{
                     backgroundColor: tokens.surface,
                     borderColor: tokens.border,
-                    color: tokens.text
+                    color: tokens.text,
                   }}
-                  placeholder="Phone number"
+                  placeholder={t("settings.user.modal.phone")}
                   maxLength="15"
                 />
               </div>
 
+              {/* DOB / Gender */}
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label" style={{ color: tokens.text }}>
-                    Date of Birth
+                    {t("settings.user.modal.dob")}
                   </label>
                   <input
                     type="date"
                     value={userFormData.profile.date_of_birth || ""}
-                    onChange={(e) => setUserFormData(prev => ({
-                      ...prev,
-                      profile: { ...prev.profile, date_of_birth: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setUserFormData((prev) => ({
+                        ...prev,
+                        profile: {
+                          ...prev.profile,
+                          date_of_birth: e.target.value,
+                        },
+                      }))
+                    }
                     className="form-field"
                     style={{
                       backgroundColor: tokens.surface,
                       borderColor: tokens.border,
-                      color: tokens.text
+                      color: tokens.text,
                     }}
                   />
                 </div>
 
                 <div className="form-group">
                   <label className="form-label" style={{ color: tokens.text }}>
-                    Gender <span className="required">*</span>
+                    {t("settings.user.modal.gender")}{" "}
+                    <span className="required">*</span>
                   </label>
                   <select
                     value={userFormData.profile.gender || ""}
-                    onChange={(e) => setUserFormData(prev => ({
-                      ...prev,
-                      profile: { ...prev.profile, gender: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setUserFormData((prev) => ({
+                        ...prev,
+                        profile: { ...prev.profile, gender: e.target.value },
+                      }))
+                    }
                     className="form-field form-select"
                     style={{
                       backgroundColor: tokens.surface,
                       borderColor: tokens.border,
-                      color: tokens.text
+                      color: tokens.text,
                     }}
                   >
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="">
+                      {t("settings.user.modal.select_gender")}
+                    </option>
+                    <option value="male">
+                      {t("settings.user.modal.male")}
+                    </option>
+                    <option value="female">
+                      {t("settings.user.modal.female")}
+                    </option>
+                    <option value="other">
+                      {t("settings.user.modal.other")}
+                    </option>
                   </select>
                 </div>
               </div>
 
+              {/* Country / City */}
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label" style={{ color: tokens.text }}>Country</label>
-                  <input type="text" value={userFormData.profile.country || ""}
-                    onChange={(e) => setUserFormData(prev => ({ ...prev, profile: { ...prev.profile, country: e.target.value } }))}
-                    className="form-field" style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }} placeholder="Country" />
+                  <label className="form-label" style={{ color: tokens.text }}>
+                    {t("settings.user.modal.country")}
+                  </label>
+                  <input
+                    type="text"
+                    value={userFormData.profile.country || ""}
+                    onChange={(e) =>
+                      setUserFormData((prev) => ({
+                        ...prev,
+                        profile: { ...prev.profile, country: e.target.value },
+                      }))
+                    }
+                    className="form-field"
+                    style={{
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.text,
+                    }}
+                    placeholder={t("settings.user.modal.country")}
+                  />
                 </div>
                 <div className="form-group">
-                  <label className="form-label" style={{ color: tokens.text }}>City</label>
-                  <input type="text" value={userFormData.profile.city || ""}
-                    onChange={(e) => setUserFormData(prev => ({ ...prev, profile: { ...prev.profile, city: e.target.value } }))}
-                    className="form-field" style={{ backgroundColor: tokens.surface, borderColor: tokens.border, color: tokens.text }} placeholder="City" />
+                  <label className="form-label" style={{ color: tokens.text }}>
+                    {t("settings.user.modal.city")}
+                  </label>
+                  <input
+                    type="text"
+                    value={userFormData.profile.city || ""}
+                    onChange={(e) =>
+                      setUserFormData((prev) => ({
+                        ...prev,
+                        profile: { ...prev.profile, city: e.target.value },
+                      }))
+                    }
+                    className="form-field"
+                    style={{
+                      backgroundColor: tokens.surface,
+                      borderColor: tokens.border,
+                      color: tokens.text,
+                    }}
+                    placeholder={t("settings.user.modal.city")}
+                  />
                 </div>
               </div>
 
+              {/* Address */}
               <div className="form-group">
                 <label className="form-label" style={{ color: tokens.text }}>
-                  Address
+                  {t("settings.user.modal.address")}
                 </label>
                 <textarea
                   value={userFormData.profile.address || ""}
-                  onChange={(e) => setUserFormData(prev => ({
-                    ...prev,
-                    profile: { ...prev.profile, address: e.target.value }
-                  }))}
+                  onChange={(e) =>
+                    setUserFormData((prev) => ({
+                      ...prev,
+                      profile: { ...prev.profile, address: e.target.value },
+                    }))
+                  }
                   className="form-field form-textarea"
                   style={{
                     backgroundColor: tokens.surface,
                     borderColor: tokens.border,
-                    color: tokens.text
+                    color: tokens.text,
                   }}
-                  placeholder="Full address"
+                  placeholder={t("settings.user.modal.address")}
                 />
               </div>
             </div>
           </div>
 
-          <div className="modal-actions" style={{ borderTopColor: tokens.border }}>
+          <div
+            className="modal-actions"
+            style={{ borderTopColor: tokens.border }}
+          >
+            <button onClick={handleSaveUser} className="btn btn-success">
+              {editingUser
+                ? t("settings.user.modal.update")
+                : t("settings.user.modal.create")}
+            </button>
             <button
               onClick={() => setIsCreateUserModalOpen(false)}
               className="btn btn-secondary"
             >
-              Cancel
-            </button>
-            <button
-              onClick={handleSaveUser}
-              className="btn btn-success"
-            >
-              {editingUser ? "Update" : "Create"}
+              {t("settings.user.modal.cancel")}
             </button>
           </div>
         </div>

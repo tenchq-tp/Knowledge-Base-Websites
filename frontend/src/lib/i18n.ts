@@ -50,6 +50,65 @@ const resources = {
         title: "การตั้งค่า",
         subtitle: "จัดการการตั้งค่าบัญชีและการกำหนดค่าของคุณ",
         user: {
+          table: {
+            no: "#",
+            username: "ผู้ใช้",
+            email: "อีเมล",
+            role: "บทบาท",
+            status: "สถานะ",
+            updated: "วันที่อัปเดต",
+            action: "จัดการ"
+          },
+          modal: {
+            basicinformation: "ข้อมูลพื้นฐาน",
+            profileinformation: "ข้อมูลโปรไฟล์",
+            title: "คำนำหน้า",
+            gender: "เพศ",
+            select_title: "เลือกคำนำหน้า",
+            select_gender: "เลือกเพศ",
+            mr: "นาย",
+            ms: "นางสาว",
+            mrs: "นาง",
+            dr: "ดร.",
+            male: "ชาย",
+            female: "หญิง",
+            other: "อื่นๆ",
+            firstname: "ชื่อจริง",
+            lastname: "นามสกุล",
+            email: "อีเมล",
+            username: "ชื่อผู้ใช้",
+            role: "บทบาท",
+            phone: "เบอร์โทร",
+            dob: "วันเกิด",
+            country: "ประเทศ",
+            city: "เมือง",
+            address: "ที่อยู่",
+            department: "แผนก",
+            status: "สถานะ",
+            employee_id: "รหัสพนักงาน",
+            profile_image: "รูปโปรไฟล์",
+            created_date: "วันที่สร้าง",
+            updated_date: "วันที่แก้ไข",
+            cancel: "ยกเลิก",
+            create: "สร้าง",
+            update: "อัปเดต",
+            close: "ปิด",
+            view_details: "ดูรายละเอียด",
+            edit: "แก้ไข",
+            save: "บันทึก",
+            reset: "รีเซ็ต",
+            confirm_delete: "ยืนยันการลบ",
+            yes: "ใช่",
+            no: "ไม่ใช่",
+            search: "ค้นหา",
+            select_department: "เลือกแผนก",
+            select_role: "เลือกบทบาท",
+            not_available: "ไม่มีข้อมูล",
+            loading: "กำลังโหลด...",
+            success: "สำเร็จ",
+            error: "เกิดข้อผิดพลาด"
+          },
+        
           title: "การตั้งค่าผู้ใช้",
           username: "ชื่อผู้ใช้",
           email: "อีเมล",
@@ -57,8 +116,12 @@ const resources = {
           lastName: "นามสกุล",
           edit: "แก้ไข",
           cancel: "ยกเลิก",
-          save: "บันทึกการตั้งค่าผู้ใช้"
+          manage: "จัดการผู้ใช้",
+          save: "บันทึกการตั้งค่าผู้ใช้",
+          create: "สร้างผู้ใช้งาน",
+          search: "ค้นหาผู้ใช้"
         },
+        
         role: {
           title: "การตั้งค่าบทบาท",
           current: "บทบาทปัจจุบัน",
@@ -69,6 +132,7 @@ const resources = {
           guest: "แขก",
           edit: "แก้ไข",
           cancel: "ยกเลิก",
+          manage:"จัดการบทบาท",
           save: "บันทึกการตั้งค่าบทบาท"
         },
         theme: {
@@ -84,9 +148,17 @@ const resources = {
           switchedToDark: "เปลี่ยนเป็นโหมดมืดแล้ว"
         },
         language: {
-          title: "การตั้งค่าภาษา",
+          title: "ภาษา",
           select: "เลือกภาษา",
-          save: "บันทึกภาษา"
+          successTitle: "สำเร็จ",
+          successText: "เปลี่ยนภาษาเป็น {{language}} แล้ว",
+          languageNames: {
+            th: "ไทย (TH)",
+            en: "English (EN)",
+            zh: "中文 (ZH)",
+            ja: "日本語 (JA)",
+            ko: "한국어 (KO)"
+          },
         },
         success: {
           title: "บันทึกสำเร็จ",
@@ -141,6 +213,7 @@ const resources = {
 
   en: {
     translation: {
+      
       navbar: {
         welcome: "Welcome - KB",
         home: "Home",
@@ -186,6 +259,64 @@ const resources = {
         title: "Settings",
         subtitle: "Manage your account settings and preferences",
         user: {
+          table: {
+            no: "#",
+            username: "Username",
+            email: "Email",
+            role: "Role",
+            status: "Status",
+            updated: "Updated Date",
+            action: "Action"
+          },
+          modal: {
+            basicinformation: "Basic Information",
+            profileinformation: "Profile Information",
+            title: "Title",
+            gender: "Gender",
+            select_title: "Select Title",
+            select_gender: "Select Gender",
+            mr: "Mr.",
+            ms: "Ms.",
+            mrs: "Mrs.",
+            dr: "Dr.",
+            male: "Male",
+            female: "Female",
+            other: "Other",
+            firstname: "First Name",
+            lastname: "Last Name",
+            email: "Email",
+            username: "Username",
+            role: "Role",
+            phone: "Phone",
+            dob: "Date of Birth",
+            country: "Country",
+            city: "City",
+            address: "Address",
+            department: "Department",
+            status: "Status",
+            employee_id: "Employee ID",
+            profile_image: "Profile Image",
+            created_date: "Created Date",
+            updated_date: "Updated Date",
+            cancel: "Cancel",
+            create: "Create",
+            update: "Update",
+            close: "Close",
+            view_details: "View Details",
+            edit: "Edit",
+            save: "Save",
+            reset: "Reset",
+            confirm_delete: "Confirm Delete",
+            yes: "Yes",
+            no: "No",
+            search: "Search",
+            select_department: "Select Department",
+            select_role: "Select Role",
+            not_available: "Not Available",
+            loading: "Loading...",
+            success: "Success",
+            error: "Error"
+          },
           title: "User Settings",
           username: "Username",
           email: "Email",
@@ -193,7 +324,10 @@ const resources = {
           lastName: "Last Name",
           edit: "Edit",
           cancel: "Cancel",
-          save: "Save User Settings"
+          manage: "Manage Users",
+          save: "Save User Settings",
+          create: "Create User",
+          search: "Search Users"
         },
         role: {
           title: "Role Settings",
@@ -205,6 +339,7 @@ const resources = {
           guest: "Guest",
           edit: "Edit",
           cancel: "Cancel",
+          manage:"Manage Role",
           save: "Save Role Settings"
         },
         theme: {
@@ -220,10 +355,19 @@ const resources = {
           switchedToDark: "Switched to Dark Mode"
         },
         language: {
-          title: "Language Settings",
+          title: "Language",
           select: "Select Language",
-          save: "Save Language"
+          successTitle: "Success",
+          successText: "Language changed to {{language}}",
+          languageNames: {
+            th: "Thai (TH)",
+            en: "English (EN)",
+            zh: "Chinese (ZH)",
+            ja: "Japanese (JA)",
+            ko: "Korean (KO)"
+          }
         },
+        
         success: {
           title: "Settings Saved",
           message: "Your settings have been saved successfully!"
@@ -251,14 +395,76 @@ const resources = {
         title: "设置",
         subtitle: "管理您的账户设置和偏好",
         user: {
+          table: {
+            no: "#",
+            username: "用户名",
+            email: "电子邮件",
+            role: "角色",
+            status: "状态",
+            updated: "更新日期",
+            action: "管理"
+          },
+          modal: {
+            basicinformation: "基本信息",
+            profileinformation: "个人资料",
+            title: "称谓",
+            gender: "性别",
+            select_title: "选择称谓",
+            select_gender: "选择性别",
+            mr: "先生",
+            ms: "小姐",
+            mrs: "女士",
+            dr: "博士",
+            male: "男",
+            female: "女",
+            other: "其他",
+            firstname: "名字",
+            lastname: "姓氏",
+            email: "电子邮件",
+            username: "用户名",
+            role: "角色",
+            phone: "电话",
+            dob: "出生日期",
+            country: "国家",
+            city: "城市",
+            address: "地址",
+            department: "部门",
+            status: "状态",
+            employee_id: "员工编号",
+            profile_image: "头像",
+            created_date: "创建日期",
+            updated_date: "更新日期",
+            cancel: "取消",
+            create: "创建",
+            update: "更新",
+            close: "关闭",
+            view_details: "查看详情",
+            edit: "编辑",
+            save: "保存",
+            reset: "重置",
+            confirm_delete: "确认删除",
+            yes: "是",
+            no: "否",
+            search: "搜索",
+            select_department: "选择部门",
+            select_role: "选择角色",
+            not_available: "无数据",
+            loading: "加载中...",
+            success: "成功",
+            error: "错误"
+          },
+        
           title: "用户设置",
           username: "用户名",
-          email: "邮箱",
-          firstName: "名",
-          lastName: "姓",
+          email: "电子邮件",
+          firstName: "名字",
+          lastName: "姓氏",
           edit: "编辑",
           cancel: "取消",
-          save: "保存用户设置"
+          manage: "管理用户",
+          save: "保存用户设置",
+          create: "创建用户",
+          search: "搜索用户"
         },
         role: {
           title: "角色设置",
@@ -270,8 +476,10 @@ const resources = {
           guest: "访客",
           edit: "编辑",
           cancel: "取消",
+          manage: "角色管理",
           save: "保存角色设置"
         },
+        
         theme: {
           title: "主题设置",
           light: "浅色主题",
@@ -285,10 +493,19 @@ const resources = {
           switchedToDark: "已切换到深色模式"
         },
         language: {
-          title: "语言设置",
+          title: "语言",
           select: "选择语言",
-          save: "保存语言"
+          successTitle: "成功",
+          successText: "已将语言更改为 {{language}}",
+          languageNames: {
+            th: "泰语 (TH)",
+            en: "英语 (EN)",
+            zh: "中文 (ZH)",
+            ja: "日语 (JA)",
+            ko: "韩语 (KO)"
+          }
         },
+        
         success: {
           title: "保存成功",
           message: "您的设置已成功保存！"
@@ -323,6 +540,8 @@ const resources = {
           lastName: "姓",
           edit: "編集",
           cancel: "キャンセル",
+          manage:"管理用戶",
+
           save: "ユーザー設定を保存"
         },
         role: {
@@ -335,6 +554,7 @@ const resources = {
           guest: "ゲスト",
           edit: "編集",
           cancel: "キャンセル",
+          manage:"管理角色",
           save: "役割設定を保存"
         },
         theme: {
@@ -350,9 +570,17 @@ const resources = {
           switchedToDark: "ダークモードに切り替えました"
         },
         language: {
-          title: "言語設定",
+          title: "言語",
           select: "言語を選択",
-          save: "言語を保存"
+          successTitle: "成功",
+          successText: "言語が{{language}}に変更されました",
+          languageNames: {
+            th: "タイ語 (TH)",
+            en: "英語 (EN)",
+            zh: "中国語 (ZH)",
+            ja: "日本語 (JA)",
+            ko: "韓国語 (KO)"
+          }
         },
         success: {
           title: "保存成功",
@@ -415,10 +643,19 @@ const resources = {
           switchedToDark: "다크 모드로 전환했습니다"
         },
         language: {
-          title: "언어 설정",
+          title: "언어",
           select: "언어 선택",
-          save: "언어 저장"
+          successTitle: "성공",
+          successText: "언어가 {{language}}(으)로 변경되었습니다",
+          languageNames: {
+            th: "태국어 (TH)",
+            en: "영어 (EN)",
+            zh: "중국어 (ZH)",
+            ja: "일본어 (JA)",
+            ko: "한국어 (KO)"
+          }
         },
+        
         success: {
           title: "저장 성공",
           message: "설정이 성공적으로 저장되었습니다!"
