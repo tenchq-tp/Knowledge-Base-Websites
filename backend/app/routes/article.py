@@ -4,14 +4,12 @@ from typing import List, Optional, Union
 import json
 from app.db.session import get_db
 from app.schemas.article import ArticleCreate, ArticleOut, ArticleUpdate, ArticleMediaIn
-from app.crud.article import create_article, get_article_by_slug, list_articles, create_media, update_article, delete_article, parse_positions_field
+from app.crud.article import create_article_with_categories, list_articles, create_media, update_article_with_categories, delete_article, parse_positions_field
 from app.services.minio_client import upload_file
 from app.models.article import Article, ArticleMedia, ArticleViewLog
 from datetime import datetime, timedelta
 from app.routes.auth import get_current_user
-from app.models.user import User, UserSession
-from app.core.security import hash_token
-import uuid
+from app.models.user import User
 
 async def get_current_user_optional(current_user: Optional[User] = Depends(get_current_user)) -> Optional[User]:
     try:
@@ -31,9 +29,9 @@ def create_article_with_media(
     content: Optional[str] = Form(None),
     media_files: Union[UploadFile, List[UploadFile], None] = File(default=None),
     positions_list: List[int] = Depends(parse_positions_field),
+    category_ids: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    # เตรียม media_files_list ให้เป็น list เสมอ
     if media_files is None:
         media_files_list = []
     elif isinstance(media_files, list):
@@ -41,11 +39,17 @@ def create_article_with_media(
     else:
         media_files_list = [media_files]
 
-    # สร้าง article ใน DB
     article_data = ArticleCreate(title=title, slug=slug, content=content)
-    article = create_article(db, article_data)
+    if category_ids:
+        try:
+            category_ids_list = [int(x.strip()) for x in category_ids.split(',') if x.strip()]
+        except ValueError:
+            raise HTTPException(status_code=422, detail="category_ids must be comma-separated integers")
+    else:
+        category_ids_list = []
 
-    # วนลูป media_files กับ positions โดยใช้ zip จะจับคู่จนกว่าตัวใดตัวหนึ่งหมด
+    article = create_article_with_categories(db, article_data, category_ids_list)
+
     for file, pos in zip(media_files_list, positions_list):
         url = upload_file(file)  # ฟังก์ชัน upload ไฟล์
         media = create_media(db, file.filename, file.content_type, url)  # สร้าง media record
@@ -61,7 +65,7 @@ def get_article_with_view_tracking(
     slug: str,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),  # assume ต้องล็อกอินก่อนดู
+    current_user: User = Depends(get_current_user),
 ):
     article = db.query(Article).filter(Article.slug == slug).first()
     if not article:
@@ -89,7 +93,6 @@ def get_article_with_view_tracking(
         db.commit()
         db.refresh(article)
 
-    # render media inline
     content = article.content or ""
     media_links_sorted = sorted(article.media_links, key=lambda x: x.position)
     for idx, link in enumerate(media_links_sorted):
@@ -116,7 +119,7 @@ def update_article_route(
     db: Session = Depends(get_db)
 ):
     data = ArticleUpdate(title=title, slug=new_slug, content=content, media_links=media_links)
-    article = update_article(db, slug, data)
+    article = update_article_with_categories(db, slug, data)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     return article

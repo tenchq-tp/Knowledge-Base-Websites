@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 class Category(Base):
@@ -9,4 +10,4 @@ class Category(Base):
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
     
-    
+    articles = relationship("Article", secondary="article_category", back_populates="categories")
