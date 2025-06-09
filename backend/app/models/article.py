@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, BigInteger
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, BigInteger, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, INET
 from datetime import datetime
@@ -16,6 +16,11 @@ class Article(Base):
 
     media_links = relationship("ArticleMedia", back_populates="article")
     view_logs = relationship("ArticleViewLog", back_populates="article", cascade="all, delete-orphan")
+    categories = relationship("Category", secondary="article_category", back_populates="articles")
+
+    @property
+    def category_names(self):
+        return [c.name for c in self.categories] if self.categories else []
 
 class MediaFile(Base):
     __tablename__ = "media_file"
@@ -48,3 +53,11 @@ class ArticleViewLog(Base):
     viewed_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     article = relationship("Article", back_populates="view_logs")
+    
+class ArticleCategory(Base):
+    __tablename__ = "article_category"
+    id = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"))
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"))
+    
+    __table_args__ = (UniqueConstraint("article_id", "category_id", name="_article_category_uc"),)

@@ -3,6 +3,7 @@ from typing import Optional, List, Union
 from datetime import datetime
 from fastapi import Form, File, UploadFile
 import json
+from app.schemas.category import CategoryResponse
 
 class MediaFileOut(BaseModel):
     id: int
@@ -36,6 +37,7 @@ class ArticleUpdate(BaseModel):
     media_links: Optional[List[ArticleMediaIn]] = []
 
 class ArticleOut(ArticleCreate):
+    categories: List[CategoryResponse] = []
     id: int
     created_at: datetime
     updated_at: datetime
@@ -66,3 +68,19 @@ class ArticleFormIn(BaseModel):
         if media_files and len(media_files) != len(v):
             raise ValueError("Number of media_files and positions must be equal")
         return v
+
+class ArticleCategoryIn(BaseModel):
+    category_ids: Optional[List[int]] = None
+
+    @validator('category_ids', pre=True)
+    def parse_category_ids(cls, v):
+        if isinstance(v, str):
+            # แปลง "1,2" เป็น [1, 2]
+            return [int(x.strip()) for x in v.split(',') if x.strip()]
+        return v
+
+class ArticleOutWithCategory(ArticleOut):
+    categories: List[CategoryResponse] = []
+
+    class Config:
+        orm_mode = True

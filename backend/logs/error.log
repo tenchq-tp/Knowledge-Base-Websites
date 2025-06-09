@@ -78,3 +78,18 @@ DETAIL:  Failing row contains (2, 2, null, null, 172.24.0.1, 2025-06-06 04:12:03
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
 2025-06-06 04:22:10,325 - app.db.session - ERROR - Database session error: 
 2025-06-06 04:22:24,974 - app.db.session - ERROR - Database session error: 
+2025-06-09 10:47:37,221 - app.db.session - ERROR - Database session error: [{'type': 'missing', 'loc': ('body', 'category_ids'), 'msg': 'Field required', 'input': None, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}]
+2025-06-09 10:48:28,678 - app.db.session - ERROR - Database session error: [{'type': 'missing', 'loc': ('body', 'category_ids'), 'msg': 'Field required', 'input': None, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}]
+2025-06-09 10:50:47,364 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-09 10:50:50,076 - app.db.session - ERROR - Database session error: 'NoneType' object is not iterable
+2025-06-09 10:52:17,812 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(gggggg) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'ggggggg', 'slug': 'gggggg', 'content': 'gggggg', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 9, 10, 52, 17, 808955), 'updated_at': datetime.datetime(2025, 6, 9, 10, 52, 17, 808959)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-09 10:57:17,295 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-09 10:57:35,206 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1,2]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-09 10:58:06,797 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-09 11:00:18,694 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-09 11:00:33,773 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]

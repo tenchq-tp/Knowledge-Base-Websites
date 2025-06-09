@@ -6,13 +6,22 @@ from app.models.user import User, UserSession
 from app.schemas.article import ArticleCreate, ArticleUpdate
 from datetime import datetime, timedelta
 import json
+from sqlalchemy import text
 
-
-def create_article(db: Session, data: ArticleCreate):
-    article = Article(**data.dict()) 
+def create_article_with_categories(db: Session, article_data, category_ids: Optional[List[int]] = None):
+    if category_ids is None:
+        category_ids = []  
+    article = Article(**article_data.dict())
     db.add(article)
     db.commit()
     db.refresh(article)
+
+    for cat_id in category_ids:
+        db.execute(
+            text("INSERT INTO article_category (article_id, category_id) VALUES (:a, :c) ON CONFLICT DO NOTHING"),
+            {"a": article.id, "c": cat_id}
+        )
+    db.commit()
     return article
 
 def create_media(db: Session, filename: str, file_type: str, url: str):
@@ -42,7 +51,7 @@ def get_article_by_slug(db: Session, slug: str):
 def list_articles(db: Session):
     return db.query(Article).all()
 
-def update_article(db: Session, slug: str, data: ArticleUpdate):
+def update_article_with_categories(db: Session, slug: str, data: ArticleUpdate, category_ids: List[int]):
     article = db.query(Article).filter(Article.slug == slug).first()
     if not article:
         return None
@@ -54,33 +63,12 @@ def update_article(db: Session, slug: str, data: ArticleUpdate):
     if data.content is not None:
         article.content = data.content
 
-    if data.media_links is not None:
-        existing_links = db.query(ArticleMedia).filter(ArticleMedia.article_id == article.id).all()
-        existing_media_ids = {link.media_id for link in existing_links}
-        new_media_ids = {m.media_id for m in data.media_links}
-
-        to_remove_ids = existing_media_ids - new_media_ids
-        if to_remove_ids:
-            db.query(ArticleMedia).filter(
-                ArticleMedia.article_id == article.id,
-                ArticleMedia.media_id.in_(to_remove_ids)
-            ).delete(synchronize_session=False)
-
-        to_add_ids = new_media_ids - existing_media_ids
-        for m in data.media_links:
-            if m.media_id in to_add_ids:
-                db.add(ArticleMedia(
-                    article_id=article.id,
-                    media_id=m.media_id,
-                    position=m.position
-                ))
-
-        for m in data.media_links:
-            if m.media_id in existing_media_ids:
-                db.query(ArticleMedia).filter_by(
-                    article_id=article.id,
-                    media_id=m.media_id
-                ).update({"position": m.position})
+    db.execute("DELETE FROM article_category WHERE article_id = :aid", {"aid": article.id})
+    for cat_id in category_ids:
+        db.execute(
+            text("INSERT INTO article_category (article_id, category_id) VALUES (:a, :c) ON CONFLICT DO NOTHING"),
+            {"a": article.id, "c": cat_id}
+        )
 
     db.commit()
     db.refresh(article)
