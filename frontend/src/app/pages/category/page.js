@@ -7,10 +7,13 @@ import CreateCategoryModal from "../../component/create_category_modal";
 import styles from "../../style/category.module.css";
 import Navbar from "../../component/Navbar";
 import Swal from "sweetalert2";
+import { useTheme } from "../../contexts/ThemeContext";
 import "../../../lib/i18n";
+
 
 export default function CategoryPage() {
   const { t } = useTranslation();
+  const { tokens, isDark } = useTheme();
   const [showModal, setShowModal] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,10 +55,10 @@ export default function CategoryPage() {
   }, []);
 
   function parseIcon(iconStr) {
-    if (!iconStr) return { IconComponent: null, color: "#000" };
+    if (!iconStr) return { IconComponent: null, color: tokens.primary };
     const [iconName, color] = iconStr.split("_");
     const IconComponent = FaIcons[iconName] || null;
-    return { IconComponent, color: color ? "#" + color : "#000" };
+    return { IconComponent, color: color ? "#" + color : tokens.primary };
   }
 
   // กด edit
@@ -75,8 +78,10 @@ export default function CategoryPage() {
       showCancelButton: true,
       confirmButtonText: t("categoryModal.confirmYes"),
       cancelButtonText: t("categoryModal.confirmNo"),
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: tokens.error,
+      cancelButtonColor: tokens.primary,
+      background: tokens.surface,
+      color: tokens.text,
     });
 
     if (result.isConfirmed) {
@@ -100,8 +105,10 @@ export default function CategoryPage() {
           icon: "success",
           title: t("categoryModal.deleteSuccessTitle"),
           text: t("categoryModal.deleteSuccessText"),
-          confirmButtonColor: "#3085d6",
+          confirmButtonColor: tokens.primary,
           confirmButtonText: "OK",
+          background: tokens.surface,
+          color: tokens.text,
         });
 
         fetchCategories(); // fetch ข้อมูลใหม่หลังลบ
@@ -110,8 +117,10 @@ export default function CategoryPage() {
           icon: "error",
           title: t("categoryModal.errorTitle"),
           text: t("categoryModal.deleteErrorText"),
-          confirmButtonColor: "#d33",
+          confirmButtonColor: tokens.error,
           confirmButtonText: "OK",
+          background: tokens.surface,
+          color: tokens.text,
         });
       }
     }
@@ -122,7 +131,7 @@ export default function CategoryPage() {
       <>
         <Navbar />
         <div className={styles.container}>
-          <p>{t("loading", { defaultValue: "Loading categories..." })}</p>
+          <p style={{ color: tokens.text }}>{t("loading", { defaultValue: "Loading categories..." })}</p>
         </div>
       </>
     );
@@ -132,7 +141,12 @@ export default function CategoryPage() {
     <>
       <Navbar />
       <div className={styles.container}>
-        <button onClick={() => setShowModal(true)} className={styles.addBtn}>
+        <button onClick={() => setShowModal(true)} className={styles.addBtn}
+          style={{
+            backgroundColor: tokens.success,
+            boxShadow: `0 4px 8px ${tokens.success}80`,
+            color: 'white'
+          }}>
           + {t("navbar.category")}
         </button>
 
@@ -141,22 +155,40 @@ export default function CategoryPage() {
             const { IconComponent, color } = parseIcon(cat.icon);
 
             return (
-              <div key={cat.id} className={styles.card}>
-                <div className={styles.iconWrapper}>
+              <div key={cat.id} className={styles.card}
+                style={{
+                  backgroundColor: tokens.surface,
+                  boxShadow: tokens.shadow,
+                  border: `1px solid ${tokens.border}`
+                }}>
+                <div className={styles.iconWrapper}  
+                style={{
+                    backgroundColor: `${tokens.primary}20`,
+                    boxShadow: `0 2px 6px ${tokens.primary}40`
+                  }}>
                   {IconComponent ? (
                     <IconComponent size={40} color={color} />
                   ) : (
-                    <div style={{ fontSize: 40, color: "#ccc" }}>?</div>
+                    <div style={{ fontSize: 40, color: tokens.textMuted }}>?</div>
                   )}
                 </div>
-                <h3 className={styles.cardTitle}>{cat.name}</h3>
-                <p className={styles.cardDesc}>{cat.description}</p>
+                <h3 className={styles.cardTitle} style={{ color: tokens.primary }}>{cat.name}</h3>
+                <p className={styles.cardDesc} style={{ color: tokens.textSecondary }}>{cat.description}</p>
                 <div className={styles.buttonGroup}>
-                  <button className={styles.createArticleBtn}>
+                  <button className={styles.createArticleBtn}
+                  style={{
+                      backgroundColor: tokens.success,
+                      boxShadow: `0 4px 10px ${tokens.success}70`,
+                      color: 'white'
+                    }}>
                     <FaIcons.FaPlus className={styles.icon} />
                     {t("actions.createArticle")}
                   </button>
-                  <button className={styles.readBtn}>
+                  <button className={styles.readBtn}  
+                  style={{
+                      backgroundColor: tokens.primary,
+                      boxShadow: `0 4px 10px ${tokens.primary}70`
+                    }}>
                     <FaIcons.FaBookOpen className={styles.icon} />
                     {t("actions.read")}
                   </button>
@@ -167,6 +199,7 @@ export default function CategoryPage() {
                     className={styles.editBtn}
                     title={t("actions.edit")}
                     onClick={() => handleEdit(cat)}
+                    style={{ color: tokens.warning }}
                   >
                     <FaIcons.FaEdit />
                   </button>
@@ -175,6 +208,7 @@ export default function CategoryPage() {
                     className={styles.deleteBtn}
                     title={t("actions.delete")}
                     onClick={() => handleDelete(cat.id)} // เรียกฟังก์ชันลบ
+                    style={{ color: tokens.error }} 
                   >
                     <FaIcons.FaTrash />
                   </button>

@@ -7,6 +7,23 @@
     width: 100%;
     margin: 0 auto;
     box-sizing: border-box;
+    background-color: var(--theme-background); /* ✅ แทนที่ hard-coded color */
+  color: var(--theme-text); /* ✅ เพิ่ม theme text color */
+}
+
+.pageWrapper {
+  background-color: var(--theme-background);
+  color: var(--theme-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.profileImageWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .profileSection {
@@ -48,7 +65,7 @@
     text-align: center;
     font-size: 2.2rem;
     font-weight: 800;
-    color: #2e3c50;
+    color: #4e5a9e;
     margin-top: 20px;
 }
 
@@ -70,7 +87,7 @@
 .label {
     flex: 0 0 150px;
     font-weight: 600;
-    color: #37474f;
+    color: #4e5a9e;
     text-align: right;
 }
 
@@ -184,4 +201,204 @@
 
 .discord {
     background-color: #5865F2;
+}
+
+.card {
+  background: var(--theme-surface); /* ✅ ใช้ theme surface */
+  border: 1px solid var(--theme-border); /* ✅ เพิ่ม border */
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: var(--theme-shadowMedium); /* ✅ ใช้ theme shadow */
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+/* Header Card Layout */
+.headerCard {
+ display: flex;
+ align-items: center;
+ gap: 30px;
+ margin-bottom: 20px;
+}
+
+.headerImageWrapper .profileImage {
+ width: 100px;
+ height: 100px;
+}
+
+.headerImageWrapper .profileImagePlaceholder {
+ width: 100px;
+ height: 100px;
+}
+
+.profileInfo {
+ flex: 1;
+}
+
+.profileName {
+ font-size: 24px;
+ font-weight: bold;
+ color: var(--theme-text);
+ margin: 0 0 8px 0;
+}
+
+.profileLocation {
+ color: var(--theme-textSecondary);
+ margin: 0;
+ font-size: 16px;
+}
+
+.socialContainer {
+ display: flex;
+ gap: 10px;
+ align-items: center;
+}
+
+/* Section Cards */
+.sectionCard {
+ margin-bottom: 20px;
+}
+
+.sectionHeader {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 20px;
+ border-bottom: 1px solid var(--theme-border);
+ padding-bottom: 15px;
+}
+
+.sectionTitle {
+ font-size: 18px;
+ font-weight: 600;
+ color: var(--theme-text);
+ margin: 0;
+}
+
+/* Buttons */
+.primaryEditButton {
+ background-color: var(--theme-primary);
+ color: var(--theme-surface);
+ border: none;
+ padding: 8px 16px;
+ border-radius: 6px;
+ cursor: pointer;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ font-size: 14px;
+ margin-left: 20px;
+ transition: all 0.3s ease;
+}
+
+.primaryEditButton:hover {
+ background-color: var(--theme-primaryHover);
+}
+
+.secondaryEditButton {
+ background-color: transparent;
+ color: var(--theme-primary);
+ border: 1px solid var(--theme-primary);
+ padding: 6px 12px;
+ border-radius: 4px;
+ cursor: pointer;
+ font-size: 12px;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ transition: all 0.3s ease;
+}
+
+.secondaryEditButton:hover {
+ background-color: var(--theme-primary);
+ color: var(--theme-surface);
+}
+
+/* Form Grid */
+.fieldGrid {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 20px;
+}
+
+.fieldLabel {
+ display: block;
+ margin-bottom: 8px;
+ font-size: 14px;
+ font-weight: 500;
+ color: var(--theme-textSecondary);
+}
+
+.fieldInput {
+ background-color: var(--theme-surface);
+ color: var(--theme-text);
+ border: 1px solid var(--theme-border);
+ width: 100%;
+ min-width: auto;
+}
+
+.fieldDisplay {
+ background-color: var(--theme-surfaceAlt);
+ color: var(--theme-text);
+ min-height: 20px;
+ display: flex;
+ align-items: center;
+}
+
+.bioTextarea {
+ width: 100%;
+ padding: 10px 16px;
+ border: 1px solid var(--theme-border);
+ border-radius: 10px;
+ font-size: 1rem;
+ background-color: var(--theme-surface);
+ color: var(--theme-text);
+ min-height: 80px;
+ resize: vertical;
+ font-family: inherit;
+ transition: border-color 0.3s ease;
+}
+
+.bioTextarea:focus {
+ outline: none;
+ border-color: var(--theme-primary);
+}
+
+.bioDisplay {
+ background-color: var(--theme-surfaceAlt);
+ color: var(--theme-text);
+ min-height: 60px;
+ display: flex;
+ align-items: flex-start;
+ padding-top: 10px;
+}
+
+.fullWidth {
+ grid-column: 1 / -1;
+}
+
+/* Loading */
+.loading {
+ text-align: center;
+ font-size: 1.2rem;
+ color: var(--theme-textSecondary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+ .headerCard {
+   flex-direction: column;
+   gap: 20px;
+   text-align: center;
+ }
+ 
+ .fieldGrid {
+   grid-template-columns: 1fr;
+ }
+ 
+ .socialContainer {
+   justify-content: center;
+ }
 }

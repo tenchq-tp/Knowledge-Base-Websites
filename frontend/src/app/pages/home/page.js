@@ -6,6 +6,8 @@ import * as FaIcons from "react-icons/fa";
 import "../../../lib/i18n";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
+import { useTheme } from "../../contexts/ThemeContext";
+
 const spinningEarthGif = "/images/earth.gif";
 
 export default function Homepage() {
@@ -21,6 +23,8 @@ export default function Homepage() {
   const earthRef = useRef(null); // ref ของรูปโลก เพื่อหาตำแหน่งศูนย์กลาง
 
   const { t } = useTranslation();
+
+const { tokens, isDark } = useTheme();
 
   useEffect(() => {
     async function fetchCategories() {
@@ -107,7 +111,9 @@ export default function Homepage() {
                 src={spinningEarthGif}
                 alt="Spinning Earth"
                 className={styles.spinningEarth}
-                style={{ transform: `rotate(${rotation}deg)` }}
+                style={{ transform: `rotate(${rotation}deg)`,
+               filter: isDark ? 'brightness(0.8)' : 'brightness(1)'
+               }}
               />
             ) : (
               <div className={styles.categoryDetail}>
@@ -188,7 +194,7 @@ export default function Homepage() {
         {/* ส่วน categoryGrid ไม่เปลี่ยนแปลง */}
         <div className={styles.categoryGrid}>
           {loading ? (
-            <p>Loading categories...</p>
+            <p style={{color: tokens.textSecondary}}>Loading categories...</p>
           ) : filteredCategories.length > 0 ? (
             filteredCategories.map((cat) => (
               <div
@@ -204,15 +210,15 @@ export default function Homepage() {
                     return IconComponent ? (
                       <IconComponent
                         size={40}
-                        color={color ? "#" + color : "#000"}
+                        color={color ? "#" + color : tokens.primary}
                         className={styles.categoryIcon}
                       />
                     ) : (
-                      <FaIcons.FaQuestion size={40} color="#ccc" />
+                      <FaIcons.FaQuestion size={40} color={tokens.textMuted} />
                     );
                   })()
                 ) : (
-                  <FaIcons.FaQuestion size={40} color="#ccc" />
+                  <FaIcons.FaQuestion size={40} color={tokens.textMuted} />
                 )}
                 <div className={styles.categoryInfo}>
                   <h3>{cat.name}</h3>
@@ -223,7 +229,7 @@ export default function Homepage() {
               </div>
             ))
           ) : (
-            <p>No categories found.</p>
+            <p style={{ color: tokens.textSecondary}}>No categories found.</p>
           )}
         </div>
       </div>

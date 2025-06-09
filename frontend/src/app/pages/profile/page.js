@@ -19,13 +19,17 @@ import {
 
 import Navbar from "../../component/Navbar";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "../../contexts/ThemeContext";
 import Swal from "sweetalert2";
 import "../../../lib/i18n";
 import styles from "../../style/profile.module.css";
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation();
+  const { tokens, isDark } = useTheme();
   const [profile, setProfile] = useState(null);
+  const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
@@ -51,7 +55,7 @@ export default function ProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
+  const handleSave = async (section) => {
     const accessToken = localStorage.getItem("access_token");
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API}/profiles/me`, {
@@ -65,15 +69,22 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error("Update failed");
       const updated = await res.json();
       setProfile(updated);
-      setIsEditing(false);
+      if (section === "personal") setIsEditingPersonal(false);
+      if (section === "address") setIsEditingAddress(false);
+
+      const successMessage =
+        section === "personal"
+          ? t("profile.savePersonalSuccess") || "บันทึกข้อมูลส่วนตัวสำเร็จ"
+          : t("profile.saveAddressSuccess") || "บันทึกที่อยู่สำเร็จ";
 
       Swal.fire({
         icon: "success",
         title: t("profile.saveSuccess") || "บันทึกโปรไฟล์สำเร็จ",
         timer: 1500,
         showConfirmButton: false,
-        background: "#ffffff", // พื้นหลังขาว
-        color: "#4caf50", // ฟอนต์เขียว (Success)
+        background: tokens.surface, // ใช้ theme
+        color: tokens.success, //  ใช้ theme
+        confirmButtonColor: tokens.success, //  ใช้ theme
       });
     } catch (err) {
       console.error("Failed to update profile", err);
@@ -81,8 +92,9 @@ export default function ProfilePage() {
         icon: "error",
         title: t("profile.saveFailed") || "บันทึกไม่สำเร็จ",
         text: err.message,
-        background: "#ffffff", // พื้นหลังขาว
-        color: "#f44336", // ฟอนต์แดง (Error)
+        background: tokens.surface, //  ใช้ theme
+        color: tokens.error, //  ใช้ theme
+        confirmButtonColor: tokens.error, //  ใช้ them
       });
     }
   };
@@ -111,253 +123,297 @@ export default function ProfilePage() {
   const profileImageUrl = profile.imageUrl || profile.avatar || null;
 
   return (
-    <>
-      <Navbar />
-      <div
-        className={styles.container}
-        style={{ backgroundColor: "#f9f9f9", color: "#222" }}
-      >
-        <div className={styles.profileImageWrapper}>
-          {profileImageUrl ? (
-            <img
-              src={profileImageUrl}
-              alt="Profile"
-              className={styles.profileImage}
-              onError={(e) => {
-                e.currentTarget.src = "/images/placeholder.png";
-              }}
-            />
-          ) : (
-            <div className={styles.profileImagePlaceholder}>
-              <FaUser size={64} color="#999" />
-            </div>
-          )}
-        </div>
-
-        <h1 className={styles.title} style={{ color: "#00796b" }}>
-          {isEditing ? t("profile.editmyProfile") : t("profile.myProfile")}
-        </h1>
-
-        <div
-          className={styles.card}
-          style={{
-            background: "linear-gradient(135deg, #e0f2f1, #b2dfdb)",
-            color: "#004d40",
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          {/* Title */}
-          <div className={styles.row}>
-            <FaIdBadge className={styles.icon} />
-            <label className={styles.label}>{t("profile.title")}:</label>
-            {isEditing ? (
-              <select
-                className={styles.inputField}
-                name="title"
-                value={formData.title || ""}
-                onChange={handleInputChange}
-              >
-                {titleOptions.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(
-                  titleOptions.find((o) => o.value === profile.title)?.label
-                )}
-              </span>
-            )}
-          </div>
-
-          {/* First Name */}
-          <div className={styles.row}>
-            <FaUser className={styles.icon} />
-            <label className={styles.label}>{t("profile.firstName")}:</label>
-            {isEditing ? (
-              <input
-                className={styles.inputField}
-                name="first_name"
-                value={formData.first_name || ""}
-                onChange={handleInputChange}
-                placeholder={t("profile.firstName")}
+  <>
+    <Navbar />
+    <div
+      className={styles.pageWrapper}
+      style={{
+        backgroundColor: tokens.background,
+        color: tokens.text,
+      }}
+    >
+      <div className={styles.container}>
+        {/* Header Section with Profile Image and Basic Info */}
+        <div className={`${styles.card} ${styles.headerCard}`}>
+          <div
+            className={`${styles.profileImageWrapper} ${styles.headerImageWrapper}`}
+          >
+            {profileImageUrl ? (
+              <img
+                src={profileImageUrl}
+                alt="Profile"
+                className={styles.profileImage}
+                onError={(e) => {
+                  e.currentTarget.src = "/images/placeholder.png";
+                }}
               />
             ) : (
-              <span className={styles.text}>
-                {renderFieldValue(profile.first_name)}
-              </span>
+              <div className={styles.profileImagePlaceholder}>
+                <FaUser size={40} color={tokens.textSecondary} />
+              </div>
             )}
           </div>
 
-          {/* Last Name */}
-          <div className={styles.row}>
-            <FaUser className={styles.icon} />
-            <label className={styles.label}>{t("profile.lastName")}:</label>
-            {isEditing ? (
-              <input
-                className={styles.inputField}
-                name="last_name"
-                value={formData.last_name || ""}
-                onChange={handleInputChange}
-                placeholder={t("profile.lastName")}
-              />
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(profile.last_name)}
-              </span>
-            )}
+          <div className={styles.profileInfo}>
+            <h1 className={styles.profileName}>
+              {profile.title ? `${titleOptions.find(o => o.value === profile.title)?.label} ` : ''}
+              {profile.first_name} {profile.last_name}
+            </h1>
           </div>
 
-          {/* Phone */}
-          <div className={styles.row}>
-            <FaPhone className={styles.icon} />
-            <label className={styles.label}>{t("profile.phone")}:</label>
-            {isEditing ? (
-              <input
-                className={styles.inputField}
-                name="phone"
-                value={formData.phone || ""}
-                onChange={handleInputChange}
-                placeholder={t("profile.phone")}
-                type="tel"
-              />
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(profile.phone)}
-              </span>
-            )}
-          </div>
-
-          {/* Date of Birth */}
-          <div className={styles.row}>
-            <FaBirthdayCake className={styles.icon} />
-            <label className={styles.label}>{t("profile.dateOfBirth")}:</label>
-            {isEditing ? (
-              <input
-                className={styles.inputField}
-                name="date_of_birth"
-                type="date"
-                value={formData.date_of_birth || ""}
-                onChange={handleInputChange}
-              />
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(profile.date_of_birth)}
-              </span>
-            )}
-          </div>
-
-          {/* Gender */}
-          <div className={styles.row}>
-            <FaVenusMars className={styles.icon} />
-            <label className={styles.label}>{t("profile.gender")}:</label>
-            {isEditing ? (
-              <select
-                className={styles.inputField}
-                name="gender"
-                value={formData.gender || ""}
-                onChange={handleInputChange}
-              >
-                {genderOptions.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(
-                  genderOptions.find((o) => o.value === profile.gender)?.label
-                )}
-              </span>
-            )}
-          </div>
-
-          {/* Country */}
-          <div className={styles.row}>
-            <FaGlobe className={styles.icon} />
-            <label className={styles.label}>{t("profile.country")}:</label>
-            {isEditing ? (
-              <input
-                className={styles.inputField}
-                name="country"
-                value={formData.country || ""}
-                onChange={handleInputChange}
-                placeholder={t("profile.country")}
-              />
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(profile.country)}
-              </span>
-            )}
-          </div>
-
-          {/* City */}
-          <div className={styles.row}>
-            <FaCity className={styles.icon} />
-            <label className={styles.label}>{t("profile.city")}:</label>
-            {isEditing ? (
-              <input
-                className={styles.inputField}
-                name="city"
-                value={formData.city || ""}
-                onChange={handleInputChange}
-                placeholder={t("profile.city")}
-              />
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(profile.city)}
-              </span>
-            )}
-          </div>
-
-          {/* Address */}
-          <div className={styles.row}>
-            <FaMapMarkedAlt className={styles.icon} />
-            <label className={styles.label}>{t("profile.address")}:</label>
-            {isEditing ? (
-              <input
-                className={styles.inputField}
-                name="address"
-                value={formData.address || ""}
-                onChange={handleInputChange}
-                placeholder={t("profile.address")}
-              />
-            ) : (
-              <span className={styles.text}>
-                {renderFieldValue(profile.address)}
-              </span>
-            )}
-          </div>
-        </div>
-        <div className={styles.contactBox}>
-          <h2 className={styles.contactTitle}>Contact</h2>
-          <div className={styles.iconRow}>
+          <div className={styles.socialContainer}>
             <div className={`${styles.iconCircle} ${styles.facebook}`}>
-              <FaFacebookF />
+              <FaFacebookF size={16} />
             </div>
             <div className={`${styles.iconCircle} ${styles.instagram}`}>
-              <FaInstagram />
+              <FaInstagram size={16} />
             </div>
             <div className={`${styles.iconCircle} ${styles.line}`}>
-              <FaLine />
+              <FaLine size={16} />
             </div>
             <div className={`${styles.iconCircle} ${styles.discord}`}>
-              <FaDiscord />
+              <FaDiscord size={16} />
             </div>
           </div>
         </div>
-        <button
-          className={styles.editButton}
-          onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-          style={{ backgroundColor: "#00796b", color: "#fff" }}
-        >
-          <FaEdit className={styles.editIcon} />{" "}
-          {isEditing ? t("profile.save") : t("profile.edit")}
-        </button>
+
+        {/* Personal Information Section */}
+        <div className={`${styles.card} ${styles.sectionCard}`}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              Personal Information
+            </h2>
+            <button
+              onClick={() =>
+                isEditingPersonal
+                  ? handleSave("personal")
+                  : setIsEditingPersonal(true)
+              }
+              className={styles.secondaryEditButton}
+            >
+              <FaEdit size={12} />
+              {isEditingPersonal ? "Save" : "Edit"}
+            </button>
+          </div>
+
+          <div className={styles.fieldGrid}>
+            {/* Title */}
+            <div>
+              <label className={styles.fieldLabel}>
+                Title
+              </label>
+              {isEditingPersonal ? (
+                <select
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="title"
+                  value={formData.title || ""}
+                  onChange={handleInputChange}
+                >
+                  {titleOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(titleOptions.find(o => o.value === profile.title)?.label)}
+                </div>
+              )}
+            </div>
+
+            {/* First Name */}
+            <div>
+              <label className={styles.fieldLabel}>
+                First Name
+              </label>
+              {isEditingPersonal ? (
+                <input
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="first_name"
+                  value={formData.first_name || ""}
+                  onChange={handleInputChange}
+                  placeholder="First Name"
+                />
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(profile.first_name)}
+                </div>
+              )}
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label className={styles.fieldLabel}>
+                Last Name
+              </label>
+              {isEditingPersonal ? (
+                <input
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="last_name"
+                  value={formData.last_name || ""}
+                  onChange={handleInputChange}
+                  placeholder="Last Name"
+                />
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(profile.last_name)}
+                </div>
+              )}
+            </div>
+
+            {/* Date of Birth */}
+            <div>
+              <label className={styles.fieldLabel}>
+                Date of Birth
+              </label>
+              {isEditingPersonal ? (
+                <input
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="date_of_birth"
+                  type="date"
+                  value={formData.date_of_birth || ""}
+                  onChange={handleInputChange}
+                />
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(profile.date_of_birth)}
+                </div>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className={styles.fieldLabel}>
+                Phone
+              </label>
+              {isEditingPersonal ? (
+                <input
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="phone"
+                  value={formData.phone || ""}
+                  onChange={handleInputChange}
+                  placeholder="Phone Number"
+                  type="tel"
+                />
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(profile.phone)}
+                </div>
+              )}
+            </div>
+
+            {/* Gender */}
+            <div>
+              <label className={styles.fieldLabel}>
+                Gender
+              </label>
+              {isEditingPersonal ? (
+                <select
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="gender"
+                  value={formData.gender || ""}
+                  onChange={handleInputChange}
+                >
+                  {genderOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(genderOptions.find(o => o.value === profile.gender)?.label)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Address Section */}
+        <div className={styles.card}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
+              Address
+            </h2>
+            <button
+              onClick={() =>
+                isEditingAddress
+                  ? handleSave("address")
+                  : setIsEditingAddress(true)
+              }
+              className={styles.secondaryEditButton}
+            >
+              <FaEdit size={12} />
+              {isEditingAddress ? "Save" : "Edit"}
+            </button>
+          </div>
+
+          <div className={styles.fieldGrid}>
+            {/* Country */}
+            <div>
+              <label className={styles.fieldLabel}>
+                Country
+              </label>
+              {isEditingAddress ? (
+                <input
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="country"
+                  value={formData.country || ""}
+                  onChange={handleInputChange}
+                  placeholder="Country"
+                />
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(profile.country)}
+                </div>
+              )}
+            </div>
+
+            {/* City */}
+            <div>
+              <label className={styles.fieldLabel}>
+                City
+              </label>
+              {isEditingAddress ? (
+                <input
+                  className={`${styles.inputField} ${styles.fieldInput}`}
+                  name="city"
+                  value={formData.city || ""}
+                  onChange={handleInputChange}
+                  placeholder="City"
+                />
+              ) : (
+                <div className={`${styles.text} ${styles.fieldDisplay}`}>
+                  {renderFieldValue(profile.city)}
+                </div>
+              )}
+            </div>
+
+            {/* Address */}
+            <div className={styles.fullWidth}>
+              <label className={styles.fieldLabel}>
+                Address
+              </label>
+              {isEditingAddress ? (
+                <textarea
+                  className={styles.bioTextarea}
+                  name="address"
+                  value={formData.address || ""}
+                  onChange={handleInputChange}
+                  placeholder="Address"
+                  rows={3}
+                />
+              ) : (
+                <div className={`${styles.text} ${styles.bioDisplay}`}>
+                  {renderFieldValue(profile.address)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 }
