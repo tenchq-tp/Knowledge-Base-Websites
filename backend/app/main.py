@@ -12,7 +12,6 @@ from datetime import datetime
 # Setup custom logging
 logger, security_logger = setup_logging()
 
-# Create tables
 try:
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created successfully")

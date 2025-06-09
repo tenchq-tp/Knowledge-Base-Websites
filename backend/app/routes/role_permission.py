@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Union, List
 from app.db.database import get_db
@@ -6,8 +6,25 @@ import app.crud.role_permission as crud
 import app.schemas.role_permission as schemas
 from app.routes.auth import get_current_user
 from app.models.user import User
-
+from app.schemas.user import UserProfileResponse
 router = APIRouter(prefix="/v1/api/role-permissions", tags=["RolePermission"])
+
+@router.get("/me", response_model=schemas.RolePermissionsMEResponse)
+def get_my_role_permissions(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if not current_user.profile.role_id:
+        raise HTTPException(status_code=400, detail="User has no role assigned")
+
+    rps = crud.get_role_permissions_by_role_id(db, role_id=current_user.profile.role_id)
+
+    return schemas.RolePermissionsMEResponse(
+        role_id=current_user.profile.role_id,
+        role_name=current_user.profile.role.name,
+        permissions=rps
+    )
+
 
 @router.get("/", response_model=list[schemas.RolePermissionResponse])
 def get_all_role_permissions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
