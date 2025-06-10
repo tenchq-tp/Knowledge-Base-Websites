@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faUserTag,
-  faEdit,
-  faChevronDown,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
+import { faUserTag, faEdit, faChevronDown, faChevronRight, } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import Modal from "../../component/setting_modal";
@@ -24,16 +19,15 @@ export default function RoleSettings() {
   const [expanded, setExpanded] = useState({});
   const [role, setRole] = useState("");
   const [perms, setPerms] = useState({});
-
   const [formMode, setFormMode] = useState("create"); // "create" or "edit"
   const [formRoleName, setFormRoleName] = useState("");
   const [formRoleDescription, setFormRoleDescription] = useState("");
   const [formLoading, setFormLoading] = useState(false);
   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState(null);
-
   const [menuPermissions, setMenuPermissions] = useState({});
   const [permissionsLoading, setPermissionsLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [menuGroups, setMenuGroups] = useState([]);  // เพิ่ม state สำหรับ menu groups ที่ดึงจากฐานข้อมูล
 
   const API_BASE = process.env.NEXT_PUBLIC_API;
 
@@ -52,78 +46,12 @@ export default function RoleSettings() {
   const alert = (type, msg) =>
     Swal.fire({ icon: type, text: msg, timer: 2000, showConfirmButton: false });
 
-  const groupPermissionsByMenu = (permissionsData) => {
-    const grouped = {
-      home: [],
-      dashboard: [],
-      category: [],
-      profile: [],
-      setting: [],
-    };
-
-    const permissionColors = {
-      view: "#28a745",
-      add: "#007bff",
-      edit: "#ffc107",
-      delete: "#dc3545",
-      role_setting: "#6f42c1",
-      user_setting: "#20c997",
-    };
-
-    permissionsData.forEach((permission) => {
-      const { name, id } = permission;
-      if (name.includes("_home")) {
-        const action = name.replace("_home", "");
-        grouped.home.push({
-          key: action,
-          id: id,
-          color: permissionColors[action] || "#6c757d",
-          label: action.charAt(0).toUpperCase() + action.slice(1),
-        });
-      } else if (name.includes("_category")) {
-        const action = name.replace("_category", "");
-        grouped.category.push({
-          key: action,
-          id: id,
-          color: permissionColors[action] || "#6c757d",
-          label: action.charAt(0).toUpperCase() + action.slice(1),
-        });
-      } else if (name.includes("_profile")) {
-        const action = name.replace("_profile", "");
-        grouped.profile.push({
-          key: action,
-          id: id,
-          color: permissionColors[action] || "#6c757d",
-          label: action.charAt(0).toUpperCase() + action.slice(1),
-        });
-      } else if (name === "role_setting" || name === "user_setting") {
-        grouped.setting.push({
-          key: name,
-          id: id,
-          color: permissionColors[name] || "#6c757d",
-          label: name
-            .replace("_", " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase()),
-        });
-      } else if (name === "view_dashboard") {
-        grouped.dashboard.push({
-          key: "view",
-          id: id,
-          color: permissionColors.view,
-          label: "View",
-        });
-      }
-    });
-
-    return grouped;
-  };
-
   const loadRoles = async () => {
     setLoading(true);
     try {
       setRoles(await api("/roles"));
     } catch {
-      alert("error", "Failed to load roles");
+      alert("error", t("settings.role.messages.load_roles_failed"));
     } finally {
       setLoading(false);
     }
@@ -143,43 +71,100 @@ export default function RoleSettings() {
     }
   };
 
+  // โหลดกลุ่มเมนูจาก permissions ที่มีอยู่
+  const loadMenuGroups = async () => {
+    try {
+      const permissionsData = await api("/permissions");
+      const menuGroupsSet = new Set();
+
+      // แยกกลุ่มจาก permission names
+      permissionsData.forEach(permission => {
+        const { name } = permission;
+        if (name.includes('_')) {
+          const parts = name.split('_');
+          if (parts.length >= 2) {
+            const menuGroup = parts[parts.length - 1]; // เอาส่วนหลัง _ สุดท้าย
+            menuGroupsSet.add(menuGroup);
+          }
+        }
+      });
+
+      // แปลง Set เป็น array ของ objects
+      const menuGroupsArray = Array.from(menuGroupsSet).map(groupName => ({
+        name: groupName,
+        display_name: t(`settings.role.menus.${groupName}`, groupName.charAt(0).toUpperCase() + groupName.slice(1))
+      }));
+
+      setMenuGroups(menuGroupsArray);
+    } catch (error) {
+      console.error("Load menu groups error:", error);
+      setMenuGroups([]);
+    }
+  };
+
+  // จัดกลุ่ม Permission ให้เป็น menu
+  const groupPermissionsByMenu = (permissionsData) => {
+    const grouped = {};  // สร้าง object ว่างโดยใช้ข้อมูลจาก menuGroups
+    menuGroups.forEach(group => {
+      grouped[group.name] = [];
+    });
+
+    const permissionColors = {
+      view: "#28a745", add: "#007bff", edit: "#ffc107", delete: "#dc3545", role: "#6f42c1", user: "#20c997",
+    };
+
+    permissionsData.forEach((permission) => {
+      const { name, id } = permission;
+
+      if (name.includes('_')) {
+        const parts = name.split('_');
+        if (parts.length >= 2) {
+          const menuGroup = parts[parts.length - 1]; // เอาส่วนหลัง _ สุดท้าย
+          const action = parts.slice(0, -1).join('_'); // เอาส่วนหน้า _ สุดท้าย
+          if (grouped[menuGroup]) {
+            grouped[menuGroup].push({
+              key: action,
+              id: id,
+              color: permissionColors[action] || "#6c757d",
+              label: t(`settings.role.permissions.${action}`, action.charAt(0).toUpperCase() + action.slice(1)),
+            });
+          }
+        }
+      }
+    });
+
+    return grouped;
+  };
+
+  // โหลด role permission
   const loadRolePermissions = async (roleId) => {
     try {
       const rolePermissions = await api(`/role-permissions/role/${roleId}`);
-
       const permsState = {};
+      menuGroups.forEach(group => {
+        permsState[group.name] = {};  // สร้าง object ว่างสำหรับทุกกลุ่มเมนู
+      });
 
       rolePermissions.forEach((rp) => {
         const permissionName = rp.permission.name;
 
-        if (permissionName.includes("_home")) {
-          const action = permissionName.replace("_home", "");
-          if (!permsState.home) permsState.home = {};
-          permsState.home[action] = true;
-        } else if (permissionName.includes("_category")) {
-          const action = permissionName.replace("_category", "");
-          if (!permsState.category) permsState.category = {};
-          permsState.category[action] = true;
-        } else if (permissionName.includes("_profile")) {
-          const action = permissionName.replace("_profile", "");
-          if (!permsState.profile) permsState.profile = {};
-          permsState.profile[action] = true;
-        } else if (
-          permissionName === "role_setting" ||
-          permissionName === "user_setting"
-        ) {
-          if (!permsState.setting) permsState.setting = {};
-          permsState.setting[permissionName] = true;
-        } else if (permissionName === "view_dashboard") {
-          if (!permsState.dashboard) permsState.dashboard = {};
-          permsState.dashboard.view = true;
+        if (permissionName.includes('_')) {
+          const parts = permissionName.split('_');
+          if (parts.length >= 2) {
+            const menuGroup = parts[parts.length - 1]; // เอาส่วนหลัง _ สุดท้าย
+            const action = parts.slice(0, -1).join('_'); // เอาส่วนหน้า _ สุดท้าย
+
+            if (permsState[menuGroup]) {
+              permsState[menuGroup][action] = true;
+            }
+          }
         }
       });
 
       setPerms(permsState);
     } catch (error) {
       console.error("Load role permissions error:", error);
-      alert("error", "Failed to load role permissions");
+      alert("error", t("settings.role.messages.load_permissions_failed"));
       setPerms({});
     }
   };
@@ -194,12 +179,12 @@ export default function RoleSettings() {
 
   const openEditModal = () => {
     if (!role.trim()) {
-      return alert("warning", "Please select a role to edit");
+      return alert("warning", t("settings.role.messages.select_role_warning"));
     }
 
     const selectedRole = roles.find((r) => r.name === role);
     if (!selectedRole) {
-      return alert("error", "Selected role not found");
+      return alert("error", t("settings.role.messages.role_not_found"));
     }
 
     setFormMode("edit");
@@ -218,11 +203,11 @@ export default function RoleSettings() {
 
   const handleFormSubmit = async () => {
     if (!formRoleName.trim()) {
-      return alert("warning", "Please enter role name");
+      return alert("warning", t("settings.role.messages.role_name_required"));
     }
 
     if (!formRoleDescription.trim()) {
-      return alert("warning", "Please enter role description");
+      return alert("warning", t("settings.role.messages.description_required"));
     }
 
     setFormLoading(true);
@@ -235,10 +220,10 @@ export default function RoleSettings() {
             description: formRoleDescription.trim(),
           }),
         });
-        alert("success", "Role created successfully!");
+        alert("success", t("settings.role.messages.role_created"));
       } else if (formMode === "edit") {
         if (!selectedRoleForEdit) {
-          return alert("error", "Role data not found");
+          return alert("error", t("settings.role.messages.role_not_found"));
         }
         await api(`/roles/${selectedRoleForEdit.id}`, {
           method: "PUT",
@@ -247,7 +232,7 @@ export default function RoleSettings() {
             description: formRoleDescription.trim(),
           }),
         });
-        alert("success", "Role updated successfully!");
+        alert("success", t("settings.role.messages.role_updated"));
       }
 
       closeFormModal();
@@ -257,8 +242,8 @@ export default function RoleSettings() {
       alert(
         "error",
         formMode === "create"
-          ? "Failed to create role"
-          : "Failed to update role"
+          ? t("settings.role.messages.create_failed")
+          : t("settings.role.messages.update_failed")
       );
     } finally {
       setFormLoading(false);
@@ -276,21 +261,22 @@ export default function RoleSettings() {
       return;
     }
 
-    if (!role.trim()) return alert("warning", "Select a role");
+    if (!role.trim()) return alert("warning", t("settings.role.messages.select_role_warning"));
 
     if (action === "delete") {
       const confirm = await Swal.fire({
         icon: "warning",
-        title: "Delete role?",
+        title: t("settings.role.messages.confirm_delete_title"),
         showCancelButton: true,
         confirmButtonColor: "#d33",
-        confirmButtonText: "Delete",
+        confirmButtonText: t("settings.role.messages.confirm_delete_button"),
+        cancelButtonText: t("settings.role.cancel")
       });
       if (!confirm.isConfirmed) return;
 
       const selectedRole = roles.find((r) => r.name === role);
       if (!selectedRole) {
-        return alert("error", "Selected role not found");
+        return alert("error", t("settings.role.messages.role_not_found"));
       }
 
       try {
@@ -298,26 +284,16 @@ export default function RoleSettings() {
           method: "DELETE",
         });
 
-        alert("success", "Role deleted successfully!");
+        alert("success", t("settings.role.messages.role_deleted"));
         setRole("");
         setPerms({});
         setExpanded({});
         await loadRoles(); // Reload roles list
       } catch (error) {
         console.error("Delete role error:", error);
-        alert("error", "Failed to delete role");
+        alert("error", t("settings.role.messages.delete_failed"));
       }
       return;
-    }
-
-    try {
-      alert("success", `Role ${action}d successfully!`);
-      setRole("");
-      setPerms({});
-      setExpanded({});
-      setOpen(false);
-    } catch {
-      alert("error", `Failed to ${action} role`);
     }
   };
 
@@ -336,12 +312,12 @@ export default function RoleSettings() {
 
   const saveRolePermissions = async () => {
     if (!role.trim()) {
-      return alert("warning", "Please select a role to save permissions");
+      return alert("warning", t("settings.role.messages.select_role_to_save"));
     }
 
     const selectedRole = roles.find((r) => r.name === role);
     if (!selectedRole) {
-      return alert("error", "Selected role not found");
+      return alert("error", t("settings.role.messages.role_not_found"));
     }
 
     const permissionIds = [];
@@ -368,25 +344,62 @@ export default function RoleSettings() {
         }),
       });
 
-      alert("success", "Role permissions updated successfully!");
+      alert("success", t("settings.role.messages.permissions_updated"));
     } catch (error) {
       console.error("Save role permissions error:", error);
-      alert("error", "Failed to update role permissions");
+      alert("error", t("settings.role.messages.permissions_failed"));
     } finally {
       setSaveLoading(false);
     }
   };
 
-  const toggle = (menu) => setExpanded((p) => ({ ...p, [menu]: !p[menu] }));
-  const setPerm = (menu, type, val) =>
-    setPerms((p) => ({ ...p, [menu]: { ...p[menu], [type]: val } }));
+  const handleSectionCheckAll = (menuName) => {
+    const newPerms = { ...perms };
+    const isAllChecked = checkIfSectionAllChecked(menuName);
+
+    if (!newPerms[menuName]) {
+      newPerms[menuName] = {};
+    }
+
+    if (menuPermissions[menuName]) {
+      menuPermissions[menuName].forEach(permission => {
+        newPerms[menuName][permission.key] = !isAllChecked;
+      });
+    }
+
+    setPerms(newPerms);
+  };
+
+  // ฟังก์ชันเช็คว่า permissions ในแต่ละ section ถูกเลือกหมดหรือไม่
+  const checkIfSectionAllChecked = (menuName) => {
+    if (!menuPermissions[menuName] || menuPermissions[menuName].length === 0) {
+      return false;
+    }
+
+    for (const permission of menuPermissions[menuName]) {
+      if (!perms[menuName]?.[permission.key]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const toggle = (menu) => setExpanded((p) => ({ ...p, [menu]: !p[menu] })); //เปิด/ปิดการแสดงผล แต่ละหมวดหมู่ permission
+  const setPerm = (menu, type, val) => setPerms((p) => ({ ...p, [menu]: { ...p[menu], [type]: val } })); //ใช้สำหรับ เปลี่ยนสถานะ checkbox ของ permission แต่ละตัว
 
   useEffect(() => {
-    loadRoles();
-    loadPermissions();
+    const initializeData = async () => {
+      await loadMenuGroups();
+      await loadRoles();
+    };
+    initializeData();
   }, []);
 
-  const menus = ["home", "dashboard", "category", "profile", "setting"];
+  useEffect(() => {
+    if (menuGroups.length > 0) {
+      loadPermissions();
+    }
+  }, [menuGroups]); // โหลด permissions หลังจากที่ menuGroups โหลดเสร็จแล้ว
 
   return (
     <>
@@ -406,7 +419,7 @@ export default function RoleSettings() {
           </div>
           <button onClick={() => setOpen(true)} className="btn btn-primary">
             <FontAwesomeIcon icon={faEdit} />
-            Manage
+            {t("settings.role.manage")}
           </button>
         </div>
       </div>
@@ -414,7 +427,7 @@ export default function RoleSettings() {
       <Modal
         isOpen={formModalOpen}
         onClose={closeFormModal}
-        title={formMode === "create" ? "Create Role" : "Edit Role"}
+        title={formMode === "create" ? t("settings.role.modal.create_title") : t("settings.role.modal.edit_title")}
         size="small"
       >
         <div className="form-role-content">
@@ -422,7 +435,7 @@ export default function RoleSettings() {
             type="text"
             value={formRoleName}
             onChange={(e) => setFormRoleName(e.target.value)}
-            placeholder="Role name *"
+            placeholder={t("settings.role.modal.role_name_placeholder")}
             className="form-input"
             disabled={formLoading}
             style={{
@@ -435,7 +448,7 @@ export default function RoleSettings() {
           <textarea
             value={formRoleDescription}
             onChange={(e) => setFormRoleDescription(e.target.value)}
-            placeholder="Description *"
+            placeholder={t("settings.role.modal.description_placeholder")}
             rows={2}
             className="form-textarea"
             disabled={formLoading}
@@ -452,7 +465,7 @@ export default function RoleSettings() {
               disabled={formLoading}
               className="btn btn-secondary"
             >
-              Cancel
+              {t("settings.role.modal.cancel")}
             </button>
             <button
               onClick={handleFormSubmit}
@@ -461,19 +474,18 @@ export default function RoleSettings() {
                 !formRoleName.trim() ||
                 !formRoleDescription.trim()
               }
-              className={`btn ${
-                formMode === "create" ? "btn-create" : "btn-update"
-              }`}
+              className={`btn ${formMode === "create" ? "btn-create" : "btn-update"
+                }`}
             >
               {formLoading ? (
                 <>
                   <span className="spinner"></span>
-                  {formMode === "create" ? "Creating..." : "Updating..."}
+                  {formMode === "create" ? t("settings.role.modal.creating") : t("settings.role.modal.updating")}
                 </>
               ) : formMode === "create" ? (
-                "Create"
+                t("settings.role.modal.create")
               ) : (
-                "Update"
+                t("settings.role.modal.update")
               )}
             </button>
           </div>
@@ -483,14 +495,14 @@ export default function RoleSettings() {
       <Modal
         isOpen={open}
         onClose={() => setOpen(false)}
-        title="Role Settings"
+        title={t("settings.role.modal.title")}
         size="large"
       >
         <div className="role-modal-content">
           <div className="role-section">
             <div className="role-header">
               <label className="role-label" style={{ color: tokens.text }}>
-                Role Name
+                {t("settings.role.modal.role_name")}
               </label>
               <div className="action-buttons">
                 {["create", "update", "delete"].map((action) => (
@@ -499,7 +511,7 @@ export default function RoleSettings() {
                     onClick={() => handleAction(action)}
                     className={`btn btn-${action}`}
                   >
-                    {action.toUpperCase()}
+                    {t(`settings.role.modal.${action}`).toUpperCase()}
                   </button>
                 ))}
               </div>
@@ -515,7 +527,7 @@ export default function RoleSettings() {
                 color: tokens.text,
               }}
             >
-              <option value="">{loading ? "Loading..." : "Select role"}</option>
+              <option value="">{loading ? t("settings.role.modal.loading") : t("settings.role.modal.select_role")}</option>
               {roles.map((r) => (
                 <option key={r.id} value={r.name}>
                   {r.name}
@@ -525,59 +537,92 @@ export default function RoleSettings() {
           </div>
 
           <div className="permissions-section">
-            <h3 className="permissions-title" style={{ color: tokens.text }}>
-              Permissions{" "}
-              {permissionsLoading && (
-                <span className="loading-text">(Loading...)</span>
-              )}
-            </h3>
+            <div className="permissions-header">
+              <h3 className="permissions-title" style={{ color: tokens.text }}>
+                {t("settings.role.modal.permissions")}{" "}
+                {permissionsLoading && (
+                  <span className="loading-text">{t("settings.role.modal.permissions_loading")}</span>
+                )}
+              </h3>
+            </div>
 
-            {menus.map((menu) => (
-              <div key={menu} className="permission-menu">
-                <div className="permission-header" onClick={() => toggle(menu)}>
-                  <span style={{ color: tokens.text }}>
-                    {menu.charAt(0).toUpperCase() + menu.slice(1)}
-                  </span>
-                  <FontAwesomeIcon
-                    icon={expanded[menu] ? faChevronDown : faChevronRight}
-                    style={{ color: tokens.text }}
-                  />
-                </div>
-                {expanded[menu] && (
-                  <div className="permission-dropdown">
-                    <div className="permission-checkboxes">
-                      {menuPermissions[menu]?.length > 0 ? (
-                        menuPermissions[menu].map(({ key, color, label }) => (
-                          <label key={key} className="permission-checkbox">
-                            <input
-                              type="checkbox"
-                              checked={perms[menu]?.[key] || false}
-                              onChange={(e) =>
-                                setPerm(menu, key, e.target.checked)
-                              }
-                            />
-                            <div
-                              className="permission-checkbox-custom"
-                              style={{ borderColor: color }}
-                            ></div>
-                            <span
-                              className="permission-text"
-                              style={{ color: tokens.text }}
-                            >
-                              {label}
-                            </span>
-                          </label>
-                        ))
-                      ) : (
-                        <span style={{ color: tokens.text, opacity: 0.6 }}>
-                          No permissions available for {menu}
-                        </span>
+            {menuGroups.map((menuGroup) => {
+              const isSectionAllChecked = checkIfSectionAllChecked(menuGroup.name);
+
+              return (
+                <div key={menuGroup.name} className="permission-menu">
+                  <div className="permission-header" onClick={() => toggle(menuGroup.name)}>
+                    <div className="permission-header-left">
+                      <span style={{ color: tokens.text }}>
+                        {menuGroup.display_name || menuGroup.name.charAt(0).toUpperCase() + menuGroup.name.slice(1)}
+                      </span>
+                    </div>
+                    <div className="permission-header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {role && !permissionsLoading && menuPermissions[menuGroup.name]?.length > 0 && (
+                        <label
+                          className="permission-checkbox"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ display: 'flex', alignItems: 'center', margin: 0 }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSectionAllChecked}
+                            onChange={() => handleSectionCheckAll(menuGroup.name)}
+                          />
+                          <div
+                            className="permission-checkbox-custom"
+                            style={{ borderColor: tokens.primary }}
+                          ></div>
+                          <span
+                            className="permission-text"
+                            style={{ color: tokens.text }}
+                          >
+                            {t("settings.role.modal.all")}
+                          </span>
+                        </label>
                       )}
+                      <FontAwesomeIcon
+                        icon={expanded[menuGroup.name] ? faChevronDown : faChevronRight}
+                        style={{ color: tokens.text }}
+                      />
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
+                  {expanded[menuGroup.name] && (
+                    <div className="permission-dropdown">
+                      <div className="permission-checkboxes">
+                        {menuPermissions[menuGroup.name]?.length > 0 ? (
+                          menuPermissions[menuGroup.name].map(({ key, color, label }) => (
+                            <label key={key} className="permission-checkbox">
+                              <input
+                                type="checkbox"
+                                checked={perms[menuGroup.name]?.[key] || false}
+                                onChange={(e) =>
+                                  setPerm(menuGroup.name, key, e.target.checked)
+                                }
+                              />
+                              <div
+                                className="permission-checkbox-custom"
+                                style={{ borderColor: color }}
+                              ></div>
+                              <span
+                                className="permission-text"
+                                style={{ color: tokens.text }}
+                              >
+                                {label}
+                              </span>
+                            </label>
+                          ))
+                        ) : (
+                          <span style={{ color: tokens.text, opacity: 0.6 }}>
+                            {t("settings.role.modal.no_permissions")} {menuGroup.display_name || menuGroup.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             {role && (
               <div
                 className="save-permissions-section"
@@ -591,10 +636,10 @@ export default function RoleSettings() {
                   {saveLoading ? (
                     <>
                       <span className="spinner"></span>
-                      Saving...
+                      {t("settings.role.modal.saving")}
                     </>
                   ) : (
-                    "Save Permissions"
+                    t("settings.role.modal.save_permissions")
                   )}
                 </button>
               </div>

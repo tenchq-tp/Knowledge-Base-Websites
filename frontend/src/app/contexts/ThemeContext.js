@@ -40,7 +40,9 @@ const THEME_TOKENS = {
     warning: '#ffc107',
     
     // Shadows
-    shadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+     shadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    shadowLight: '0 1px 4px rgba(0, 0, 0, 0.08)',
+    shadowMedium: '0 4px 12px rgba(0, 0, 0, 0.12)',
     shadowStrong: '0 10px 25px rgba(0, 0, 0, 0.15)'
   },
   dark: {
@@ -69,7 +71,9 @@ const THEME_TOKENS = {
     warning: '#ff9800',
     
     // Shadows
-    shadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+   shadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+    shadowLight: '0 1px 4px rgba(0, 0, 0, 0.2)',
+    shadowMedium: '0 4px 12px rgba(0, 0, 0, 0.4)',
     shadowStrong: '0 10px 25px rgba(0, 0, 0, 0.5)'
   }
 };
