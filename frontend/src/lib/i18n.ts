@@ -14,6 +14,7 @@ const resources = {
         logout: "ออกจากระบบ"
       },
       profile: {
+        personal:"ข้อมูลส่วนตัว",
         loading: "กำลังโหลดข้อมูลโปรไฟล์...",
         myProfile: "ข้อมูลโปรไฟล์ของฉัน",
         editmyProfile: "เเก้ไขโปรไฟล์ของฉัน",
@@ -36,8 +37,6 @@ const resources = {
         edit: "แก้ไข",
         save: "บันทึก",
         saveSuccess:"บันทึกสำเร็จ"
-        
-        
       },
       actions: {
         createArticle: "สร้างบทความ",
@@ -224,6 +223,7 @@ const resources = {
         logout: "Logout"
       },
       profile: {
+        personal:"Personal Information",
         saveSuccess:"Save Success",
         editmyProfile: "Edit My Profile",
         loading: "Loading profile...",
@@ -391,6 +391,31 @@ const resources = {
         settings: "设置",
         logout: "登出"
       },
+      profile: {
+      personal: "个人信息",
+      loading: "正在加载个人资料...",
+      myProfile: "我的个人资料",
+      editmyProfile: "编辑我的个人资料",
+      title: "称谓",
+      selectTitle: "选择称谓",
+      fullName: "全名",
+      displayName: "显示名称",
+      firstName: "名字",
+      lastName: "姓氏",
+      phone: "电话号码",
+      dateOfBirth: "出生日期",
+      gender: "性别",
+      selectGender: "选择性别",
+      male: "男",
+      female: "女",
+      other: "其他",
+      country: "国家",
+      city: "城市",
+      address: "地址",
+      edit: "编辑",
+      save: "保存",
+      saveSuccess: "保存成功"
+    },
       settings: {
         title: "设置",
         subtitle: "管理您的账户设置和偏好",
@@ -529,6 +554,31 @@ const resources = {
         settings: "設定",
         logout: "ログアウト"
       },
+    profile: {
+      personal: "個人情報",
+      loading: "プロフィールを読み込み中...",
+      myProfile: "マイプロフィール",
+      editmyProfile: "マイプロフィールを編集",
+      title: "敬称",
+      selectTitle: "敬称を選択",
+      fullName: "氏名",
+      displayName: "表示名",
+      firstName: "名前",
+      lastName: "姓",
+      phone: "電話番号",
+      dateOfBirth: "生年月日",
+      gender: "性別",
+      selectGender: "性別を選択",
+      male: "男性",
+      female: "女性",
+      other: "その他",
+      country: "国",
+      city: "市",
+      address: "住所",
+      edit: "編集",
+      save: "保存",
+      saveSuccess: "保存成功"
+    },
       settings: {
         title: "設定",
         subtitle: "アカウント設定と環境設定を管理",
@@ -605,6 +655,31 @@ const resources = {
         settings: "설정",
         logout: "로그아웃"
       },
+    profile: {
+      personal: "개인 정보",
+      loading: "프로필 로딩 중...",
+      myProfile: "내 프로필",
+      editmyProfile: "내 프로필 편집",
+      title: "칭호",
+      selectTitle: "칭호 선택",
+      fullName: "전체 이름",
+      displayName: "표시 이름",
+      firstName: "이름",
+      lastName: "성",
+      phone: "전화번호",
+      dateOfBirth: "생년월일",
+      gender: "성별",
+      selectGender: "성별 선택",
+      male: "남성",
+      female: "여성",
+      other: "기타",
+      country: "국가",
+      city: "도시",
+      address: "주소",
+      edit: "편집",
+      save: "저장",
+      saveSuccess: "저장 성공"
+    },
       settings: {
         title: "설정",
         subtitle: "계정 설정 및 환경 설정 관리",
