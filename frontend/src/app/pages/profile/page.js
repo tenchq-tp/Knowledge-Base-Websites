@@ -2,14 +2,8 @@
 
 import { useState, useEffect } from "react";
 import {
-  FaIdBadge,
   FaUser,
   FaPhone,
-  FaBirthdayCake,
-  FaVenusMars,
-  FaGlobe,
-  FaCity,
-  FaMapMarkedAlt,
   FaEdit,
   FaFacebookF,
   FaInstagram,
@@ -30,7 +24,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
   useEffect(() => {
@@ -74,27 +67,27 @@ export default function ProfilePage() {
 
       const successMessage =
         section === "personal"
-          ? t("profile.savePersonalSuccess") || "บันทึกข้อมูลส่วนตัวสำเร็จ"
-          : t("profile.saveAddressSuccess") || "บันทึกที่อยู่สำเร็จ";
+          ? t("profile.savePersonalSuccess") 
+          : t("profile.saveAddressSuccess") 
 
       Swal.fire({
         icon: "success",
-        title: t("profile.saveSuccess") || "บันทึกโปรไฟล์สำเร็จ",
+        title: t("profile.saveSuccess"),
         timer: 1500,
         showConfirmButton: false,
-        background: tokens.surface, // ใช้ theme
-        color: tokens.success, //  ใช้ theme
-        confirmButtonColor: tokens.success, //  ใช้ theme
+        background: tokens.surface, 
+        color: tokens.success, 
+        confirmButtonColor: tokens.success, 
       });
     } catch (err) {
       console.error("Failed to update profile", err);
       Swal.fire({
         icon: "error",
-        title: t("profile.saveFailed") || "บันทึกไม่สำเร็จ",
+        title: t("profile.saveFailed"),
         text: err.message,
-        background: tokens.surface, //  ใช้ theme
-        color: tokens.error, //  ใช้ theme
-        confirmButtonColor: tokens.error, //  ใช้ them
+        background: tokens.surface, 
+        color: tokens.error, 
+        confirmButtonColor: tokens.error, 
       });
     }
   };
