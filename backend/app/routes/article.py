@@ -5,7 +5,7 @@ import json
 from app.db.session import get_db
 from app.schemas.article import ArticleCreate, ArticleOut, ArticleUpdate, ArticleMediaIn
 from app.crud.article import create_article_with_categories, list_articles, create_media, update_article_with_categories, delete_article, parse_positions_field
-from app.services.minio_client import upload_file
+from app.services.minio_service import MinIOArticleService, get_minio_article_service
 from app.models.article import Article, ArticleMedia, ArticleViewLog
 from datetime import datetime, timedelta
 from app.routes.auth import get_current_user
@@ -19,16 +19,13 @@ async def get_current_user_optional(current_user: Optional[User] = Depends(get_c
 
 router = APIRouter(prefix="/vi/api/articles", tags=["Articles"], dependencies=[Depends(get_current_user)])
 
-from fastapi import UploadFile, File
-from typing import Union, List
-
 @router.post("/", response_model=ArticleOut)
 def create_article_with_media(
     title: str = Form(...),
     slug: str = Form(...),
     content: Optional[str] = Form(None),
     media_files: Union[UploadFile, List[UploadFile], None] = File(default=None),
-    positions_list: List[int] = Depends(parse_positions_field),
+    positions: Optional[str] = Form(None),
     category_ids: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
@@ -38,6 +35,8 @@ def create_article_with_media(
         media_files_list = media_files
     else:
         media_files_list = [media_files]
+
+    positions_list = parse_positions_field(positions, media_files_list)
 
     article_data = ArticleCreate(title=title, slug=slug, content=content)
     if category_ids:
@@ -49,11 +48,12 @@ def create_article_with_media(
         category_ids_list = []
 
     article = create_article_with_categories(db, article_data, category_ids_list)
-
+    minio_service = get_minio_article_service()
+    
     for file, pos in zip(media_files_list, positions_list):
-        url = upload_file(file)  # ฟังก์ชัน upload ไฟล์
-        media = create_media(db, file.filename, file.content_type, url)  # สร้าง media record
-        link = ArticleMedia(article_id=article.id, media_id=media.id, position=pos)  # ลิงก์ media กับ article
+        url = minio_service.upload_article_file(file)
+        media = create_media(db, file.filename, file.content_type, url)
+        link = ArticleMedia(article_id=article.id, media_id=media.id, position=pos)
         db.add(link)
 
     db.commit()
@@ -116,9 +116,19 @@ def update_article_route(
     new_slug: str = Form(...),
     content: Optional[str] = Form(None),
     media_links: Optional[List[ArticleMediaIn]] = Body(None),
+    category_ids: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
-    data = ArticleUpdate(title=title, slug=new_slug, content=content, media_links=media_links)
+    # แปลง category_ids เช่นเดียวกับ create
+    if category_ids:
+        try:
+            category_ids_list = [int(x.strip()) for x in category_ids.split(',') if x.strip()]
+        except ValueError:
+            raise HTTPException(status_code=422, detail="category_ids must be comma-separated integers")
+    else:
+        category_ids_list = []
+
+    data = ArticleUpdate(title=title, slug=new_slug, content=content, media_links=media_links, category_ids=category_ids_list)
     article = update_article_with_categories(db, slug, data)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")

@@ -17,7 +17,6 @@ LINE 1: INSERT INTO media_file (filename, file_type, url, updated_at...
                                                           ^
 
 [SQL: INSERT INTO media_file (filename, file_type, url, updated_at) VALUES (%(filename)s, %(file_type)s, %(url)s, %(updated_at)s) RETURNING media_file.id]
-[parameters: {'filename': 'Screenshot (371).png', 'file_type': 'image/png', 'url': 'http://minio:9000/articles/b339352c-7c60-4ae4-9774-80b7010765bc.png', 'updated_at': datetime.datetime(2025, 6, 5, 9, 29, 55, 76915)}]
 (Background on this error at: https://sqlalche.me/e/20/f405)
 2025-06-05 09:31:08,113 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
 DETAIL:  Key (slug)=(ชื่อ-บทความ-สำหรับ-url) already exists.
@@ -93,3 +92,33 @@ DETAIL:  Key (slug)=(gggggg) already exists.
 2025-06-09 10:58:06,797 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
 2025-06-09 11:00:18,694 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
 2025-06-09 11:00:33,773 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-10 09:19:37,144 - app.db.session - ERROR - Database session error: MinIOArticleService.upload_article_file() missing 1 required positional argument: 'file'
+2025-06-10 09:19:52,759 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(ttttt2) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'ttttt2', 'slug': 'ttttt2', 'content': 'ttttttt2', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 10, 9, 19, 52, 754862), 'updated_at': datetime.datetime(2025, 6, 10, 9, 19, 52, 754864)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-10 09:20:01,687 - app.db.session - ERROR - Database session error: MinIOArticleService.upload_article_file() missing 1 required positional argument: 'file'
+2025-06-10 09:20:18,560 - app.db.session - ERROR - Database session error: MinIOArticleService.upload_article_file() missing 1 required positional argument: 'file'
+2025-06-10 09:24:52,299 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(ttttt222) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'ttttt222', 'slug': 'ttttt222', 'content': 'ttttttt222', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 10, 9, 24, 52, 297501), 'updated_at': datetime.datetime(2025, 6, 10, 9, 24, 52, 297503)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-10 09:25:00,225 - app.db.session - ERROR - Database session error: MinIOArticleService.upload_article_file() missing 1 required positional argument: 'file'
+2025-06-10 09:27:44,910 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(ttttt2223) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'ttttt2223', 'slug': 'ttttt2223', 'content': 'ttttttt2223', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 10, 9, 27, 44, 907903), 'updated_at': datetime.datetime(2025, 6, 10, 9, 27, 44, 907905)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-10 09:27:57,062 - app.db.session - ERROR - Database session error: MinIOArticleService.__init__() missing 1 required positional argument: 'self'
+2025-06-10 09:35:45,982 - app.db.session - ERROR - Database session error: 
+2025-06-10 09:36:14,515 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(yuk55544) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'th55544', 'slug': 'yuk55544', 'content': 'ghj5554', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 10, 9, 36, 14, 513821), 'updated_at': datetime.datetime(2025, 6, 10, 9, 36, 14, 513825)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

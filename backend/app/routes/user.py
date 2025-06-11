@@ -1,5 +1,6 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
+from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.user import UserResponse, UserUpdate,UserProfileUpdate, UserSafeResponse, UserProfileResponse, UserCreate, ChangePasswordRequest
@@ -14,9 +15,7 @@ router = APIRouter(prefix="/v1/api/users", tags=["User Management"])
 def list_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    role: Optional[str] = Query(None),
     is_verified: Optional[bool] = Query(None),
-    search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -177,4 +176,4 @@ def create_user_by_authenticated_user(
         profile=new_user.profile,
         session_id=None
     )
-    
+

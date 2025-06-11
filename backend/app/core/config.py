@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv(dotenv_path="/backend/.env")
 
 class Settings(BaseSettings):
     DATABASE_URL: str
@@ -10,14 +10,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int 
     ALGORITHM: str
 
-    minio_endpoint: str
-    minio_access_key: str
-    minio_secret_key: str
-    minio_bucket: str
-    minio_secure: bool = False
+    MINIO_ENDPOINT: str
+    MINIO_ACCESS_KEY: str
+    MINIO_SECRET_KEY: str
+    MINIO_SECURE: bool = False
+    
+    MINIO_ARTICLE_BUCKET: str
+    MINIO_AVATAR_BUCKET: str
     
     class Config:
-        env_file = ".env"
+        env_file = "/backend/.env"
         env_file_encoding = "utf-8"
 
     @property

@@ -17,8 +17,10 @@ class UserProfileBase(BaseModel):
     country: Optional[str] = Field(None, max_length=50)
     city: Optional[str] = Field(None, max_length=50)
     address: Optional[str] = None
+    avatar_url: Optional[str] = None
+    avatar_filename: Optional[str] = None
     role_id: Optional[int] = None
-
+    
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=128)
     is_verified: Optional[bool] = False
@@ -39,6 +41,8 @@ class UserProfileUpdate(BaseModel):
     address: Optional[str] = None
 
 class UserProfileResponse(UserProfileBase):
+    avatar_url: Optional[str] = None
+    avatar_filename: Optional[str] = None
     role_id: Optional[int] = None 
     role_name: Optional[str] = None
     full_name: str

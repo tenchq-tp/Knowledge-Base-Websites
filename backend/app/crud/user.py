@@ -296,3 +296,30 @@ def update_user(db: Session, user_id: int, user_update: UserUpdate, modified_by:
     db.commit()
     db.refresh(user)
     return user
+
+def update_user_avatar(db: Session, user_id: int, avatar_url: str, avatar_filename: str, 
+                      modified_by: Optional[int] = None) -> bool:
+    """อัปเดต avatar ใน UserProfile"""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+    if profile:
+        profile.avatar_url = avatar_url
+        profile.avatar_filename = avatar_filename
+        profile.modified_by = modified_by
+        db.commit()
+        return True
+    return False
+
+def remove_user_avatar(db: Session, user_id: int, modified_by: Optional[int] = None) -> Optional[str]:
+    """ลบ avatar จาก UserProfile และคืนค่า file_key เก่า"""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+    if profile and profile.avatar_url:
+        # Extract file_key from URL
+        old_file_key = profile.avatar_url.split(f"/{profile.user.id}/")[-1] if "/" in profile.avatar_url else None
+        
+        profile.avatar_url = None
+        profile.avatar_filename = None
+        profile.modified_by = modified_by
+        db.commit()
+        
+        return f"user_{user_id}/{old_file_key}" if old_file_key else None
+    return None

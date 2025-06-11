@@ -66,7 +66,10 @@ class UserProfile(Base):
     phone = Column(String(20))
     date_of_birth = Column(Date)
     gender = Column(Enum(GenderType), index=True)  
-    role_id = Column(BigInteger, ForeignKey("roles.id"), index=True) # เพิ่ม nullable=False ให้ role_id ถ้าต้องการบังคับทุก user ต้องมี role
+    role_id = Column(BigInteger, ForeignKey("roles.id"), index=True) 
+    
+    avatar_url = Column(String(500), nullable=True) 
+    avatar_filename = Column(String(255), nullable=True)
     
     country = Column(String(50), index=True)
     city = Column(String(50), index=True)
