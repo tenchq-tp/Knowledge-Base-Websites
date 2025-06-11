@@ -69,17 +69,44 @@ export default function Login() {
       console.log("Login response:", data);
 
       if (response.ok && data.access_token) {
-        // เก็บ token และข้อมูล user ใน localStorage
+        // 1. เก็บ token และข้อมูล user ใน localStorage
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
         localStorage.setItem("token_type", data.token_type);
         localStorage.setItem("user_data", JSON.stringify(data.user));
-
         localStorage.setItem("user_id", data.user.id.toString());
         localStorage.setItem("username", data.user.username);
-        localStorage.setItem("user_role", data.user.role);
+        localStorage.setItem("user_role", data.user.role_name);
         localStorage.setItem("is_verified", data.user.is_verified.toString());
 
+        // 2. เรียก role-permissions/me และเก็บใน localStorage
+        try {
+          const roleResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API}/role-permissions/me`,
+            {
+              method: "GET",
+              headers: {
+                accept: "application/json",
+                Authorization: `Bearer ${data.access_token}`,
+              },
+            }
+          );
+
+          const roleData = await roleResponse.json();
+          if (roleResponse.ok) {
+            localStorage.setItem(
+              "user_permissions",
+              JSON.stringify(roleData.permissions)
+            );
+            localStorage.setItem("user_role_id", roleData.role_id.toString());
+          } else {
+            console.warn("Failed to fetch permissions:", roleData);
+          }
+        } catch (roleError) {
+          console.error("Error fetching role permissions:", roleError);
+        }
+
+        // 3. แสดง Swal แล้ว redirect
         Swal.fire({
           icon: "success",
           title: "Login Success",

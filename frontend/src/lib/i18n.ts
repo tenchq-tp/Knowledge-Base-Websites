@@ -14,6 +14,17 @@ const resources = {
         logout: "ออกจากระบบ"
       },
       profile: {
+        "titleOptions": {
+          "Mr": "นาย",
+          "Mrs": "นาง",
+          "Ms": "นางสาว",
+          "Dr": "ดร."
+        },
+        "genderOption": {
+          "male": "ชาย",
+          "female": "หญิง",
+          "other": "อื่นๆ"
+        },
         personal:"ข้อมูลส่วนตัว",
         loading: "กำลังโหลดข้อมูลโปรไฟล์...",
         myProfile: "ข้อมูลโปรไฟล์ของฉัน",
@@ -250,7 +261,7 @@ const resources = {
         confirmNo: "ไม่ใช่",
         createTitle: "สร้างหมวดหมู่",
         editTitle: "แก้ไขหมวดหมู่",
-        nameLabel: "ชื่อหมวดหมู่ *",
+        nameLabel: "ชื่อหมวดหมู่",
         descriptionLabel: "คำอธิบาย (ไม่บังคับ)",
         nameLabelinput: "กรอกชื่อหมวดหมู่...", 
         descriptionLabelinput: "กรอกคำอธิบาย...",  
@@ -284,6 +295,17 @@ const resources = {
         logout: "Logout"
       },
       profile: {
+        "titleOptions": {
+          "Mr": "Mr.",
+          "Mrs": "Mrs.",
+          "Ms": "Ms.",
+          "Dr": "Dr."
+        },
+        "genderOption": {
+          "male": "Male",
+          "female": "Female",
+          "other": "Other"
+        },
         personal:"Personal Information",
         saveSuccess:"Save Success",
         editmyProfile: "Edit My Profile",
@@ -506,6 +528,7 @@ const resources = {
       navbar: {
         welcome: "欢迎 - KB",
         home: "首页",
+        category: "类别",
         dashboard: "仪表盘",
         article: "文章",
         profile: "个人资料",
@@ -513,6 +536,17 @@ const resources = {
         logout: "登出"
       },
       profile: {
+        "titleOptions": {
+          "Mr": "先生",
+          "Mrs": "夫人",
+          "Ms": "女士",
+          "Dr": "博士"
+        },
+        "genderOption": {
+          "male": "男",
+          "female": "女",
+          "other": "其他"
+        },
       personal: "个人信息",
       loading: "正在加载个人资料...",
       myProfile: "我的个人资料",
@@ -669,6 +703,7 @@ const resources = {
       navbar: {
         welcome: "ようこそ - KB",
         home: "ホーム",
+        category: "カテゴリー",
         dashboard: "ダッシュボード",
         article: "記事",
         profile: "プロフィール",
@@ -676,6 +711,17 @@ const resources = {
         logout: "ログアウト"
       },
     profile: {
+      "titleOptions": {
+        "Mr": "氏",
+        "Mrs": "夫人",
+        "Ms": "さん",
+        "Dr": "博士"
+      },
+      "genderOption": {
+        "male": "男性",
+        "female": "女性",
+        "other": "その他"
+      },
       personal: "個人情報",
       loading: "プロフィールを読み込み中...",
       myProfile: "マイプロフィール",
@@ -770,6 +816,7 @@ const resources = {
       navbar: {
         welcome: "환영합니다 - KB",
         home: "홈",
+        category:"카테고리",
         dashboard: "대시보드",
         article: "기사",
         profile: "프로필",
@@ -777,6 +824,17 @@ const resources = {
         logout: "로그아웃"
       },
     profile: {
+      "titleOptions": {
+        "Mr": "Mr.",
+        "Mrs": "Mrs.",
+        "Ms": "Ms.",
+        "Dr": "박사"
+      },
+      "genderOption": {
+        "male": "남성",
+        "female": "여성",
+        "other": "기타"
+      },
       personal: "개인 정보",
       loading: "프로필 로딩 중...",
       myProfile: "내 프로필",

@@ -9,7 +9,7 @@ import Navbar from "../../component/Navbar";
 import Swal from "sweetalert2";
 import { useTheme } from "../../contexts/ThemeContext";
 import "../../../lib/i18n";
-
+import { useRouter } from "next/navigation";
 
 export default function CategoryPage() {
   const { t } = useTranslation();
@@ -18,6 +18,12 @@ export default function CategoryPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [canCreate, setCanCreate] = useState(false);
+  const [canRead, setCanRead] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
+
+  const router = useRouter();
 
   async function fetchCategories() {
     setLoading(true);
@@ -125,13 +131,51 @@ export default function CategoryPage() {
       }
     }
   };
+  useEffect(() => {
+    const permissions = JSON.parse(
+      localStorage.getItem("user_permissions") || "[]"
+    );
+    const hasPermission = permissions.some(
+      (p) => p.permission?.name === "view_category"
+    );
 
+    if (!hasPermission) {
+      router.push("/pages/access-denied");
+    }
+  }, [router]);
+  useEffect(() => {
+    const stored = localStorage.getItem("user_permissions");
+    if (stored) {
+      const userPermissions = JSON.parse(stored);
+
+      setCanCreate(
+        userPermissions.some((perm) => perm.permission?.name === "add_category")
+      );
+      setCanRead(
+        userPermissions.some(
+          (perm) => perm.permission?.name === "read_category"
+        )
+      );
+      setCanEdit(
+        userPermissions.some(
+          (perm) => perm.permission?.name === "edit_category"
+        )
+      );
+      setCanDelete(
+        userPermissions.some(
+          (perm) => perm.permission?.name === "delete_category"
+        )
+      );
+    }
+  }, []);
   if (loading) {
     return (
       <>
         <Navbar />
         <div className={styles.container}>
-          <p style={{ color: tokens.text }}>{t("loading", { defaultValue: "Loading categories..." })}</p>
+          <p style={{ color: tokens.text }}>
+            {t("loading", { defaultValue: "Loading categories..." })}
+          </p>
         </div>
       </>
     );
@@ -141,77 +185,112 @@ export default function CategoryPage() {
     <>
       <Navbar />
       <div className={styles.container}>
-        <button onClick={() => setShowModal(true)} className={styles.addBtn}
-          style={{
-            backgroundColor: tokens.success,
-            boxShadow: `0 4px 8px ${tokens.success}80`,
-            color: 'white'
-          }}>
-          + {t("navbar.category")}
-        </button>
+        {canCreate && (
+          <button
+            onClick={() => setShowModal(true)}
+            className={styles.addBtn}
+            style={{
+              backgroundColor: tokens.success,
+              boxShadow: `0 4px 8px ${tokens.success}80`,
+              color: "white",
+            }}
+          >
+            <FaIcons.FaPlus className={styles.icon} />
+            {t("navbar.category")}
+          </button>
+        )}
 
         <div className={styles.grid}>
           {categories.map((cat) => {
             const { IconComponent, color } = parseIcon(cat.icon);
 
             return (
-              <div key={cat.id} className={styles.card}
+              <div
+                key={cat.id}
+                className={styles.card}
                 style={{
                   backgroundColor: tokens.surface,
                   boxShadow: tokens.shadow,
-                  border: `1px solid ${tokens.border}`
-                }}>
-                <div className={styles.iconWrapper}  
-                style={{
+                  border: `1px solid ${tokens.border}`,
+                }}
+              >
+                <div
+                  className={styles.iconWrapper}
+                  style={{
                     backgroundColor: `${tokens.primary}20`,
-                    boxShadow: `0 2px 6px ${tokens.primary}40`
-                  }}>
+                    boxShadow: `0 2px 6px ${tokens.primary}40`,
+                  }}
+                >
                   {IconComponent ? (
                     <IconComponent size={40} color={color} />
                   ) : (
-                    <div style={{ fontSize: 40, color: tokens.textMuted }}>?</div>
+                    <div style={{ fontSize: 40, color: tokens.textMuted }}>
+                      ?
+                    </div>
                   )}
                 </div>
-                <h3 className={styles.cardTitle} style={{ color: tokens.primary }}>{cat.name}</h3>
-                <p className={styles.cardDesc} style={{ color: tokens.textSecondary }}>{cat.description}</p>
+                <h3
+                  className={styles.cardTitle}
+                  style={{ color: tokens.primary }}
+                >
+                  {cat.name}
+                </h3>
+                <p
+                  className={styles.cardDesc}
+                  style={{ color: tokens.textSecondary }}
+                >
+                  {cat.description}
+                </p>
                 <div className={styles.buttonGroup}>
-                  <button className={styles.createArticleBtn}
-                  style={{
-                      backgroundColor: tokens.success,
-                      boxShadow: `0 4px 10px ${tokens.success}70`,
-                      color: 'white'
-                    }}>
-                    <FaIcons.FaPlus className={styles.icon} />
-                    {t("actions.createArticle")}
-                  </button>
-                  <button className={styles.readBtn}  
-                  style={{
-                      backgroundColor: tokens.primary,
-                      boxShadow: `0 4px 10px ${tokens.primary}70`
-                    }}>
-                    <FaIcons.FaBookOpen className={styles.icon} />
-                    {t("actions.read")}
-                  </button>
+                  {canCreate && (
+                    <button
+                      className={styles.createArticleBtn}
+                      style={{
+                        backgroundColor: tokens.success,
+                        boxShadow: `0 4px 10px ${tokens.success}70`,
+                        color: "white",
+                      }}
+                    >
+                      <FaIcons.FaPlus className={styles.icon} />
+                      {t("actions.createArticle")}
+                    </button>
+                  )}
+
+                  {canRead && (
+                    <button
+                      className={styles.readBtn}
+                      style={{
+                        backgroundColor: tokens.primary,
+                        boxShadow: `0 4px 10px ${tokens.primary}70`,
+                      }}
+                    >
+                      <FaIcons.FaBookOpen className={styles.icon} />
+                      {t("actions.read")}
+                    </button>
+                  )}
                 </div>
 
                 <div className={styles.actions}>
-                  <button
-                    className={styles.editBtn}
-                    title={t("actions.edit")}
-                    onClick={() => handleEdit(cat)}
-                    style={{ color: tokens.warning }}
-                  >
-                    <FaIcons.FaEdit />
-                  </button>
-
-                  <button
-                    className={styles.deleteBtn}
-                    title={t("actions.delete")}
-                    onClick={() => handleDelete(cat.id)} // เรียกฟังก์ชันลบ
-                    style={{ color: tokens.error }} 
-                  >
-                    <FaIcons.FaTrash />
-                  </button>
+                  {canEdit && (
+                    <button
+                      className={styles.editBtn}
+                      title={t("actions.edit")}
+                      onClick={() => handleEdit(cat)}
+                      style={{ color: tokens.warning }}
+                    >
+                      <FaIcons.FaEdit />
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      className={styles.deleteBtn}
+                      title={t("actions.delete")}
+                      onClick={() => handleDelete(cat.id)} // เรียกฟังก์ชันลบ
+                      style={{ color: tokens.error }}
+                    >
+                      <FaIcons.FaTrash />
+                    </button>
+                  )}
                 </div>
               </div>
             );

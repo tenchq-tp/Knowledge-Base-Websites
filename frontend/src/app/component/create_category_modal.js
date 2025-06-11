@@ -194,16 +194,14 @@ export default function CreateCategoryModal({
           mode === "edit"
             ? t("categoryModal.successUpdate")
             : t("categoryModal.successCreate"),
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-        cancelButtonText: "No",
-       confirmButtonColor: tokens.primary,
+
+        confirmButtonColor: tokens.primary,
         cancelButtonColor: tokens.error,
         background: tokens.surface,
         color: tokens.text,
       });
 
-      if (result.isConfirmed) {
+      {
         onClose();
         window.location.reload();
       }
@@ -229,31 +227,34 @@ export default function CreateCategoryModal({
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.modal}
+      <div
+        className={styles.modal}
         style={{
           backgroundColor: tokens.surface,
           border: `1px solid ${tokens.border}`,
-          boxShadow: tokens.shadowStrong
-        }}>
-        <h2 className={styles.headerTitle}
-        style={{ color: tokens.primary }}>
+          boxShadow: tokens.shadowStrong,
+        }}
+      >
+        <h2 className={styles.headerTitle} style={{ color: tokens.primary }}>
           {mode === "edit"
             ? t("categoryModal.editTitle")
             : t("categoryModal.createTitle")}
         </h2>
 
-        <div className={styles.selectedIconPreview} 
-        style={{
+        <div
+          className={styles.selectedIconPreview}
+          style={{
             backgroundColor: `${tokens.primary}10`,
-            border: `2px solid ${tokens.border}`
-          }}>
+            border: `2px solid ${tokens.border}`,
+          }}
+        >
           {SelectedIconComponent ? (
             <SelectedIconComponent size={64} color={selectedColor} />
           ) : (
             <FaQuestionCircle size={64} color={tokens.textMuted} />
           )}
         </div>
-        <h4 className={styles.sectionTitle}  style={{ color: tokens.text }}>
+        <h4 className={styles.sectionTitle} style={{ color: tokens.text }}>
           {t("categoryModal.selectColorTitle")}
         </h4>
         <div className={styles.colorPicker}>
@@ -263,11 +264,13 @@ export default function CreateCategoryModal({
               className={`${styles.colorCircle} ${
                 selectedColor === color ? styles.colorSelected : ""
               }`}
-              style={{ backgroundColor: color,
-                border: selectedColor === color 
-                  ? `3px solid ${tokens.primary}` 
-                  : `2px solid ${tokens.border}`
-               }}
+              style={{
+                backgroundColor: color,
+                border:
+                  selectedColor === color
+                    ? `3px solid ${tokens.primary}`
+                    : `2px solid ${tokens.border}`,
+              }}
               onClick={() => setSelectedColor(color)}
             />
           ))}
@@ -275,21 +278,25 @@ export default function CreateCategoryModal({
         <h4 className={styles.sectionTitle} style={{ color: tokens.text }}>
           {t("categoryModal.selectIconTitle")}
         </h4>
-        <div className={styles.searchBox}
-         style={{
+        <div
+          className={styles.searchBox}
+          style={{
             backgroundColor: tokens.background,
-            border: `1px solid ${tokens.border}`
-          }} >
-          <FaSearch className={styles.searchIcon}
-          style={{ color: tokens.textMuted }} />
+            border: `1px solid ${tokens.border}`,
+          }}
+        >
+          <FaSearch
+            className={styles.searchIcon}
+            style={{ color: tokens.textMuted }}
+          />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("categoryModal.searchPlaceholder")}
-            style={{ 
+            style={{
               color: tokens.text,
-              backgroundColor: 'transparent'
+              backgroundColor: "transparent",
             }}
           />
         </div>
@@ -304,39 +311,49 @@ export default function CreateCategoryModal({
                   selectedIcon === iconName ? styles.selected : ""
                 }`}
                 style={{
-                  backgroundColor: selectedIcon === iconName 
-                    ? `${tokens.primary}20` 
-                    : tokens.surface,
-                  border: selectedIcon === iconName 
-                    ? `2px solid ${tokens.primary}` 
-                    : `1px solid ${tokens.border}`,
-                  color: tokens.text
+                  backgroundColor:
+                    selectedIcon === iconName
+                      ? `${tokens.primary}20`
+                      : tokens.surface,
+                  border:
+                    selectedIcon === iconName
+                      ? `2px solid ${tokens.primary}`
+                      : `1px solid ${tokens.border}`,
+                  color: tokens.text,
                 }}
                 onClick={() => setSelectedIcon(iconName)}
               >
-                <Icon size={24}  color={selectedIcon === iconName ? tokens.primary : tokens.textSecondary} />
+                <Icon
+                  size={24}
+                  color={
+                    selectedIcon === iconName
+                      ? tokens.primary
+                      : tokens.textSecondary
+                  }
+                />
               </div>
             );
           })}
         </div>
 
-        <label className={styles.label} style={{ color: tokens.text }}>{t("categoryModal.nameLabel")}</label>
+        <label className={styles.label} style={{ color: tokens.text }}>
+          {t("categoryModal.nameLabel")}
+          <span style={{ color: "red" }}>*</span>
+        </label>
         <input
           className={styles.input}
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t("categoryModal.nameLabelinput")}
-           style={{
+          style={{
             backgroundColor: tokens.background,
             border: `1px solid ${tokens.border}`,
-            color: tokens.text
+            color: tokens.text,
           }}
-
         />
 
-        <label className={styles.label}
-        style={{ color: tokens.text }}>
+        <label className={styles.label} style={{ color: tokens.text }}>
           {t("categoryModal.descriptionLabel")}
         </label>
         <input
@@ -348,7 +365,7 @@ export default function CreateCategoryModal({
           style={{
             backgroundColor: tokens.background,
             border: `1px solid ${tokens.border}`,
-            color: tokens.text
+            color: tokens.text,
           }}
         />
 
@@ -360,9 +377,10 @@ export default function CreateCategoryModal({
             onClick={handleCreate}
             disabled={!name || loading}
             style={{
-              backgroundColor: !name || loading ? tokens.textMuted : tokens.success,
-              cursor: !name || loading ? 'not-allowed' : 'pointer',
-              opacity: !name || loading ? 0.6 : 1
+              backgroundColor:
+                !name || loading ? tokens.textMuted : tokens.success,
+              cursor: !name || loading ? "not-allowed" : "pointer",
+              opacity: !name || loading ? 0.6 : 1,
             }}
           >
             {loading
@@ -377,10 +395,10 @@ export default function CreateCategoryModal({
             className={styles.cancelBtn}
             onClick={onClose}
             disabled={loading}
-             style={{
+            style={{
               backgroundColor: tokens.error,
               opacity: loading ? 0.6 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer'
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
             {t("categoryModal.cancelBtn")}

@@ -16,16 +16,40 @@ export default function Homepage() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
-  // ลบ state rotationSpeedRef และ requestAnimationFrame ที่หมุนอัตโนมัติออก
-
+  const [canAddHome, setCanAddHome] = useState(false);
+  const [canReadHome, setCanReadHome] = useState(false);
   const [rotation, setRotation] = useState(0);
 
-  const earthRef = useRef(null); // ref ของรูปโลก เพื่อหาตำแหน่งศูนย์กลาง
+  const earthRef = useRef(null);
 
   const { t } = useTranslation();
 
-const { tokens, isDark } = useTheme();
+  const { tokens, isDark } = useTheme();
+  useEffect(() => {
+    const permissions = JSON.parse(
+      localStorage.getItem("user_permissions") || "[]"
+    );
 
+    setCanAddHome(
+      permissions.some((perm) => perm.permission?.name === "add_home")
+    );
+    setCanReadHome(
+      permissions.some((perm) => perm.permission?.name === "read_home")
+    );
+  }, []);
+
+  useEffect(() => {
+    const permissions = JSON.parse(
+      localStorage.getItem("user_permissions") || "[]"
+    );
+    const hasViewHome = permissions.some(
+      (perm) => perm.permission?.name === "view_home"
+    );
+
+    if (!hasViewHome) {
+      router.push("/pages/access-denied");
+    }
+  }, []);
   useEffect(() => {
     async function fetchCategories() {
       setLoading(true);
@@ -47,7 +71,6 @@ const { tokens, isDark } = useTheme();
           setCategories(data);
         } else {
           setCategories([]);
-          console.error("Data is not an array");
         }
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -111,9 +134,10 @@ const { tokens, isDark } = useTheme();
                 src={spinningEarthGif}
                 alt="Spinning Earth"
                 className={styles.spinningEarth}
-                style={{ transform: `rotate(${rotation}deg)`,
-               filter: isDark ? 'brightness(0.8)' : 'brightness(1)'
-               }}
+                style={{
+                  transform: `rotate(${rotation}deg)`,
+                  filter: isDark ? "brightness(0.8)" : "brightness(1)",
+                }}
               />
             ) : (
               <div className={styles.categoryDetail}>
@@ -159,26 +183,31 @@ const { tokens, isDark } = useTheme();
                   marginTop: "20px",
                 }}
               >
-                <button
-                  className={styles.createArticleBtn}
-                  onClick={() => {
-                    router.push(
-                      `/pages/article/create_article?categoryId=${selectedCategory.id}`
-                    );
-                  }}
-                >
-                  <FaIcons.FaPlus className={styles.icon} />
-                  {t("actions.createArticle")}
-                </button>
+                {canAddHome && (
+                  <button
+                    className={styles.createArticleBtn}
+                    onClick={() => {
+                      router.push(
+                        `/pages/article/create_article?categoryId=${selectedCategory.id}`
+                      );
+                    }}
+                  >
+                    <FaIcons.FaPlus className={styles.icon} />
+                    {t("actions.createArticle")}
+                  </button>
+                )}
 
-                <button
-                  className={styles.readBtn}
-                  type="button"
-                  onClick={() => alert("อ่านบทความ")}
-                >
-                  <FaIcons.FaBookOpen className={styles.icon} />
-                  {t ? t("actions.read") : "อ่าน"}
-                </button>
+                {canReadHome && (
+                  <button
+                    className={styles.readBtn}
+                    type="button"
+                    onClick={() => alert("อ่านบทความ")}
+                  >
+                    <FaIcons.FaBookOpen className={styles.icon} />
+                    {t ? t("actions.read") : "อ่าน"}
+                  </button>
+                )}
+
                 <button
                   className={styles.backButton}
                   type="button"
@@ -194,7 +223,7 @@ const { tokens, isDark } = useTheme();
         {/* ส่วน categoryGrid ไม่เปลี่ยนแปลง */}
         <div className={styles.categoryGrid}>
           {loading ? (
-            <p style={{color: tokens.textSecondary}}>Loading categories...</p>
+            <p style={{ color: tokens.textSecondary }}>Loading categories...</p>
           ) : filteredCategories.length > 0 ? (
             filteredCategories.map((cat) => (
               <div
@@ -229,7 +258,7 @@ const { tokens, isDark } = useTheme();
               </div>
             ))
           ) : (
-            <p style={{ color: tokens.textSecondary}}>No categories found.</p>
+            <p style={{ color: tokens.textSecondary }}>No categories found.</p>
           )}
         </div>
       </div>

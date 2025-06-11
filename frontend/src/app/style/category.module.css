@@ -24,9 +24,9 @@
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
+  width: 200px;
   background-color: var(--theme-success);
   margin-right: 20px;
-
   border: none;
   color: white;
   font-weight: 700;
@@ -37,6 +37,13 @@
   transition: background-color 0.25s ease;
   box-shadow: var(--theme-shadow);
   user-select: none;
+
+  /* ✅ แก้ตรงนี้ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* หรือ space-between */
+  gap: 8px;
 }
 
 .addBtn:hover {

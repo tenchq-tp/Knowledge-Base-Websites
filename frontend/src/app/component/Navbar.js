@@ -1,5 +1,5 @@
 "use client";
-
+import jwtDecode from "jwt-decode";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,8 +26,55 @@ export default function Navbar() {
   const { t, i18n } = useTranslation();
   const [forceUpdate, setForceUpdate] = useState(0);
   const [username, setUsername] = useState(null);
-
+  const [permissions, setPermissions] = useState([]);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        const decoded = jwtDecode(token);
+        console.log("token type:", typeof token, ", token value:", token);
+
+        const now = Date.now() / 1000;
+        const expDate = new Date(decoded.exp * 1000).toLocaleString();
+
+        console.log("Decoded token:", decoded);
+        console.log("Current time (Unix timestamp):", now);
+        console.log("Token expires at:", expDate);
+
+        if (decoded.exp < now) {
+          console.log(
+            "Token expired, clearing specific localStorage items and redirecting..."
+          );
+
+          // ลบแค่ key ที่ระบุไว้
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("token_type");
+          localStorage.removeItem("user_data");
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("user_role");
+          localStorage.removeItem("is_verified");
+          localStorage.removeItem("user_permissions");
+          localStorage.removeItem("user_role_id");
+          // ไม่ลบ session_id หรือ key อื่น ๆ
+
+          router.push("/pages/login");
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+
+        // กรณี token ไม่ถูกต้อง ลบทั้งหมดเพื่อความปลอดภัย
+        localStorage.clear();
+        router.push("/pages/login");
+      }
+    };
+
+    checkTokenExpiration();
+  }, [router]);
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("language") || "th";
@@ -99,7 +146,8 @@ export default function Navbar() {
         localStorage.removeItem("username");
         localStorage.removeItem("user_role");
         localStorage.removeItem("is_verified");
-
+        localStorage.removeItem("user_permissions");
+        localStorage.removeItem("user_role_id");
         if (response.ok) {
           let timerInterval;
           await Swal.fire({
@@ -145,7 +193,8 @@ export default function Navbar() {
       localStorage.removeItem("username");
       localStorage.removeItem("user_role");
       localStorage.removeItem("is_verified");
-
+      localStorage.removeItem("user_permissions");
+      localStorage.removeItem("user_role_id");
       await Swal.fire({
         icon: "error",
         title: t("logout.error_title"),
@@ -156,7 +205,13 @@ export default function Navbar() {
       router.push("/pages/login");
     }
   };
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("user_permissions") || "[]");
+    const names = stored.map((p) => p.permission?.name);
+    setPermissions(names);
+  }, []);
 
+  const hasPermission = (permName) => permissions.includes(permName);
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>
@@ -165,34 +220,45 @@ export default function Navbar() {
       </div>
 
       <ul className={styles.navLinks}>
-        <li
-          onClick={() => router.push("/pages/home")}
-          className={styles.navItem}
-        >
-          <FontAwesomeIcon icon={faHome} className={styles.icon} />
-          <span className={styles.navText}>{t("navbar.home")}</span>
-        </li>
-        <li
-          onClick={() => router.push("/pages/dashboard")}
-          className={styles.navItem}
-        >
-          <FontAwesomeIcon icon={faTachometerAlt} className={styles.icon} />
-          <span className={styles.navText}>{t("navbar.dashboard")}</span>
-        </li>
-        <li
-          onClick={() => router.push("/pages/category")}
-          className={styles.navItem}
-        >
-          <FontAwesomeIcon icon={faNewspaper} className={styles.icon} />
-          <span className={styles.navText}>{t("navbar.category")}</span>
-        </li>
-        <li
-          onClick={() => router.push("/pages/profile")}
-          className={styles.navItem}
-        >
-          <FontAwesomeIcon icon={faUser} className={styles.icon} />
-          <span className={styles.navText}>{t("navbar.profile")}</span>
-        </li>
+        {hasPermission("view_home") && (
+          <li
+            onClick={() => router.push("/pages/home")}
+            className={styles.navItem}
+          >
+            <FontAwesomeIcon icon={faHome} className={styles.icon} />
+            <span className={styles.navText}>{t("navbar.home")}</span>
+          </li>
+        )}
+
+        {hasPermission("view_dashboard") && (
+          <li
+            onClick={() => router.push("/pages/dashboard")}
+            className={styles.navItem}
+          >
+            <FontAwesomeIcon icon={faTachometerAlt} className={styles.icon} />
+            <span className={styles.navText}>{t("navbar.dashboard")}</span>
+          </li>
+        )}
+
+        {hasPermission("view_category") && (
+          <li
+            onClick={() => router.push("/pages/category")}
+            className={styles.navItem}
+          >
+            <FontAwesomeIcon icon={faNewspaper} className={styles.icon} />
+            <span className={styles.navText}>{t("navbar.category")}</span>
+          </li>
+        )}
+
+        {hasPermission("view_profile") && (
+          <li
+            onClick={() => router.push("/pages/profile")}
+            className={styles.navItem}
+          >
+            <FontAwesomeIcon icon={faUser} className={styles.icon} />
+            <span className={styles.navText}>{t("navbar.profile")}</span>
+          </li>
+        )}
         <li
           onClick={() => router.push("/pages/setting")}
           className={styles.navItem}
