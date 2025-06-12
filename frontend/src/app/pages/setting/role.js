@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import Modal from "../../component/setting_modal";
 import { useTheme } from "../../contexts/ThemeContext";
-import roleApi from "../../component/role_api";
 import "../../style/role_setting.css";
 
 export default function RoleSettings() {
@@ -30,14 +29,27 @@ export default function RoleSettings() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [menuGroups, setMenuGroups] = useState([]);  // เพิ่ม state สำหรับ menu groups ที่ดึงจากฐานข้อมูล
 
+  const API_BASE = process.env.NEXT_PUBLIC_API;
+
+  const api = async (url, opts = {}) => {
+    const res = await fetch(`${API_BASE}${url}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        "Content-Type": "application/json",
+      },
+      ...opts,
+    });
+    if (!res.ok) throw new Error("API Error");
+    return res.json();
+  };
+
   const alert = (type, msg) =>
     Swal.fire({ icon: type, text: msg, timer: 2000, showConfirmButton: false });
 
   const loadRoles = async () => {
     setLoading(true);
     try {
-      const rolesData = await roleApi.getRoles();
-      setRoles(rolesData);
+      setRoles(await api("/roles"));
     } catch {
       alert("error", t("settings.role.messages.load_roles_failed"));
     } finally {
@@ -48,7 +60,7 @@ export default function RoleSettings() {
   const loadPermissions = async () => {
     setPermissionsLoading(true);
     try {
-      const permissionsData = await roleApi.getPermissions();
+      const permissionsData = await api("/permissions");
       const groupedPerms = groupPermissionsByMenu(permissionsData);
       setMenuPermissions(groupedPerms);
     } catch (error) {
@@ -62,7 +74,7 @@ export default function RoleSettings() {
   // โหลดกลุ่มเมนูจาก permissions ที่มีอยู่
   const loadMenuGroups = async () => {
     try {
-      const permissionsData = await roleApi.getPermissions();
+      const permissionsData = await api("/permissions");
       const menuGroupsSet = new Set();
 
       // แยกกลุ่มจาก permission names
@@ -127,7 +139,7 @@ export default function RoleSettings() {
   // โหลด role permission
   const loadRolePermissions = async (roleId) => {
     try {
-      const rolePermissions = await roleApi.getRolePermissions(roleId);
+      const rolePermissions = await api(`/role-permissions/role/${roleId}`);
       const permsState = {};
       menuGroups.forEach(group => {
         permsState[group.name] = {};  // สร้าง object ว่างสำหรับทุกกลุ่มเมนู
@@ -201,18 +213,24 @@ export default function RoleSettings() {
     setFormLoading(true);
     try {
       if (formMode === "create") {
-        await roleApi.createRole({
-          name: formRoleName.trim(),
-          description: formRoleDescription.trim(),
+        await api("/roles", {
+          method: "POST",
+          body: JSON.stringify({
+            name: formRoleName.trim(),
+            description: formRoleDescription.trim(),
+          }),
         });
         alert("success", t("settings.role.messages.role_created"));
       } else if (formMode === "edit") {
         if (!selectedRoleForEdit) {
           return alert("error", t("settings.role.messages.role_not_found"));
         }
-        await roleApi.updateRole(selectedRoleForEdit.id, {
-          name: formRoleName.trim(),
-          description: formRoleDescription.trim(),
+        await api(`/roles/${selectedRoleForEdit.id}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            name: formRoleName.trim(),
+            description: formRoleDescription.trim(),
+          }),
         });
         alert("success", t("settings.role.messages.role_updated"));
       }
@@ -262,7 +280,10 @@ export default function RoleSettings() {
       }
 
       try {
-        await roleApi.deleteRole(selectedRole.id);
+        await api(`/roles/${selectedRole.id}`, {
+          method: "DELETE",
+        });
+
         alert("success", t("settings.role.messages.role_deleted"));
         setRole("");
         setPerms({});
@@ -315,7 +336,14 @@ export default function RoleSettings() {
 
     setSaveLoading(true);
     try {
-      await roleApi.updateRolePermissions(selectedRole.id, permissionIds);
+      await api("/role-permissions/role", {
+        method: "PUT",
+        body: JSON.stringify({
+          role_id: selectedRole.id,
+          permission_id: permissionIds,
+        }),
+      });
+
       alert("success", t("settings.role.messages.permissions_updated"));
     } catch (error) {
       console.error("Save role permissions error:", error);
