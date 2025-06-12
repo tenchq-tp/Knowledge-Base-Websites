@@ -134,7 +134,8 @@ export default function ProfilePage() {
     return value && value !== "" ? value : "\u00A0";
   };
 
-  const profileImageUrl = profile.imageUrl || profile.avatar || null;
+  const profileImageUrl =
+    profile.avatar_url || profile.avatar || profile.imageUrl || null;
 
   return (
     <>
