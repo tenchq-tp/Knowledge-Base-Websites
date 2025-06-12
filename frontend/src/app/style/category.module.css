@@ -13,7 +13,7 @@
   box-shadow: none;
   /* เอาเงาออก */
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  position: relative;
+
   overflow: auto;
   transition: background-color 0.3s ease;
   /* เผื่อมี content overflow */
@@ -21,7 +21,7 @@
 
 /* ปุ่ม +Add Category ด้านบนขวา */
 .addBtn {
-  position: absolute;
+
   top: 1.5rem;
   right: 1.5rem;
   width: 200px;
@@ -238,4 +238,15 @@
     display: block;
     margin: 1rem auto 2rem;
   }
+}
+
+.button:hover,
+.addBtn:hover,
+.readBtn:hover,
+.createArticleBtn:hover,
+.editBtn:hover,
+.deleteBtn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-5px);
+  transition: all 0.25s ease;
 }

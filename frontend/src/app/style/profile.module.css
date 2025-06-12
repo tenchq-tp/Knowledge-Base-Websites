@@ -1,404 +1,457 @@
-.container {
+/* General Layout */
+.pageBackground {
+    background-color: #f0f2f5;
+    /* Light gray background */
+    min-height: calc(100vh - 60px);
+    /* Adjust for Navbar height */
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 2rem;
+}
+
+.editorContainer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
     width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
-    background-color: var(--theme-background); /* ✅ แทนที่ hard-coded color */
-  color: var(--theme-text); /* ✅ เพิ่ม theme text color */
-}
-
-.pageWrapper {
-  background-color: var(--theme-background);
-  color: var(--theme-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
-  min-height: 100vh;
-  padding: 20px;
-}
-
-.profileImageWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.profileSection {
+    max-width: 900px;
+    /* Max width for content */
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 40px;
-}
-
-.profileImage {
-    height: 140px;
-    width: 140px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid transparent;
-    background-image: linear-gradient(white, white),
-        linear-gradient(135deg, #42a5f5, #7e57c2);
-    background-origin: border-box;
-    background-clip: content-box, border-box;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-}
-
-.profileImagePlaceholder {
-    height: 140px;
-    width: 140px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #90caf9, #b39ddb);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .title {
+    color: #333;
+    font-size: 2em;
+    margin-bottom: 15px;
     text-align: center;
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #4e5a9e;
-    margin-top: 20px;
 }
 
-.row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+.inputTitle {
     width: 100%;
-    margin: 16px 0;
-    gap: 12px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
 }
 
-.icon {
-    color: #5c6bc0;
-    font-size: 35px;
-    min-width: 26px;
+/* Sticky Header for Editor Controls */
+.stickyHeader {
+    position: sticky;
+    top: 60px;
+    /* Adjust based on your Navbar height */
+    z-index: 1000;
+    /* Ensure it stays on top of other content */
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 10px 20px;
+    width: 100%;
+    max-width: 900px;
+    /* Match editor container width */
+    border-radius: 8px 8px 0 0;
+    /* Rounded top corners, sharp bottom */
+    margin-top: -20px;
+    /* Pull it up to sit nicely with editor container */
+    box-sizing: border-box;
 }
 
-.label {
-    flex: 0 0 150px;
-    font-weight: 600;
-    color: #4e5a9e;
-    text-align: right;
+.contentSpacer {
+    height: 220px;
+    /* Adjust this height to match the height of your stickyHeader + any margin */
+    /* This creates empty space so content doesn't get hidden behind the sticky header */
+    /* You'll need to fine-tune this value based on the exact height of your menu bars and title/input */
 }
 
-.inputField {
-    flex: 1;
-    padding: 10px 16px;
-    border: 1px solid #cfd8dc;
-    border-radius: 10px;
-    min-width: 500px;
-    font-size: 1rem;
-    background-color: #f9fafb;
-    transition: border 0.2s ease;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.inputField:focus {
-    outline: none;
-    border-color: #7e57c2;
-    background-color: #eef1f9;
-}
-
-.text {
-    flex: 1;
-    padding: 10px 14px;
-    font-size: 1rem;
-    color: #263238;
-    background-color: #f5f5f5;
-    border-radius: 8px;
-}
-
-.editButtonContainer {
+/* Tab Bar Styling */
+.tabBar {
     display: flex;
-    justify-content: center;
-    margin-top: 30px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 10px;
 }
 
-.editButton {
-    padding: 14px 38px;
+.tabButton {
+    background-color: #f8f8f8;
+    color: #555;
     border: none;
-    margin-top: 20px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    background: linear-gradient(135deg, #42a5f5, #7e57c2);
-    color: white;
+    padding: 10px 15px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(66, 165, 245, 0.3);
+    font-weight: 600;
+    font-size: 0.95em;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    margin-right: 5px;
+    /* Space between tabs */
 }
 
-.editButton:hover {
-    background: linear-gradient(135deg, #1e88e5, #5e35b1);
-    transform: scale(1.02);
+.tabButton:hover {
+    background-color: #e0e0e0;
 }
 
-.editIcon {
-    margin-right: 10px;
-    font-size: 18px;
-    vertical-align: middle;
+.tabButton.activeTab {
+    background-color: #ffffff;
+    /* Active tab is white to blend with menuBar */
+    color: #007bff;
+    /* Primary color for active tab text */
+    border-bottom: 3px solid #007bff;
+    /* Highlight active tab */
+    margin-bottom: -1px;
+    /* Overlap border-bottom of tabBar */
 }
 
-.contactBox {
-    background-color: #e0f2f1;
-    padding: 16px;
-    border-radius: 12px;
-    width: fit-content;
-    margin: 20px 0;
-}
-
-.contactTitle {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 12px;
-    color: #004d40;
-}
-
-.iconRow {
+/* Menu Bar (Toolbox) */
+.menuBar {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    /* Allow groups to wrap to the next line */
+    gap: 15px;
+    /* Space between groups */
+    padding: 10px 0;
+    align-items: flex-start;
+    /* Align groups to the top */
 }
 
-/* ไอคอนกลมเหมือนเดิม แต่เปลี่ยนสีพื้นหลังตามแบรนด์ */
-.iconCircle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+.menuGroup {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 8px 10px;
+    position: relative;
+    background-color: #fdfdfd;
+}
+
+.menuGroupLabel {
+    position: absolute;
+    bottom: -20px;
+    /* Position below the group */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7em;
+    color: #777;
+    white-space: nowrap;
+    /* Prevent label from wrapping */
+}
+
+.menuGroup button {
+    background-color: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    padding: 8px 10px;
+    margin: 2px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #333;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.menuGroup button:hover {
+    background-color: #e9e9e9;
+    border-color: #c0c0c0;
+}
+
+.menuGroup button.active {
+    background-color: #007bff;
+    /* Primary color for active buttons */
+    color: #fff;
+    border-color: #007bff;
+}
+
+.menuGroup button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8f8f8;
+    border-color: #e0e0e0;
+    color: #999;
+}
+
+.menuGroup svg {
+    margin-right: 5px;
+}
+
+.menuGroup button:last-child svg {
+    margin-right: 0;
+    /* No margin for last icon if it's the only one */
+}
+
+.menuGroup select {
+    padding: 7px 5px;
+    margin: 2px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 0.9em;
+    background-color: #fff;
+    color: #333;
     cursor: pointer;
-    font-size: 20px;
-    user-select: none;
-    color: white;
-    /* ไอคอนสีขาว */
+    min-width: 80px;
+    /* Ensure select boxes have minimum width */
 }
 
-/* Facebook */
-.facebook {
-    background-color: #1877f2;
+.menuGroup .colorInput {
+    width: 40px;
+    /* Adjust width for color input */
+    height: 30px;
+    padding: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    margin: 2px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    /* Remove default browser styling for color input */
+    -moz-appearance: none;
+    appearance: none;
+    background-color: transparent;
 }
 
-/* Instagram (gradient แทนง่ายๆใช้สีชมพูม่วง) */
-.instagram {
-    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+.menuGroup .colorInput::-webkit-color-swatch-wrapper {
+    padding: 0;
 }
 
-/* Line */
-.line {
-    background-color: #00c300;
+.menuGroup .colorInput::-webkit-color-swatch {
+    border: none;
+    border-radius: 3px;
 }
 
-.discord {
-    background-color: #5865F2;
+.menuGroup .colorInput::-moz-color-swatch-wrapper {
+    padding: 0;
 }
 
-.card {
-  background: var(--theme-surface); /* ✅ ใช้ theme surface */
-  border: 1px solid var(--theme-border); /* ✅ เพิ่ม border */
-  border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 800px;
-  box-shadow: var(--theme-shadowMedium); /* ✅ ใช้ theme shadow */
-  margin-bottom: 2rem;
-  transition: all 0.3s ease;
+.menuGroup .colorInput::-moz-color-swatch {
+    border: none;
+    border-radius: 3px;
 }
 
-/* Header Card Layout */
-.headerCard {
- display: flex;
- align-items: center;
- gap: 30px;
- margin-bottom: 20px;
+
+/* Tiptap Editor Content Area */
+.editor {
+    border: 1px solid #e0e0e0;
+    border-radius: 0 0 8px 8px;
+    /* Rounded bottom corners, sharp top */
+    padding: 20px;
+    min-height: 400px;
+    outline: none;
+    font-family: Arial, sans-serif;
+    /* Default font for editor content */
+    line-height: 1.6;
+    color: #333;
+    width: 100%;
+    /* Ensure editor takes full width of container */
+    box-sizing: border-box;
+
+    /* Basic Tiptap default styles to make content render correctly */
+    &>.ProseMirror {
+        outline: none;
+        /* Remove blue outline on focus */
+        min-height: 400px;
+        /* Ensures editor has a minimum height */
+    }
+
+    &>.ProseMirror p {
+        margin-bottom: 1em;
+    }
+
+    &>.ProseMirror h1,
+    &>.ProseMirror h2,
+    &>.ProseMirror h3,
+    &>.ProseMirror h4,
+    &>.ProseMirror h5,
+    &>.ProseMirror h6 {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        line-height: 1.2;
+    }
+
+    &>.ProseMirror h1 {
+        font-size: 2.2em;
+    }
+
+    &>.ProseMirror h2 {
+        font-size: 1.8em;
+    }
+
+    &>.ProseMirror h3 {
+        font-size: 1.5em;
+    }
+
+    &>.ProseMirror ul,
+    &>.ProseMirror ol {
+        padding-left: 1.5em;
+        margin-bottom: 1em;
+    }
+
+    &>.ProseMirror blockquote {
+        border-left: 4px solid #ccc;
+        padding-left: 1em;
+        margin-left: 0;
+        font-style: italic;
+        color: #666;
+    }
+
+    &>.ProseMirror code {
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #f0f0f0;
+        padding: 2px 4px;
+        border-radius: 3px;
+    }
+
+    &>.ProseMirror pre {
+        background: #333;
+        color: #eee;
+        font-family: 'Courier New', Courier, monospace;
+        padding: 1em;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+
+    &>.ProseMirror hr {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin: 1em 0;
+    }
+
+    &>.ProseMirror a {
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+    &>.ProseMirror img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        /* Ensures images are on their own line */
+        margin: 10px 0;
+    }
+
+    &>.ProseMirror table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+    }
+
+    &>.ProseMirror th,
+    &>.ProseMirror td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+
+    &>.ProseMirror th {
+        background-color: #f0f0f0;
+    }
 }
 
-.headerImageWrapper .profileImage {
- width: 100px;
- height: 100px;
-}
 
-.headerImageWrapper .profileImagePlaceholder {
- width: 100px;
- height: 100px;
-}
-
-.profileInfo {
- flex: 1;
-}
-
-.profileName {
- font-size: 24px;
- font-weight: bold;
- color: var(--theme-text);
- margin: 0 0 8px 0;
-}
-
-.profileLocation {
- color: var(--theme-textSecondary);
- margin: 0;
- font-size: 16px;
-}
-
-.socialContainer {
- display: flex;
- gap: 10px;
- align-items: center;
-}
-
-/* Section Cards */
-.sectionCard {
- margin-bottom: 20px;
-}
-
-.sectionHeader {
- display: flex;
- justify-content: space-between;
- align-items: center;
- margin-bottom: 20px;
- border-bottom: 1px solid var(--theme-border);
- padding-bottom: 15px;
-}
-
-.sectionTitle {
- font-size: 18px;
- font-weight: 600;
- color: var(--theme-text);
- margin: 0;
-}
-
-/* Buttons */
-.primaryEditButton {
- background-color: var(--theme-primary);
- color: var(--theme-surface);
- border: none;
- padding: 8px 16px;
- border-radius: 6px;
- cursor: pointer;
- display: flex;
- align-items: center;
- gap: 8px;
- font-size: 14px;
- margin-left: 20px;
- transition: all 0.3s ease;
-}
-
-.primaryEditButton:hover {
- background-color: var(--theme-primaryHover);
-}
-
-.secondaryEditButton {
- background-color: transparent;
- color: var(--theme-primary);
- border: 1px solid var(--theme-primary);
- padding: 6px 12px;
- border-radius: 4px;
- cursor: pointer;
- font-size: 12px;
- display: flex;
- align-items: center;
- gap: 6px;
- transition: all 0.3s ease;
-}
-
-.secondaryEditButton:hover {
- background-color: var(--theme-primary);
- color: var(--theme-surface);
-}
-
-/* Form Grid */
-.fieldGrid {
- display: grid;
- grid-template-columns: 1fr 1fr;
- gap: 20px;
-}
-
-.fieldLabel {
- display: block;
- margin-bottom: 8px;
- font-size: 14px;
- font-weight: 500;
- color: var(--theme-textSecondary);
-}
-
-.fieldInput {
- background-color: var(--theme-surface);
- color: var(--theme-text);
- border: 1px solid var(--theme-border);
- width: 100%;
- min-width: auto;
-}
-
-.fieldDisplay {
- background-color: var(--theme-surfaceAlt);
- color: var(--theme-text);
- min-height: 20px;
- display: flex;
- align-items: center;
-}
-
-.bioTextarea {
- width: 100%;
- padding: 10px 16px;
- border: 1px solid var(--theme-border);
- border-radius: 10px;
- font-size: 1rem;
- background-color: var(--theme-surface);
- color: var(--theme-text);
- min-height: 80px;
- resize: vertical;
- font-family: inherit;
- transition: border-color 0.3s ease;
-}
-
-.bioTextarea:focus {
- outline: none;
- border-color: var(--theme-primary);
-}
-
-.bioDisplay {
- background-color: var(--theme-surfaceAlt);
- color: var(--theme-text);
- min-height: 60px;
- display: flex;
- align-items: flex-start;
- padding-top: 10px;
-}
-
-.fullWidth {
- grid-column: 1 / -1;
-}
-
-/* Loading */
-.loading {
- text-align: center;
- font-size: 1.2rem;
- color: var(--theme-textSecondary);
-}
-
-/* Responsive Design */
+/* Responsive adjustments */
 @media (max-width: 768px) {
- .headerCard {
-   flex-direction: column;
-   gap: 20px;
-   text-align: center;
- }
- 
- .fieldGrid {
-   grid-template-columns: 1fr;
- }
- 
- .socialContainer {
-   justify-content: center;
- }
+
+    .editorContainer,
+    .stickyHeader {
+        padding: 15px;
+        width: 95%;
+        /* Adjust for smaller screens */
+    }
+
+    .menuGroup button {
+        padding: 6px 8px;
+        font-size: 0.85em;
+    }
+
+    .menuGroup svg {
+        margin-right: 3px;
+    }
+
+    .menuGroup select {
+        min-width: 70px;
+        font-size: 0.85em;
+    }
+
+    .menuGroupLabel {
+        bottom: -18px;
+        font-size: 0.65em;
+    }
+
+    .tabButton {
+        padding: 8px 10px;
+        font-size: 0.85em;
+    }
+
+    .stickyHeader {
+        top: 0;
+        /* Stick to top even if Navbar hides on scroll (or adjust as needed) */
+    }
+
+    .contentSpacer {
+        height: 200px;
+        /* Adjust for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+
+    .editorContainer,
+    .stickyHeader {
+        padding: 10px;
+        width: 100%;
+        border-radius: 0;
+        /* Remove border-radius on very small screens */
+    }
+
+    .menuBar {
+        flex-direction: column;
+        /* Stack menu groups vertically */
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .menuGroup {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 5px;
+    }
+
+    .menuGroup button {
+        width: auto;
+        /* Allow buttons to size based on content */
+        flex-grow: 1;
+        /* Distribute space */
+        margin: 2px;
+    }
+
+    .menuGroupLabel {
+        position: static;
+        /* Place label within the flow */
+        transform: none;
+        text-align: center;
+        margin-top: 5px;
+        width: 100%;
+    }
+
+    .tabButton {
+        flex-grow: 1;
+        margin-right: 0;
+        border-radius: 0;
+    }
+
+    .stickyHeader {
+        top: 0;
+        border-radius: 0;
+    }
+
+    .contentSpacer {
+        height: 250px;
+        /* May need more height if groups stack significantly */
+    }
 }
