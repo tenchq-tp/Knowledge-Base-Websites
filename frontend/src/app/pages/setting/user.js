@@ -3,14 +3,13 @@
 
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import Modal from "../../component/setting_modal";
 import { useTheme } from "../../contexts/ThemeContext";
-import userApi from "../../component/user_api";
 import "../../style/user_setting.css";
-
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 export default function UserSettings() {
   const { t } = useTranslation();
   const { tokens, getComponentStyle } = useTheme();
@@ -40,11 +39,39 @@ export default function UserSettings() {
       address: "",
     },
   });
+  const API_BASE = process.env.NEXT_PUBLIC_API;
+  const apiCall = async (endpoint, options = {}) => {
+    const token = localStorage.getItem("access_token");
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      let errorMessage = "API request failed";
+
+      if (errorData.detail) {
+        errorMessage = Array.isArray(errorData.detail)
+          ? errorData.detail
+              .map((err) => `${err.loc?.slice(-1)[0] || "field"}: ${err.msg}`)
+              .join(", ")
+          : errorData.detail;
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  };
 
   const fetchRoles = async () => {
     setIsLoadingRoles(true);
     try {
-      const data = await userApi.getRoles();
+      const data = await apiCall("/roles");
       setRolesList(data);
     } catch (error) {
       showAlert("error", "Error", "Failed to load roles. Please try again.");
@@ -56,8 +83,8 @@ export default function UserSettings() {
   const loadUsers = async (searchTerm = "") => {
     setLoading(true);
     try {
-       const params = { skip: 0, limit: 100 };
-      const users = await userApi.getUsers(params);
+      const params = new URLSearchParams({ skip: 0, limit: 100 });
+      const users = await apiCall(`/users/?${params.toString()}`);
 
       const term = searchTerm.toLowerCase();
 
@@ -108,14 +135,14 @@ export default function UserSettings() {
         is_active: user.is_active,
         updatedDate: user.updated_at
           ? new Date(user.updated_at)
-            .toLocaleString("en-GB", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-            .replace(",", "")
+              .toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+              .replace(",", "")
           : "N/A",
         profile: user.profile || {},
       }));
@@ -128,14 +155,24 @@ export default function UserSettings() {
     }
   };
 
-    const createUser = async (userData) => {
-    await userApi.createUser(userData); // ✅ ใช้ userApi.createUser
+  const createUser = async (userData) => {
+    await apiCall("/users/create", {
+      method: "POST",
+      body: JSON.stringify(userData),
+    });
     await loadUsers(searchUsername);
     showAlert("success", "Success", "User created successfully!");
   };
 
   const showAlert = (type, title, text, timer = 2000) =>
-    Swal.fire({ icon: type, title, text, timer, timerProgressBar: true, showConfirmButton: false, });
+    Swal.fire({
+      icon: type,
+      title,
+      text,
+      timer,
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
 
   const resetForm = () => {
     setUserFormData({
@@ -162,10 +199,18 @@ export default function UserSettings() {
     setIsCreateUserModalOpen(true);
   };
 
-   const updateUser = async (userId, userData) => {
-      await userApi.updateUser(userId, userData); // ✅ ใช้ userApi.updateUser
+  const updateUser = async (userId, userData) => {
+    try {
+      await apiCall(`/users/${userId}`, {
+        method: "PUT",
+        body: JSON.stringify(userData),
+      });
       await loadUsers(searchUsername);
       showAlert("success", "Success", "User updated successfully!");
+    } catch (error) {
+      console.error("Update user error:", error);
+      throw error;
+    }
   };
 
   const handleEditUser = (user) => {
@@ -221,7 +266,7 @@ export default function UserSettings() {
 
     if (result.isConfirmed) {
       try {
-        await userApi.deleteUser(username); 
+        await apiCall(`/users/${username}`, { method: "DELETE" });
         setUsersList((prev) => prev.filter((user) => user.id !== userId));
         await loadUsers(searchUsername);
         showAlert("success", "Success", "User deleted successfully!");
@@ -292,21 +337,21 @@ export default function UserSettings() {
           prev.map((user) =>
             user.id === editingUser.id
               ? {
-                ...user,
-                username: userFormData.username,
-                email: userFormData.email,
-                role: userFormData.role,
-                profile: userFormData.profile,
-                updatedDate: new Date()
-                  .toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                  .replace(",", ""),
-              }
+                  ...user,
+                  username: userFormData.username,
+                  email: userFormData.email,
+                  role: userFormData.role,
+                  profile: userFormData.profile,
+                  updatedDate: new Date()
+                    .toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                    .replace(",", ""),
+                }
               : user
           )
         );
@@ -419,8 +464,9 @@ export default function UserSettings() {
 
             <td style={{ textAlign: "center" }}>
               <span
-                className={`status-badge ${user.status === "active" ? "status-active" : "status-inactive"
-                  }`}
+                className={`status-badge ${
+                  user.status === "active" ? "status-active" : "status-inactive"
+                }`}
               >
                 {user.status}
               </span>
@@ -454,7 +500,14 @@ export default function UserSettings() {
     </table>
   );
 
-  const renderFormField = (label, name, type = "text", placeholder = "", required = false, options = null) => (
+  const renderFormField = (
+    label,
+    name,
+    type = "text",
+    placeholder = "",
+    required = false,
+    options = null
+  ) => (
     <div className="form-group">
       <label className="form-label" style={{ color: tokens.text }}>
         {label} {required && <span className="required">*</span>}
@@ -543,7 +596,9 @@ export default function UserSettings() {
                 </label>
                 <input
                   type="text"
-                  placeholder={`${t("settings.user.username")}, ${t("settings.user.email")}, ${t("settings.user.modal.role")}`}
+                  placeholder={`${t("settings.user.username")}, ${t(
+                    "settings.user.email"
+                  )}, ${t("settings.user.modal.role")}`}
                   value={searchUsername}
                   onChange={(e) => setSearchUsername(e.target.value)}
                   className="form-field search-input"
