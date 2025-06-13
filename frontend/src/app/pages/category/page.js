@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import { useTheme } from "../../contexts/ThemeContext";
 import "../../../lib/i18n";
 import { useRouter } from "next/navigation";
+import api from "../../../lib/axios";
 
 export default function CategoryPage() {
   const { t } = useTranslation();
@@ -27,18 +28,9 @@ export default function CategoryPage() {
 
   async function fetchCategories() {
     setLoading(true);
-    const accessToken = localStorage.getItem("access_token");
-
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API}/categories`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      const data = await res.json();
+      const res = await api.get("/categories");
+      const data = res.data;
       console.log("Fetched categories:", data); // เช็คข้อมูล
 
       if (Array.isArray(data)) {
@@ -75,8 +67,6 @@ export default function CategoryPage() {
 
   // ฟังก์ชันลบ category พร้อม Swal และ fetch ใหม่
   const handleDelete = async (categoryId) => {
-    const accessToken = localStorage.getItem("access_token");
-
     const result = await Swal.fire({
       title: t("categoryModal.deleteConfirmTitle"),
       text: t("categoryModal.deleteConfirmText"),
@@ -92,21 +82,7 @@ export default function CategoryPage() {
 
     if (result.isConfirmed) {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API}/categories/${categoryId}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-
-        if (!res.ok) {
-          throw new Error("Failed to delete category");
-        }
-
+        await api.delete(`/categories/${categoryId}`);
         await Swal.fire({
           icon: "success",
           title: t("categoryModal.deleteSuccessTitle"),
@@ -131,6 +107,7 @@ export default function CategoryPage() {
       }
     }
   };
+
   useEffect(() => {
     const permissions = JSON.parse(
       localStorage.getItem("user_permissions") || "[]"
@@ -143,6 +120,7 @@ export default function CategoryPage() {
       router.push("/pages/access-denied");
     }
   }, [router]);
+  
   useEffect(() => {
     const stored = localStorage.getItem("user_permissions");
     if (stored) {

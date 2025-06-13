@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import "../../../style/login.css";
+import apiWithoutAuth from '../../../../lib/axiosWithoutAuth';
 
 export default function ChangePasswordPage() {
   const [username, setUsername] = useState("");
@@ -47,25 +48,15 @@ export default function ChangePasswordPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/users/change-password`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({
-            username: username,
-            old_password: oldPassword,
-            new_password: newPassword,
-          }),
-        }
-      );
+    const response = await apiWithoutAuth.post("/users/change-password", {
+      username: username,
+      old_password: oldPassword,
+      new_password: newPassword,
+    });
 
-      const data = await response.json();
 
-      if (response.ok) {
+      const data = response.data;
+
         Swal.fire({
           icon: "success",
           title: "Password Changed!",
@@ -74,22 +65,23 @@ export default function ChangePasswordPage() {
         }).then(() => {
           router.push("/pages/login");
         });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: data.detail || "Failed to change password",
-          confirmButtonText: "Try Again",
-        });
-      }
     } catch (error) {
       console.error("Change password error:", error);
+      if (error.response && error.response.data && error.response.data.detail) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response.data.detail,
+        confirmButtonText: "Try Again",
+      });
+    } else {
       Swal.fire({
         icon: "error",
         title: "Server Error",
         text: "Could not connect to server",
         confirmButtonText: "OK",
       });
+    }
     } finally {
       setIsLoading(false);
     }

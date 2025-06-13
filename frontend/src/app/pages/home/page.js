@@ -7,6 +7,7 @@ import "../../../lib/i18n";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../../contexts/ThemeContext";
+import api from "../../../lib/axios";
 
 const spinningEarthGif = "/images/earth.gif";
 
@@ -54,18 +55,9 @@ export default function Homepage() {
     async function fetchCategories() {
       setLoading(true);
 
-      const accessToken = localStorage.getItem("access_token");
-
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API}/categories`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        const data = await res.json();
+        const res = await api.get("/categories");
+        const data = res.data;
 
         if (Array.isArray(data)) {
           setCategories(data);

@@ -16,9 +16,9 @@ export default function LanguageSettings() {
   const [userSettings, setUserSettings] = useState(() => {
     try {
       const lang = localStorage.getItem("language");
-      return { language: lang || "th" };
+      return { language: lang || "en" };
     } catch (error) {
-      return { language: "th" };
+      return { language: "en" };
     }
   });
 

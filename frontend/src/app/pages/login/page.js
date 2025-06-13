@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import api from "../../../lib/axios";
 
 import "../../style/login.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -53,22 +54,16 @@ export default function Login() {
       formData.append("client_secret", "");
 
       // เชื่อมต่อกับ FastAPI backend
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            accept: "application/json",
-          },
-          body: formData.toString(), // ส่งข้อมูลในรูปแบบ query string
-        }
-      );
+      const response = await api.post("/auth/login", formData.toString(), {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      });
 
-      const data = await response.json();
+      const data = response.data;
       console.log("Login response:", data);
 
-      if (response.ok && data.access_token) {
+      if (data.access_token) {
         // 1. เก็บ token และข้อมูล user ใน localStorage
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh_token);
@@ -81,27 +76,13 @@ export default function Login() {
 
         // 2. เรียก role-permissions/me และเก็บใน localStorage
         try {
-          const roleResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API}/role-permissions/me`,
-            {
-              method: "GET",
-              headers: {
-                accept: "application/json",
-                Authorization: `Bearer ${data.access_token}`,
-              },
-            }
+          const roleResponse = await api.get("/role-permissions/me");
+          const roleData = roleResponse.data;
+          localStorage.setItem(
+            "user_permissions",
+            JSON.stringify(roleData.permissions)
           );
-
-          const roleData = await roleResponse.json();
-          if (roleResponse.ok) {
-            localStorage.setItem(
-              "user_permissions",
-              JSON.stringify(roleData.permissions)
-            );
-            localStorage.setItem("user_role_id", roleData.role_id.toString());
-          } else {
-            console.warn("Failed to fetch permissions:", roleData);
-          }
+          localStorage.setItem("user_role_id", roleData.role_id.toString());
         } catch (roleError) {
           console.error("Error fetching role permissions:", roleError);
         }
@@ -115,26 +96,36 @@ export default function Login() {
         }).then(() => {
           router.push("../../pages/home");
         });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Login Failed",
-          text: data.detail || "Invalid credentials",
-          confirmButtonText: "Try Again",
-        });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
+       } else {
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: "Invalid credentials",
+        confirmButtonText: "Try Again",
+      });
+    }
+
+  } catch (error) {
+    console.error("Login error:", error);
+    if (error.response && error.response.status === 401) {
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: "Incorrect username or password",
+        confirmButtonText: "Try Again",
+      });
+    } else {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: "Cannot connect to server. Please try again.",
         confirmButtonText: "OK",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="login-container">

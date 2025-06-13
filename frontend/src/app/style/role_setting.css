@@ -569,25 +569,5 @@
   z-index: 1000 !important;
 }
 
-.permissions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
 
-.check-all-section {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
 
-.btn-check-all {
-  /* สไตล์ปุ่มพิเศษ */
-}
-
-.permissions-count {
-  /* สไตล์แสดงจำนวน */
-}

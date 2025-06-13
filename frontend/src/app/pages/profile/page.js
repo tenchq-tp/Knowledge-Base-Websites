@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import {
   FaUser,
-  FaPhone,
   FaEdit,
   FaFacebookF,
   FaInstagram,
@@ -18,6 +17,7 @@ import Swal from "sweetalert2";
 import "../../../lib/i18n";
 import styles from "../../style/profile.module.css";
 import { useRouter } from "next/navigation";
+import api from "../../../lib/axios";
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation();
@@ -51,12 +51,8 @@ export default function ProfilePage() {
   }, []);
   useEffect(() => {
     const fetchProfile = async () => {
-      const accessToken = localStorage.getItem("access_token");
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API}/profiles/me`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        const data = await res.json();
+        const { data } = await api.get("/profiles/me");
         setProfile(data);
         setFormData(data);
       } catch (err) {
@@ -72,18 +68,10 @@ export default function ProfilePage() {
   };
 
   const handleSave = async (section) => {
-    const accessToken = localStorage.getItem("access_token");
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API}/profiles/me`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) throw new Error("Update failed");
-      const updated = await res.json();
+      const res = await api.put("/profiles/me", formData);
+      const updated = res.data;
+
       setProfile(updated);
       if (section === "personal") setIsEditingPersonal(false);
       if (section === "address") setIsEditingAddress(false);
