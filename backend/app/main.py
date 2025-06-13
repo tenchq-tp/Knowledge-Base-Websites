@@ -35,7 +35,7 @@ app.add_middleware(
     allow_credentials=True,
 )
 app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(RateLimitMiddleware)
+# app.add_middleware(RateLimitMiddleware)
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "*.yourdomain.com"])
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 

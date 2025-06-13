@@ -122,3 +122,21 @@ DETAIL:  Key (slug)=(yuk55544) already exists.
 [SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
 [parameters: {'title': 'th55544', 'slug': 'yuk55544', 'content': 'ghj5554', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 10, 9, 36, 14, 513821), 'updated_at': datetime.datetime(2025, 6, 10, 9, 36, 14, 513825)}]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-12 03:46:01,037 - app.db.session - ERROR - Database session error: 1 validation errors:
+  {'type': 'list_type', 'loc': ('response', 'related_articles'), 'msg': 'Input should be a valid list', 'input': '{}', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}
+
+2025-06-12 03:48:24,032 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(ten) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, created_at, updated_at, related_articles) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(created_at)s, %(updated_at)s, %(related_articles)s) RETURNING article.id]
+[parameters: {'title': 'ten', 'slug': 'ten', 'content': 'ten', 'view_count': 0, 'status': 'public', 'created_at': datetime.datetime(2025, 6, 12, 3, 48, 24, 29474), 'updated_at': datetime.datetime(2025, 6, 12, 3, 48, 24, 29476), 'related_articles': []}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-12 03:48:36,197 - app.db.session - ERROR - Database session error: 1 validation errors:
+  {'type': 'list_type', 'loc': ('response', 'related_articles'), 'msg': 'Input should be a valid list', 'input': '{}', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}
+
+2025-06-12 03:56:28,295 - app.db.session - ERROR - Database session error: 1 validation errors:
+  {'type': 'list_type', 'loc': ('response', 'related_articles'), 'msg': 'Input should be a valid list', 'input': '{}', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}
+
+2025-06-12 03:58:21,117 - app.db.session - ERROR - Database session error: 1 validation errors:
+  {'type': 'list_type', 'loc': ('response', 'related_articles'), 'msg': 'Input should be a valid list', 'input': '[]', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}
+
