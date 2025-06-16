@@ -13,7 +13,6 @@ class Category(Base):
     articles = relationship("Article", secondary="article_category", back_populates="categories")
     subcategories = relationship("SubCategory", back_populates="category", cascade="all, delete-orphan")
 
-
 class SubCategory(Base):
     __tablename__ = "subcategories"
 

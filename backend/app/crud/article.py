@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from fastapi import Form, File, UploadFile, HTTPException
-from app.models.article import Article, MediaFile, ArticleMedia, ArticleViewLog
+from app.models.article import Article, ArticleMedia, ArticleViewLog, ArticleCategory
 from app.models.user import User, UserSession
 from app.schemas.article import ArticleCreate, ArticleUpdate
 from datetime import datetime, timedelta
@@ -10,22 +10,26 @@ from sqlalchemy import text
 
 def create_article_with_categories(db: Session, article_data, category_ids: Optional[List[int]] = None):
     if category_ids is None:
-        category_ids = []  
+        category_ids = []
+
+    # สร้าง article
     article = Article(**article_data.dict())
     db.add(article)
     db.commit()
     db.refresh(article)
 
+    # สร้างความสัมพันธ์ article-category
     for cat_id in category_ids:
-        db.execute(
-            text("INSERT INTO article_category (article_id, category_id) VALUES (:a, :c) ON CONFLICT DO NOTHING"),
-            {"a": article.id, "c": cat_id}
-        )
+        # เช็คก่อนว่า record นี้มีอยู่แล้วไหม (ถ้าไม่ใช้ ON CONFLICT DO NOTHING)
+        exists = db.query(ArticleCategory).filter_by(article_id=article.id, category_id=cat_id).first()
+        if not exists:
+            article_category = ArticleCategory(article_id=article.id, category_id=cat_id)
+            db.add(article_category)
+
     db.commit()
     return article
-
 def create_media(db: Session, filename: str, file_type: str, url: str):
-    media = MediaFile(filename=filename, file_type=file_type, url=url)
+    media = ArticleMedia(filename=filename, file_type=file_type, url=url)
     db.add(media)
     db.commit()
     db.refresh(media)
@@ -86,7 +90,7 @@ def delete_article(db: Session, slug: str):
 
     used_media_ids = db.query(ArticleMedia.media_id).distinct().all()
     used_media_ids = [m[0] for m in used_media_ids]
-    unused_media = db.query(MediaFile).filter(MediaFile.id.notin_(used_media_ids)).all()
+    unused_media = db.query(ArticleMedia).filter(ArticleMedia.id.notin_(used_media_ids)).all()
     for m in unused_media:
         db.delete(m)
 

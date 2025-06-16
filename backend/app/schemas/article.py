@@ -3,8 +3,13 @@ from typing import Optional, List, Union
 from datetime import datetime
 from fastapi import Form, File, UploadFile
 import json
+from enum import Enum
 from app.schemas.category import CategoryResponse
 
+class MediaType(str, Enum):
+    embedded = "embedded"
+    attached = "attached"
+    
 class MediaFileOut(BaseModel):
     id: int
     filename: str
@@ -17,7 +22,7 @@ class MediaFileOut(BaseModel):
 class ArticleMediaOut(BaseModel):
     id: int
     media: MediaFileOut
-    position: int
+    media_type: str
     class Config:
         orm_mode = True
 
@@ -28,7 +33,7 @@ class ArticleCreate(BaseModel):
     
 class ArticleMediaIn(BaseModel):
     media_id: int
-    position: int
+    media_type: MediaType
 
 class ArticleUpdate(BaseModel):
     title: Optional[str] = None
@@ -37,11 +42,11 @@ class ArticleUpdate(BaseModel):
     media_links: Optional[List[ArticleMediaIn]] = []
 
 class ArticleOut(ArticleCreate):
-    categories: List[CategoryResponse] = []
     id: int
     created_at: datetime
     updated_at: datetime
     view_count: int
+    categories: List[CategoryResponse] = []
     media_links: List[ArticleMediaOut] = []
     class Config:
         orm_mode = True
@@ -51,22 +56,22 @@ class ArticleFormIn(BaseModel):
     slug: str = Form(...)
     content: Optional[str] = Form(None)
     media_files: List[str] = Form(None)
-    positions: Union[str, List[int]] = Form(...)
+    media_types: Union[str, List[str]] = Form(None)
 
-    @validator("positions", pre=True)
-    def parse_positions(cls, v):
+    @validator("media_types", pre=True)
+    def parse_types(cls, v):
         if isinstance(v, str):
             try:
                 return json.loads(v)
             except json.JSONDecodeError:
-                raise ValueError("positions must be a valid JSON array")
+                raise ValueError("media_types must be a valid JSON array")
         return v
-
-    @validator("positions")
-    def check_length(cls, v, values):
+    
+    @validator("media_types")
+    def check_types_length(cls, v, values):
         media_files = values.get("media_files")
         if media_files and len(media_files) != len(v):
-            raise ValueError("Number of media_files and positions must be equal")
+            raise ValueError("Number of media_files and media_types must be equal")
         return v
 
 class ArticleCategoryIn(BaseModel):
@@ -81,6 +86,18 @@ class ArticleCategoryIn(BaseModel):
 
 class ArticleOutWithCategory(ArticleOut):
     categories: List[CategoryResponse] = []
+
+    class Config:
+        orm_mode = True
+
+class ArticleOutSeparateMedia(ArticleCreate):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    view_count: int
+    categories: List[CategoryResponse] = []
+    embedded_files: List[ArticleMediaOut] = []
+    attached_files: List[ArticleMediaOut] = []
 
     class Config:
         orm_mode = True

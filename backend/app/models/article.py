@@ -3,7 +3,13 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, INET
 from datetime import datetime
 from app.db.database import Base
+from sqlalchemy import Enum
+import enum
 
+class MediaTypeEnum(str, enum.Enum):
+    embedded = "embedded"
+    attached = "attached"
+    
 class Article(Base):
     __tablename__ = "article"
     id = Column(Integer, primary_key=True)
@@ -14,34 +20,42 @@ class Article(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
-    media_links = relationship("ArticleMedia", back_populates="article")
+    article_media = relationship("ArticleMedia", back_populates="article", cascade="all, delete-orphan")
     view_logs = relationship("ArticleViewLog", back_populates="article", cascade="all, delete-orphan")
     categories = relationship("Category", secondary="article_category", back_populates="articles")
 
     @property
     def category_names(self):
         return [c.name for c in self.categories] if self.categories else []
+    
+    @property
+    def media_links(self):
+        # alias ชื่อเดียวกับ schema ArticleOut.media_links
+        return self.article_media or []
 
-class MediaFile(Base):
-    __tablename__ = "media_file"
-    id = Column(Integer, primary_key=True)
-    filename = Column(Text, nullable=False)
-    file_type = Column(String, nullable=False)
-    url = Column(Text, nullable=False)
-    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    @property
+    def embedded_media(self):
+        return [m for m in self.media_links if m.media_type == MediaTypeEnum.embedded]
 
-    article_links = relationship("ArticleMedia", back_populates="media")
-
+    @property
+    def attached_media(self):
+        return [m for m in self.media_links if m.media_type == MediaTypeEnum.attached]
 
 class ArticleMedia(Base):
     __tablename__ = "article_media"
     id = Column(Integer, primary_key=True)
-    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"))
-    media_id = Column(Integer, ForeignKey("media_file.id", ondelete="CASCADE"))
-    position = Column(Integer, default=0)
+    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"), index=True)
+    filename = Column(Text, nullable=False)
+    file_type = Column(String, nullable=False)
+    url = Column(Text, nullable=False)
+    media_type = Column(Enum(MediaTypeEnum, name="media_type_enum"), nullable=False, default="attached", index=True)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
 
-    article = relationship("Article", back_populates="media_links")
-    media = relationship("MediaFile", back_populates="article_links")
+    article = relationship("Article", back_populates="article_media")
+    
+    @property
+    def media(self):
+        return self
 
 class ArticleViewLog(Base):
     __tablename__ = "article_view_log"

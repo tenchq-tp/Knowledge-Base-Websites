@@ -100,15 +100,38 @@ class MinIOAvatarService(MinIOServiceBase):
             print(f"Error parsing or deleting avatar: {e}")
             return False
 
+# class MinIOArticleService(MinIOServiceBase):
+#     def __init__(self, **kwargs):
+#         # ใช้ bucket default เป็น articles ถ้าไม่กำหนด
+#         kwargs.setdefault("bucket", os.getenv("MINIO_ARTICLE_BUCKET", "articles"))
+#         super().__init__(**kwargs)
+
+#     def upload_article_file(self, file: UploadFile) -> str:
+#         ext = file.filename.split('.')[-1] if '.' in file.filename else 'bin'
+#         object_name = f"articles/{uuid.uuid4()}.{ext}"
+
+#         try:
+#             self.client.put_object(
+#                 self.bucket,
+#                 object_name,
+#                 file.file,
+#                 length=-1,
+#                 part_size=10 * 1024 * 1024,
+#                 content_type=file.content_type
+#             )
+#             return self.get_public_url(object_name)
+#         except S3Error as e:
+#             raise Exception(f"Failed to upload article file: {e}")
+
 class MinIOArticleService(MinIOServiceBase):
     def __init__(self, **kwargs):
-        # ใช้ bucket default เป็น articles ถ้าไม่กำหนด
         kwargs.setdefault("bucket", os.getenv("MINIO_ARTICLE_BUCKET", "articles"))
         super().__init__(**kwargs)
 
-    def upload_article_file(self, file: UploadFile) -> str:
-        ext = file.filename.split('.')[-1] if '.' in file.filename else 'bin'
-        object_name = f"articles/{uuid.uuid4()}.{ext}"
+    def upload_embedded_file(self, article_id: int, file: UploadFile) -> str:
+        # ดึงนามสกุลไฟล์แบบ `.jpg`, `.png`, ฯลฯ
+        ext = os.path.splitext(file.filename)[1] or ".bin"
+        object_name = f"article_{article_id}/embedded/{uuid.uuid4()}{ext}"
 
         try:
             self.client.put_object(
@@ -121,7 +144,24 @@ class MinIOArticleService(MinIOServiceBase):
             )
             return self.get_public_url(object_name)
         except S3Error as e:
-            raise Exception(f"Failed to upload article file: {e}")
+            raise Exception(f"Failed to upload embedded file: {e}")
+
+    def upload_attached_file(self, article_id: int, file: UploadFile) -> str:
+        ext = file.filename.split('.')[-1] if '.' in file.filename else 'bin'
+        object_name = f"article_{article_id}/attached/{uuid.uuid4()}.{ext}"
+
+        try:
+            self.client.put_object(
+                self.bucket,
+                object_name,
+                file.file,
+                length=-1,
+                part_size=10 * 1024 * 1024,
+                content_type=file.content_type
+            )
+            return self.get_public_url(object_name)
+        except S3Error as e:
+            raise Exception(f"Failed to upload attached file: {e}")
 
 @lru_cache()
 def get_minio_avatar_service() -> MinIOAvatarService:

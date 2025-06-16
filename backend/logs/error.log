@@ -290,3 +290,143 @@ DETAIL:  Key (slug)=(หห1) already exists.
 [SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
 [parameters: {'title': 'หห1', 'slug': 'หห1', 'content': 'หห {Screenshot (371)} หห {Screenshot (373)}', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 16, 5, 0, 55, 105874), 'updated_at': datetime.datetime(2025, 6, 16, 5, 0, 55, 105877)}]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-16 08:26:05,259 - root - ERROR - Error creating database tables: (psycopg2.errors.UndefinedObject) type "media_type_enum" does not exist
+LINE 8:  media_type media_type_enum NOT NULL, 
+                    ^
+
+[SQL: 
+CREATE TABLE article_media (
+	id SERIAL NOT NULL, 
+	article_id INTEGER, 
+	filename TEXT NOT NULL, 
+	file_type VARCHAR NOT NULL, 
+	url TEXT NOT NULL, 
+	media_type media_type_enum NOT NULL, 
+	uploaded_at TIMESTAMP WITHOUT TIME ZONE, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(article_id) REFERENCES article (id) ON DELETE CASCADE
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-16 08:26:08,230 - root - ERROR - Error creating database tables: (psycopg2.errors.UndefinedObject) type "media_type_enum" does not exist
+LINE 8:  media_type media_type_enum NOT NULL, 
+                    ^
+
+[SQL: 
+CREATE TABLE article_media (
+	id SERIAL NOT NULL, 
+	article_id INTEGER, 
+	filename TEXT NOT NULL, 
+	file_type VARCHAR NOT NULL, 
+	url TEXT NOT NULL, 
+	media_type media_type_enum NOT NULL, 
+	uploaded_at TIMESTAMP WITHOUT TIME ZONE, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(article_id) REFERENCES article (id) ON DELETE CASCADE
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-16 08:26:18,866 - root - ERROR - Error creating database tables: (psycopg2.errors.UndefinedObject) type "media_type_enum" does not exist
+LINE 8:  media_type media_type_enum NOT NULL, 
+                    ^
+
+[SQL: 
+CREATE TABLE article_media (
+	id SERIAL NOT NULL, 
+	article_id INTEGER, 
+	filename TEXT NOT NULL, 
+	file_type VARCHAR NOT NULL, 
+	url TEXT NOT NULL, 
+	media_type media_type_enum NOT NULL, 
+	uploaded_at TIMESTAMP WITHOUT TIME ZONE, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(article_id) REFERENCES article (id) ON DELETE CASCADE
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-16 08:42:59,419 - root - ERROR - Error creating database tables: (psycopg2.errors.UndefinedObject) type "media_type_enum" does not exist
+LINE 8:  media_type media_type_enum NOT NULL, 
+                    ^
+
+[SQL: 
+CREATE TABLE article_media (
+	id SERIAL NOT NULL, 
+	article_id INTEGER, 
+	filename TEXT NOT NULL, 
+	file_type VARCHAR NOT NULL, 
+	url TEXT NOT NULL, 
+	media_type media_type_enum NOT NULL, 
+	uploaded_at TIMESTAMP WITHOUT TIME ZONE, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(article_id) REFERENCES article (id) ON DELETE CASCADE
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-16 08:44:46,306 - root - ERROR - Error creating database tables: (psycopg2.errors.UndefinedObject) type "media_type_enum" does not exist
+LINE 8:  media_type media_type_enum NOT NULL, 
+                    ^
+
+[SQL: 
+CREATE TABLE article_media (
+	id SERIAL NOT NULL, 
+	article_id INTEGER, 
+	filename TEXT NOT NULL, 
+	file_type VARCHAR NOT NULL, 
+	url TEXT NOT NULL, 
+	media_type media_type_enum NOT NULL, 
+	uploaded_at TIMESTAMP WITHOUT TIME ZONE, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(article_id) REFERENCES article (id) ON DELETE CASCADE
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-16 08:44:49,006 - root - ERROR - Error creating database tables: (psycopg2.errors.UndefinedObject) type "media_type_enum" does not exist
+LINE 8:  media_type media_type_enum NOT NULL, 
+                    ^
+
+[SQL: 
+CREATE TABLE article_media (
+	id SERIAL NOT NULL, 
+	article_id INTEGER, 
+	filename TEXT NOT NULL, 
+	file_type VARCHAR NOT NULL, 
+	url TEXT NOT NULL, 
+	media_type media_type_enum NOT NULL, 
+	uploaded_at TIMESTAMP WITHOUT TIME ZONE, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(article_id) REFERENCES article (id) ON DELETE CASCADE
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-16 08:47:36,375 - root - ERROR - Error creating database tables: (psycopg2.errors.UndefinedObject) type "media_type_enum" does not exist
+LINE 8:  media_type media_type_enum NOT NULL, 
+                    ^
+
+[SQL: 
+CREATE TABLE article_media (
+	id SERIAL NOT NULL, 
+	article_id INTEGER, 
+	filename TEXT NOT NULL, 
+	file_type VARCHAR NOT NULL, 
+	url TEXT NOT NULL, 
+	media_type media_type_enum NOT NULL, 
+	uploaded_at TIMESTAMP WITHOUT TIME ZONE, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(article_id) REFERENCES article (id) ON DELETE CASCADE
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-06-16 09:00:03,866 - app.db.session - ERROR - Database session error: 'media_id' is an invalid keyword argument for ArticleMedia
+2025-06-16 09:27:12,492 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(gg) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'gg', 'slug': 'gg', 'content': 'gg {Screenshot (371)}', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 16, 9, 27, 12, 488173), 'updated_at': datetime.datetime(2025, 6, 16, 9, 27, 12, 488176)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
