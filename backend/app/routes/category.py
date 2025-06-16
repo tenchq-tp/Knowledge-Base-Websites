@@ -52,3 +52,46 @@ def delete_category(
         raise HTTPException(status_code=404, detail="Category not found")
     return deleted
 
+@router.get("/subcategory/{subcategory_id}", response_model=schemas.SubCategoryResponse)
+def get_subcategory_by_id(
+    subcategory_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    subcategory = crud.get_subcategory_by_id(db, subcategory_id)
+    if not subcategory:
+        raise HTTPException(status_code=404, detail="SubCategory not found")
+    return subcategory
+
+@router.post("/subcategory/", response_model=schemas.SubCategoryResponse)
+def create_subcategory(
+    subcategory: schemas.SubCategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return crud.create_subcategory(db, subcategory)
+
+
+@router.put("/subcategory/{subcategory_id}", response_model=schemas.SubCategoryResponse)
+def update_subcategory(
+    subcategory_id: int,
+    subcategory: schemas.SubCategoryUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    updated = crud.update_subcategory(db, subcategory_id, subcategory)
+    if not updated:
+        raise HTTPException(status_code=404, detail="SubCategory not found")
+    return updated
+
+
+@router.delete("/subcategory/{subcategory_id}", response_model=schemas.SubCategoryResponse)
+def delete_subcategory(
+    subcategory_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    deleted = crud.delete_subcategory(db, subcategory_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="SubCategory not found")
+    return deleted

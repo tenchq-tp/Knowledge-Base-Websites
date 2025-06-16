@@ -50,7 +50,7 @@ class ArticleFormIn(BaseModel):
     title: str = Form(...)
     slug: str = Form(...)
     content: Optional[str] = Form(None)
-    media_files: List[str] = Form(...)
+    media_files: List[str] = Form(None)
     positions: Union[str, List[int]] = Form(...)
 
     @validator("positions", pre=True)
