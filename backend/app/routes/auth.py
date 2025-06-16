@@ -115,7 +115,9 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), request: Reques
         user_agent=device_info["user_agent"]
     )
     
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    # access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=6000000)
+    
     access_token = create_access_token(
         data={"sub": user.username, "session_id": str(session.id)},
         expires_delta=access_token_expires

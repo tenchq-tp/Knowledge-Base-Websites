@@ -140,3 +140,153 @@ DETAIL:  Key (slug)=(ten) already exists.
 2025-06-12 03:58:21,117 - app.db.session - ERROR - Database session error: 1 validation errors:
   {'type': 'list_type', 'loc': ('response', 'related_articles'), 'msg': 'Input should be a valid list', 'input': '[]', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}
 
+2025-06-12 04:12:46,523 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-12 04:24:53,170 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-12 04:25:50,211 - app.db.session - ERROR - Database session error: 
+2025-06-12 04:25:55,365 - app.db.session - ERROR - Database session error: You must set the config attribute `from_attributes=True` to use from_orm
+2025-06-12 04:26:45,252 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'media_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-12 09:29:54,192 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:30:09,029 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:31:21,540 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:31:39,676 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:31:56,494 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:32:05,531 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:33:11,902 - app.db.session - ERROR - Database session error: create_article_with_categories() takes 2 positional arguments but 3 were given
+2025-06-12 09:35:38,462 - app.db.session - ERROR - Database session error: 'ArticleCreate' object has no attribute 'tags'
+2025-06-12 09:36:27,010 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
+2025-06-12 09:40:31,865 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:40:40,784 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
+2025-06-12 09:41:47,314 - app.db.session - ERROR - Database session error: 
+2025-06-12 09:41:50,986 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
+2025-06-12 09:54:45,198 - app.db.session - ERROR - Database session error: type object 'Tag' has no attribute 'name'
+2025-06-12 09:56:15,725 - app.db.session - ERROR - Database session error: 2 validation errors:
+  {'type': 'missing', 'loc': ('response', 'tags', 0, 'tagname'), 'msg': 'Field required', 'input': <app.models.article.Tag object at 0x7fef31873d50>, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}
+  {'type': 'model_attributes_type', 'loc': ('response', 'related_articles', 0), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': 1, 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+
+2025-06-12 09:59:11,056 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_article_slug"
+DETAIL:  Key (slug)=(test) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, related_articles, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(related_articles)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'test', 'slug': 'test', 'content': 'test {Screenshot (371)}', 'view_count': 0, 'status': 'public', 'related_articles': '[1]', 'created_at': datetime.datetime(2025, 6, 12, 9, 59, 11, 52444), 'updated_at': datetime.datetime(2025, 6, 12, 9, 59, 11, 52448)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-12 09:59:31,324 - app.db.session - ERROR - Database session error: 1 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response', 'related_articles', 0), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': 1, 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+
+2025-06-12 10:00:08,284 - app.db.session - ERROR - Database session error: 1 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response', 'related_articles', 0), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': 1, 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+
+2025-06-12 10:23:43,599 - app.db.session - ERROR - Database session error: [{'type': 'list_type', 'loc': ('body', 'embedded_media'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7f8c1c5dab10>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}, {'type': 'list_type', 'loc': ('body', 'attached_media'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7f8c1c5da250>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-12 10:24:51,811 - app.db.session - ERROR - Database session error: [{'type': 'list_type', 'loc': ('body', 'embedded_media'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7ff6a180a390>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}, {'type': 'list_type', 'loc': ('body', 'attached_media'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7ff6a1809dd0>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-12 10:25:27,661 - app.db.session - ERROR - Database session error: [{'type': 'list_type', 'loc': ('body', 'embedded_media'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7f850a6f2350>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}, {'type': 'list_type', 'loc': ('body', 'attached_media'), 'msg': 'Input should be a valid list', 'input': <starlette.datastructures.UploadFile object at 0x7f850a6f1d50>, 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}]
+2025-06-12 10:33:04,004 - app.db.session - ERROR - Database session error: 
+2025-06-12 10:33:43,412 - app.db.session - ERROR - Database session error: 
+2025-06-12 10:33:51,345 - app.db.session - ERROR - Database session error: 
+2025-06-12 10:45:02,895 - app.db.session - ERROR - Database session error: 
+2025-06-12 10:45:10,034 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_article_slug"
+DETAIL:  Key (slug)=(we) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, related_articles, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(related_articles)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'we', 'slug': 'we', 'content': 'we {Screenshot (371)}', 'view_count': 0, 'status': 'public', 'related_articles': '[1]', 'created_at': datetime.datetime(2025, 6, 12, 10, 45, 10, 31038), 'updated_at': datetime.datetime(2025, 6, 12, 10, 45, 10, 31041)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-13 03:47:46,213 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'related_articles', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '1,2', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'embedded_media_positions', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-13 03:54:29,210 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'related_articles'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'category_ids'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'embedded_media_positions'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'value_error', 'loc': ('body', 'attached_media', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-13 03:59:18,324 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'related_articles'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'category_ids'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'embedded_media_positions'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'value_error', 'loc': ('body', 'attached_media', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-13 03:59:51,397 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'related_articles'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'category_ids'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'embedded_media_positions'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'value_error', 'loc': ('body', 'attached_media', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-13 04:00:04,682 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'related_articles', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'category_ids', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'int_parsing', 'loc': ('body', 'embedded_media_positions', 0), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}, {'type': 'value_error', 'loc': ('body', 'attached_media', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-13 04:04:21,396 - app.db.session - ERROR - Database session error: (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: "["
+LINE 1: ... (article_id, media_id, position) VALUES (13, 22, '[') RETUR...
+                                                             ^
+
+[SQL: INSERT INTO article_media (article_id, media_id, position) VALUES (%(article_id)s, %(media_id)s, %(position)s) RETURNING article_media.id]
+[parameters: {'article_id': 13, 'media_id': 22, 'position': '['}]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)
+2025-06-13 04:05:55,356 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_article_slug"
+DETAIL:  Key (slug)=(kk) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, related_articles, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(related_articles)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'kk', 'slug': 'kk', 'content': 'kk {Screenshot (371)} kk {gg}', 'view_count': 0, 'status': 'public', 'related_articles': '[1]', 'created_at': datetime.datetime(2025, 6, 13, 4, 5, 55, 352352), 'updated_at': datetime.datetime(2025, 6, 13, 4, 5, 55, 352354)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-13 04:06:24,135 - app.db.session - ERROR - Database session error: (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: "["
+LINE 1: ... (article_id, media_id, position) VALUES (15, 24, '[') RETUR...
+                                                             ^
+
+[SQL: INSERT INTO article_media (article_id, media_id, position) VALUES (%(article_id)s, %(media_id)s, %(position)s) RETURNING article_media.id]
+[parameters: {'article_id': 15, 'media_id': 24, 'position': '['}]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)
+2025-06-13 04:09:10,529 - app.db.session - ERROR - Database session error: (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: "["
+LINE 1: ... (article_id, media_id, position) VALUES (16, 26, '[') RETUR...
+                                                             ^
+
+[SQL: INSERT INTO article_media (article_id, media_id, position) VALUES (%(article_id)s, %(media_id)s, %(position)s) RETURNING article_media.id]
+[parameters: {'article_id': 16, 'media_id': 26, 'position': '['}]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)
+2025-06-13 04:10:01,621 - app.db.session - ERROR - Database session error: [{'type': 'int_parsing', 'loc': ('body', 'embedded_media_positions'), 'msg': 'Input should be a valid integer, unable to parse string as an integer', 'input': '[1]', 'url': 'https://errors.pydantic.dev/2.11/v/int_parsing'}]
+2025-06-13 04:13:30,394 - app.db.session - ERROR - Database session error: (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: "["
+LINE 1: ... (article_id, media_id, position) VALUES (17, 28, '[') RETUR...
+                                                             ^
+
+[SQL: INSERT INTO article_media (article_id, media_id, position) VALUES (%(article_id)s, %(media_id)s, %(position)s) RETURNING article_media.id]
+[parameters: {'article_id': 17, 'media_id': 28, 'position': '['}]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)
+2025-06-13 04:13:34,253 - app.db.session - ERROR - Database session error: (psycopg2.errors.InvalidTextRepresentation) invalid input syntax for type integer: "["
+LINE 1: ... (article_id, media_id, position) VALUES (18, 30, '[') RETUR...
+                                                             ^
+
+[SQL: INSERT INTO article_media (article_id, media_id, position) VALUES (%(article_id)s, %(media_id)s, %(position)s) RETURNING article_media.id]
+[parameters: {'article_id': 18, 'media_id': 30, 'position': '['}]
+(Background on this error at: https://sqlalche.me/e/20/9h9h)
+2025-06-13 04:37:15,863 - app.db.session - ERROR - Database session error: 
+2025-06-13 05:01:23,211 - app.db.session - ERROR - Database session error: (psycopg2.errors.ForeignKeyViolation) insert or update on table "article_category" violates foreign key constraint "article_category_category_id_fkey"
+DETAIL:  Key (category_id)=(1) is not present in table "categories".
+
+[SQL: INSERT INTO article_category (article_id, category_id) VALUES (%(article_id)s, %(category_id)s) RETURNING article_category.id]
+[parameters: {'article_id': 1, 'category_id': 1}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-13 06:28:31,622 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_article_slug"
+DETAIL:  Key (slug)=(cc12) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, related_articles, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(related_articles)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'cc12', 'slug': 'cc12', 'content': 'cc {Screenshot (371)}', 'view_count': 0, 'status': 'public', 'related_articles': '[1]', 'created_at': datetime.datetime(2025, 6, 13, 6, 28, 31, 618287), 'updated_at': datetime.datetime(2025, 6, 13, 6, 28, 31, 618290)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-13 06:28:39,997 - app.db.session - ERROR - Database session error: 2 validation errors:
+  {'type': 'missing', 'loc': ('response', 'attached_media', 0, 'media'), 'msg': 'Field required', 'input': <app.models.article.MediaFile object at 0x7f508fc7ad50>, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}
+  {'type': 'missing', 'loc': ('response', 'attached_media', 1, 'media'), 'msg': 'Field required', 'input': <app.models.article.MediaFile object at 0x7f508fc7b950>, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}
+
+2025-06-13 06:36:30,684 - app.db.session - ERROR - Database session error: 4 validation errors:
+  {'type': 'missing', 'loc': ('response', 'embedded_media', 0, 'media'), 'msg': 'Field required', 'input': <app.models.article.MediaFile object at 0x7f1f32353fd0>, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}
+  {'type': 'missing', 'loc': ('response', 'embedded_media', 1, 'media'), 'msg': 'Field required', 'input': <app.models.article.MediaFile object at 0x7f1f32358b90>, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}
+  {'type': 'missing', 'loc': ('response', 'attached_media', 0, 'media'), 'msg': 'Field required', 'input': <app.models.article.MediaFile object at 0x7f1f32353fd0>, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}
+  {'type': 'missing', 'loc': ('response', 'attached_media', 1, 'media'), 'msg': 'Field required', 'input': <app.models.article.MediaFile object at 0x7f1f32358b90>, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}
+
+2025-06-13 06:49:20,203 - app.db.session - ERROR - Database session error: 
+2025-06-13 07:01:26,515 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_article_slug"
+DETAIL:  Key (slug)=(ss12) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, related_articles, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(related_articles)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'ss12', 'slug': 'ss12', 'content': 'ss {Screenshot (371)}', 'view_count': 0, 'status': 'public', 'related_articles': '[1]', 'created_at': datetime.datetime(2025, 6, 13, 7, 1, 26, 513040), 'updated_at': datetime.datetime(2025, 6, 13, 7, 1, 26, 513043)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-13 07:11:18,408 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_article_slug"
+DETAIL:  Key (slug)=(ss1232) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, related_articles, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(related_articles)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'ss12342', 'slug': 'ss1232', 'content': 'ss {Screenshot (371)}', 'view_count': 0, 'status': 'public', 'related_articles': '[1]', 'created_at': datetime.datetime(2025, 6, 13, 7, 11, 18, 404696), 'updated_at': datetime.datetime(2025, 6, 13, 7, 11, 18, 404700)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-13 07:25:10,433 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "ix_article_slug"
+DETAIL:  Key (slug)=(dfg) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, status, related_articles, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(status)s, %(related_articles)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'hhd', 'slug': 'dfg', 'content': None, 'view_count': 0, 'status': 'public', 'related_articles': '[]', 'created_at': datetime.datetime(2025, 6, 13, 7, 25, 10, 429608), 'updated_at': datetime.datetime(2025, 6, 13, 7, 25, 10, 429611)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-13 07:32:22,458 - root - ERROR - Error creating database tables: string index out of range
+2025-06-16 05:00:43,781 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(หห) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'หห', 'slug': 'หห', 'content': 'หห {Screenshot (371)} หห {Screenshot (373)}', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 16, 5, 0, 43, 778543), 'updated_at': datetime.datetime(2025, 6, 16, 5, 0, 43, 778546)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-16 05:00:55,108 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(หห1) already exists.
+
+[SQL: INSERT INTO article (title, slug, content, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(content)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'หห1', 'slug': 'หห1', 'content': 'หห {Screenshot (371)} หห {Screenshot (373)}', 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 16, 5, 0, 55, 105874), 'updated_at': datetime.datetime(2025, 6, 16, 5, 0, 55, 105877)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

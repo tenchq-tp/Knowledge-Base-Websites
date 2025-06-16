@@ -23,8 +23,8 @@ router = APIRouter(prefix="/vi/api/articles", tags=["Articles"], dependencies=[D
 def create_article_with_media(
     title: str = Form(...),
     slug: str = Form(...),
+    media_files: List[UploadFile] = File(None),
     content: Optional[str] = Form(None),
-    media_files: Union[UploadFile, List[UploadFile], None] = File(default=None),
     positions: Optional[str] = Form(None),
     category_ids: Optional[str] = Form(None),
     db: Session = Depends(get_db)
@@ -49,12 +49,22 @@ def create_article_with_media(
 
     article = create_article_with_categories(db, article_data, category_ids_list)
     minio_service = get_minio_article_service()
-    
+
+    media_refs = []  # 👉 เก็บ (filename, url)
+
     for file, pos in zip(media_files_list, positions_list):
         url = minio_service.upload_article_file(file)
         media = create_media(db, file.filename, file.content_type, url)
         link = ArticleMedia(article_id=article.id, media_id=media.id, position=pos)
         db.add(link)
+        media_refs.append((file.filename, url))
+
+    # ✅ แทนใน content ด้วย url ก่อนบันทึก
+    if content:
+        for filename, url in media_refs:
+            key = f"{{{filename.rsplit('.', 1)[0]}}}"  # เอาเฉพาะชื่อโดยไม่เอา .png/.jpg
+            content = content.replace(key, url)
+        article.content = content  # บันทึก content ใหม่ลง model
 
     db.commit()
     db.refresh(article)
@@ -98,8 +108,7 @@ def get_article_with_view_tracking(
     for idx, link in enumerate(media_links_sorted):
         placeholder = f"{{{{media_{idx}}}}}"
         media_url = link.media.url
-        img_tag = f"<img src='{media_url}' alt='media_{idx}' />"
-        content = content.replace(placeholder, img_tag)
+        content = content.replace(placeholder, media_url)
 
     response = article.__dict__.copy()
     response['content'] = content
