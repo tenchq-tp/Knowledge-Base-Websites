@@ -40,10 +40,6 @@ export default function Navbar() {
         const now = Date.now() / 1000;
         const expDate = new Date(decoded.exp * 1000).toLocaleString();
 
-        console.log("Decoded token:", decoded);
-        console.log("Current time (Unix timestamp):", now);
-        console.log("Token expires at:", expDate);
-
         if (decoded.exp < now) {
           console.log(
             "Token expired, clearing specific localStorage items and redirecting..."
