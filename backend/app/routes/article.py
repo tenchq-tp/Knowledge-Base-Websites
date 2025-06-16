@@ -90,55 +90,10 @@ def create_article_with_media(
     return article
 
 @router.get("/{slug}", response_model=ArticleOut)
-def get_article_with_view_tracking(
-    slug: str,
-    request: Request,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    article = db.query(Article).filter(Article.slug == slug).first()
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-
-    ip = request.client.host or "0.0.0.0"
-    one_hour_ago = datetime.utcnow() - timedelta(hours=1)
-
-    recent_log = db.query(ArticleViewLog).filter(
-        ArticleViewLog.article_id == article.id,
-        ArticleViewLog.user_id == current_user.id,
-        ArticleViewLog.ip_address == ip,
-        ArticleViewLog.viewed_at >= one_hour_ago,
-    ).first()
-
-    if not recent_log:
-        log = ArticleViewLog(
-            article_id=article.id,
-            user_id=current_user.id,
-            ip_address=ip,
-            viewed_at=datetime.utcnow(),
-        )
-        db.add(log)
-        article.view_count += 1
-        db.commit()
-        db.refresh(article)
-
-    content = article.content or ""
-    media_links_sorted = sorted(article.media_links, key=lambda x: x.position)
-    for idx, link in enumerate(media_links_sorted):
-        placeholder = f"{{{{media_{idx}}}}}"
-        media_url = link.media.url
-        content = content.replace(placeholder, media_url)
-
-    response = article.__dict__.copy()
-    response['content'] = content
-    return response
-
-@router.get("/{slug}/separate", response_model=ArticleOut)
 def get_article_separate(slug: str, db: Session = Depends(get_db)):
     article = db.query(Article).filter(Article.slug == slug).first()
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
-    # media_links คือนำ media ทั้งหมดรวมกัน
     return article
 
 @router.get("/", response_model=List[ArticleOut])
