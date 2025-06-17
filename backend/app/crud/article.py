@@ -29,7 +29,8 @@ def create_article_with_categories(db: Session, article_data: ArticleCreate, cat
         slug=article_data.slug,
         content=article_data.content,
         status=article_data.status or "private",
-        schedule=datetime.fromisoformat(article_data.schedule) if article_data.schedule else None,
+        start_date=datetime.fromisoformat(article_data.start_date) if article_data.start_date else None,
+        end_date=datetime.fromisoformat(article_data.end_date) if article_data.end_date else None,
         tags=article_data.tags or [],
         hashtag=article_data.hashtag or [],
         view_count=0
@@ -90,18 +91,24 @@ def update_article_with_categories(db: Session, slug: str, data: ArticleUpdate, 
     article = db.query(Article).filter(Article.slug == slug).first()
     if not article:
         return None
+
     for field in ["title", "slug", "content", "status", "tags", "hashtag"]:
         value = getattr(data, field)
         if value is not None:
             setattr(article, field, value)
-    if data.schedule:
-        article.schedule = datetime.fromisoformat(data.schedule)
+
+    if data.start_date:
+        article.start_date = datetime.fromisoformat(data.start_date)
+    if data.end_date:
+        article.end_date = datetime.fromisoformat(data.end_date)
+
     db.execute("DELETE FROM article_category WHERE article_id = :aid", {"aid": article.id})
     for cat_id in category_ids:
         db.execute(
             text("INSERT INTO article_category (article_id, category_id) VALUES (:a, :c) ON CONFLICT DO NOTHING"),
             {"a": article.id, "c": cat_id}
         )
+
     db.commit()
     db.refresh(article)
     return article

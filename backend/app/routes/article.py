@@ -29,7 +29,8 @@ def create_article_with_media(
     embedded_files: List[UploadFile] = File(None),
     attached_files: List[UploadFile] = File(None),
     status: Optional[str] = Form("private"),
-    schedule: Optional[str] = Form(None),
+    start_date: Optional[str] = Form(None),
+    end_date: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
     hashtag: Optional[str] = Form(None),
     content: Optional[str] = Form(None),
@@ -39,20 +40,21 @@ def create_article_with_media(
     tags_list = str_to_list(tags)
     hashtag_list = str_to_list(hashtag)
 
-    schedule_str = None
-    if schedule:
+    def parse_dt(dt_str):
+        if not dt_str:
+            return None
         try:
-            schedule_dt = datetime.strptime(schedule, "%Y-%m-%d %H:%M:%S") # แบบมีช่องว่าง 2025-06-20 10:00:00
-            schedule_str = schedule_dt.isoformat()
+            return datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S").isoformat()
         except ValueError:
-            raise HTTPException(status_code=422, detail="Invalid schedule datetime format")
+            raise HTTPException(status_code=422, detail="Invalid datetime format, use YYYY-MM-DD HH:MM:SS")
 
     article_data = ArticleCreate(
         title=title,
         slug=slug,
         content=content,
         status=status,
-        schedule=schedule_str,
+        start_date=parse_dt(start_date),
+        end_date=parse_dt(end_date),
         tags=tags_list,
         hashtag=hashtag_list
     )
@@ -93,10 +95,26 @@ def update_article_route(
     title: str = Form(...),
     new_slug: str = Form(...),
     content: Optional[str] = Form(None),
-    media_links: Optional[List[ArticleMediaIn]] = Body(None),
+    status: Optional[str] = Form(None),
+    start_date: Optional[str] = Form(None),
+    end_date: Optional[str] = Form(None),
+    tags: Optional[str] = Form(None),
+    hashtag: Optional[str] = Form(None),
     category_ids: Optional[str] = Form(None),
+    media_links: Optional[List[ArticleMediaIn]] = Body(None),
     db: Session = Depends(get_db)
 ):
+    def parse_dt(dt_str):
+        if not dt_str:
+            return None
+        try:
+            return datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S").isoformat()
+        except ValueError:
+            raise HTTPException(status_code=422, detail="Invalid datetime format, use YYYY-MM-DD HH:MM:SS")
+
+    tags_list = str_to_list(tags)
+    hashtag_list = str_to_list(hashtag)
+
     category_ids_list = []
     if category_ids:
         try:
@@ -104,10 +122,23 @@ def update_article_route(
         except ValueError:
             raise HTTPException(status_code=422, detail="category_ids must be comma-separated integers")
 
-    data = ArticleUpdate(title=title, slug=new_slug, content=content, media_links=media_links, category_ids=category_ids_list)
+    data = ArticleUpdate(
+        title=title,
+        slug=new_slug,
+        content=content,
+        status=status,
+        start_date=parse_dt(start_date),
+        end_date=parse_dt(end_date),
+        tags=tags_list,
+        hashtag=hashtag_list,
+        media_links=media_links,
+        category_ids=category_ids_list
+    )
+
     article = update_article_with_categories(db, slug, data, category_ids_list)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
+
     return article
 
 @router.delete("/{slug}")

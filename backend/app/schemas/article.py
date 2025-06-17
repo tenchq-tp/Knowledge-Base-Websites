@@ -42,7 +42,8 @@ class ArticleCreate(BaseModel):
     hashtag: Optional[List[str]] = []
     content: Optional[str] = None
     status: Optional[str] = "private"
-    schedule: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
     
 class ArticleMediaIn(BaseModel):
     media_id: int
@@ -53,7 +54,8 @@ class ArticleUpdate(BaseModel):
     slug: Optional[str] = None
     content: Optional[str] = None
     status: Optional[str] = None
-    schedule: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None  
     tags: Optional[List[str]] = None
     hashtag: Optional[List[str]] = None
     
@@ -62,7 +64,8 @@ class ArticleOut(ArticleCreate):
     tags: List[str] = []
     hashtag: List[str] = []
     status: str
-    schedule: Optional[datetime] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     view_count: int
