@@ -19,7 +19,6 @@ class SubCategoryResponse(SubCategoryBase):
         orm_mode = True
 
 class CategoryBase(BaseModel):
-    id: int
     icon: Optional[str] = None
     name: str
     description: Optional[str] = None

@@ -49,6 +49,12 @@ def create_article_with_media(
     tags_list = str_to_list(tags)
     hashtags_list = str_to_list(hashtags)
 
+    embedded_files = embedded_files or []
+    attached_files = attached_files or []
+
+    embedded_files = [f for f in embedded_files if hasattr(f, 'filename')]
+    attached_files = [f for f in attached_files if hasattr(f, 'filename')]
+    
     def parse_dt(dt_str):
         if not dt_str:
             return None
@@ -70,7 +76,7 @@ def create_article_with_media(
         except ValueError:
             raise HTTPException(status_code=422, detail="subcategory_ids must be comma-separated integers")
     
-    slug_basic = slugify(title)
+    slug_basic = slugify(title, allow_unicode=True)
     
     article_data = ArticleCreate(
         title=title,
@@ -93,7 +99,7 @@ def create_article_with_media(
     if content:
         article.content = replace_media_placeholders(content, media_refs)
 
-    new_slug = f"{article.id}/{slugify(article.title)}"
+    new_slug = f"{article.id}/{slugify(article.title, allow_unicode=True)}"
     article.slug = new_slug
     db.commit()
     db.refresh(article)

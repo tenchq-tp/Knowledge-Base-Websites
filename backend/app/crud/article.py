@@ -89,8 +89,9 @@ def create_article_with_categories(
     db.add(article)
     db.flush()  # ✅ ได้ article.id แล้ว แต่ยังไม่ commit
 
+    print(f"Title: {article_data.title} -> Slug: {slugify(article_data.title, allow_unicode=True)}")
     # ✅ อัปเดต slug ด้วย id ที่ได้
-    article.slug = f"{article.id}/{slugify(article.title)}"
+    article.slug = f"{article.id}/{slugify(article.title, allow_unicode=True)}"
     
     db.commit()
     db.refresh(article)

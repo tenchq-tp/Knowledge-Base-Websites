@@ -21,8 +21,23 @@ def update_category(db: Session, category_id: int, category_data: CategoryUpdate
     category = get_category_by_id(db, category_id)
     if not category:
         return None
-    for key, value in category_data.dict(exclude_unset=True).items():
+
+    update_data = category_data.dict(exclude_unset=True)
+
+    # ตรวจสอบว่า status กำลังจะถูกเปลี่ยนเป็น "private"
+    is_status_being_set_to_private = (
+        "status" in update_data and update_data["status"] == "private"
+    )
+
+    # อัปเดตค่าต่าง ๆ ให้กับ category
+    for key, value in update_data.items():
         setattr(category, key, value)
+
+    # ถ้า status ของ category ถูกตั้งเป็น private → ตั้ง subcategories ทั้งหมดเป็น private ด้วย
+    if is_status_being_set_to_private:
+        for sub in category.subcategories:
+            sub.status = "private"
+
     db.commit()
     db.refresh(category)
     return category
@@ -43,12 +58,10 @@ def get_subcategories_by_category_id(db: Session, category_id: int):
     return db.query(SubCategory).filter(SubCategory.category_id == category_id).all()
 
 def create_subcategory(db: Session, subcategory: SubCategoryCreate):
-    # ??? Category ???????????????????
     category = db.query(Category).filter(Category.id == subcategory.category_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
 
-    # ??? Category ???? private ??? SubCategory ???? public -> ????
     if category.status == "private" and subcategory.status == "public":
         raise HTTPException(
             status_code=400,
@@ -66,11 +79,9 @@ def update_subcategory(db: Session, subcategory_id: int, subcategory_data: SubCa
     if not subcategory:
         return None
 
-    # ??????????? status ?????????????????????
     new_status = subcategory_data.status or subcategory.status
 
-    # ???????????????????????? status ?????????????????
-    category = subcategory.category  # ???? relationship
+    category = subcategory.category 
 
     if category.status == "private" and new_status == "public":
         raise HTTPException(

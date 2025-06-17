@@ -9,7 +9,8 @@ class Category(Base):
     icon = Column(String, nullable=True)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
-
+    status = Column(String, nullable=False, default="public")
+    
     articles = relationship("Article", secondary="article_category", back_populates="categories")
     subcategories = relationship("SubCategory", back_populates="category", cascade="all, delete-orphan")
 
@@ -20,6 +21,7 @@ class SubCategory(Base):
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
-
+    status = Column(String, nullable=False, default="public")
+    
     category = relationship("Category", back_populates="subcategories")
     articles = relationship("Article", secondary="article_subcategory", back_populates="subcategories")
