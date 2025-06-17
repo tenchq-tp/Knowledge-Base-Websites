@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from fastapi import HTTPException, UploadFile
 from app.models.article import Article, ArticleMedia, ArticleViewLog, Tag, Hashtag
-from app.models.category import Category
+from app.models.category import Category, SubCategory
 from app.models.user import User, UserSession
 from app.schemas.article import ArticleCreate, ArticleUpdate
 from app.services.minio_service import MinIOArticleService
@@ -36,16 +36,40 @@ def get_or_create_hashtags(db: Session, hashtag_names: List[str]):
         hashtags.append(h)
     return hashtags
 
-def create_article_with_categories(db: Session, article_data: ArticleCreate, category_ids: Optional[List[int]] = None):
+def create_article_with_categories(
+    db: Session,
+    article_data: ArticleCreate,
+    category_ids: Optional[List[int]] = None,
+    subcategory_ids: Optional[List[int]] = None
+):
     category_ids = category_ids or []
+    subcategory_ids = subcategory_ids or []
 
-    if category_ids:
-        existing_categories = db.query(Category.id).filter(Category.id.in_(category_ids)).all()
-        existing_ids = {cat.id for cat in existing_categories}
-        missing_ids = set(category_ids) - existing_ids
-        if missing_ids:
-            raise HTTPException(status_code=422, detail=f"Category IDs not found: {sorted(missing_ids)}")
+    # ✅ ตรวจสอบ categories
+    existing_categories = db.query(Category.id).filter(Category.id.in_(category_ids)).all()
+    existing_cat_ids = {cat.id for cat in existing_categories}
+    missing_cat_ids = set(category_ids) - existing_cat_ids
+    if missing_cat_ids:
+        raise HTTPException(status_code=422, detail=f"Category IDs not found: {sorted(missing_cat_ids)}")
 
+    # ✅ ตรวจสอบ subcategories
+    existing_subcategories = []
+    if subcategory_ids:
+        existing_subcategories = db.query(SubCategory).filter(SubCategory.id.in_(subcategory_ids)).all()
+        existing_sub_ids = {sub.id for sub in existing_subcategories}
+        missing_sub_ids = set(subcategory_ids) - existing_sub_ids
+        if missing_sub_ids:
+            raise HTTPException(status_code=422, detail=f"SubCategory IDs not found: {sorted(missing_sub_ids)}")
+
+        # ✅ ตรวจสอบว่า subcategory ต้องอยู่ภายใต้ category ที่กำหนด
+        for sub in existing_subcategories:
+            if sub.category_id not in existing_cat_ids:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"SubCategory '{sub.name}' does not belong to selected categories"
+                )
+
+    # ✅ สร้าง Article
     article = Article(
         title=article_data.title,
         slug=article_data.slug,
@@ -56,9 +80,13 @@ def create_article_with_categories(db: Session, article_data: ArticleCreate, cat
         view_count=0
     )
 
+    # ✅ ผูกความสัมพันธ์
     if category_ids:
         article.categories = db.query(Category).filter(Category.id.in_(category_ids)).all()
+    if subcategory_ids:
+        article.subcategories = existing_subcategories
 
+    # ✅ Tags และ Hashtags
     article.tags = get_or_create_tags(db, article_data.tags or [])
     article.hashtags = get_or_create_hashtags(db, article_data.hashtags or [])
 

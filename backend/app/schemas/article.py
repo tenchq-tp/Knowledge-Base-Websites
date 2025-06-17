@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import Form, File, UploadFile
 import json
 from enum import Enum
-from app.schemas.category import CategoryResponse
+from app.schemas.category import CategoryResponse, SubCategoryResponse, CategoryBase
 
 class MediaType(str, Enum):
     embedded = "embedded"
@@ -44,6 +44,8 @@ class ArticleCreate(BaseModel):
     slug: str
     tags: Optional[List[str]] = []
     hashtags: Optional[List[str]] = []
+    category_ids: Optional[List[int]] = []
+    subcategory_ids: Optional[List[int]] = []
     content: Optional[str] = None
     status: Optional[str] = "private"
     start_date: Optional[str] = None
@@ -53,16 +55,9 @@ class ArticleMediaIn(BaseModel):
     media_id: int
     media_type: MediaType
 
-class ArticleUpdate(BaseModel):
-    title: Optional[str] = None
-    slug: Optional[str] = None
-    content: Optional[str] = None
-    status: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None  
-    tags: Optional[List[str]] = None
-    hashtags: Optional[List[str]] = None
-    
+class ArticleUpdate(ArticleCreate):
+    pass
+
 class ArticleOut(ArticleCreate):
     id: int
     tags: List[TagOut]
@@ -73,7 +68,8 @@ class ArticleOut(ArticleCreate):
     created_at: datetime
     updated_at: datetime
     view_count: int
-    categories: List[CategoryResponse] = []
+    categories: List[CategoryBase] = []
+    subcategories: List[SubCategoryResponse] = [] 
     media_links: List[ArticleMediaOut] = []
     class Config:
         orm_mode = True
@@ -112,8 +108,9 @@ class ArticleCategoryIn(BaseModel):
         return v
 
 class ArticleOutWithCategory(ArticleOut):
-    categories: List[CategoryResponse] = []
-
+    categories: List[CategoryBase] = []
+    subcategories: List[SubCategoryResponse] = []
+    
     class Config:
         orm_mode = True
 
@@ -122,7 +119,8 @@ class ArticleOutSeparateMedia(ArticleCreate):
     created_at: datetime
     updated_at: datetime
     view_count: int
-    categories: List[CategoryResponse] = []
+    categories: List[CategoryBase] = []
+    subcategories: List[SubCategoryResponse] = [] 
     embedded_files: List[ArticleMediaOut] = []
     attached_files: List[ArticleMediaOut] = []
 

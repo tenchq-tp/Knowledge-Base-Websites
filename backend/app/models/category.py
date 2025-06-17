@@ -22,3 +22,4 @@ class SubCategory(Base):
     description = Column(String, nullable=True)
 
     category = relationship("Category", back_populates="subcategories")
+    articles = relationship("Article", secondary="article_subcategory", back_populates="subcategories")

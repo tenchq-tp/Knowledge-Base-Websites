@@ -28,11 +28,16 @@ class Article(Base):
     article_media = relationship("ArticleMedia", back_populates="article", cascade="all, delete-orphan")
     view_logs = relationship("ArticleViewLog", back_populates="article", cascade="all, delete-orphan")
     categories = relationship("Category", secondary="article_category", back_populates="articles")
-    
+    subcategories = relationship("SubCategory", secondary="article_subcategory", back_populates="articles")
+
     @property
     def category_names(self):
         return [c.name for c in self.categories] if self.categories else []
 
+    @property
+    def subcategory_names(self):
+        return [s.name for s in self.subcategories] if self.subcategories else []
+    
     @property
     def tag_names(self):
         return [t.name for t in self.tags]
@@ -88,13 +93,23 @@ class ArticleCategory(Base):
     
     __table_args__ = (UniqueConstraint("article_id", "category_id", name="_article_category_uc"),)
 
+class ArticleSubCategory(Base):
+    __tablename__ = "article_subcategory"
+    
+    id = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"))
+    subcategory_id = Column(Integer, ForeignKey("subcategories.id", ondelete="CASCADE"))
+
+    __table_args__ = (
+        UniqueConstraint("article_id", "subcategory_id", name="_article_subcategory_uc"),
+    )
+
 class Tag(Base):
     __tablename__ = "tag"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
     articles = relationship("Article", secondary="article_tag", back_populates="tags")
-
 
 class Hashtag(Base):
     __tablename__ = "hashtag"
@@ -103,12 +118,10 @@ class Hashtag(Base):
 
     articles = relationship("Article", secondary="article_hashtag", back_populates="hashtags")
 
-
 class ArticleTag(Base):
     __tablename__ = "article_tag"
     article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"), primary_key=True)
     tag_id = Column(Integer, ForeignKey("tag.id", ondelete="CASCADE"), primary_key=True)
-
 
 class ArticleHashtag(Base):
     __tablename__ = "article_hashtag"

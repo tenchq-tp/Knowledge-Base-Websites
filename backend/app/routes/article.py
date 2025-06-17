@@ -4,7 +4,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from app.db.session import get_db
-from app.schemas.article import ArticleCreate, ArticleOut, ArticleUpdate, ArticleMediaIn
+from app.schemas.article import ArticleCreate, ArticleOut, ArticleUpdate, ArticleMediaIn, TagOut, HashtagOut
 from app.crud.article import (
     create_article_with_categories,
     upload_and_attach_media,
@@ -16,11 +16,19 @@ from app.crud.article import (
     get_article_by_slug
 )
 from app.services.minio_service import get_minio_article_service
-from app.models.article import Article
+from app.models.article import Article, Tag, Hashtag
 from app.routes.auth import get_current_user
 from app.models.user import User
 
 router = APIRouter(prefix="/v1/api/articles", tags=["Articles"], dependencies=[Depends(get_current_user)])
+
+@router.get("/tags", response_model=List[TagOut])
+def get_all_tags(db: Session = Depends(get_db)):
+    return db.query(Tag).all()
+
+@router.get("/hashtags", response_model=List[HashtagOut])
+def get_all_hashtags(db: Session = Depends(get_db)):
+    return db.query(Hashtag).all()
 
 @router.post("/", response_model=ArticleOut)
 def create_article_with_media(
@@ -35,6 +43,7 @@ def create_article_with_media(
     hashtags: Optional[str] = Form(None),
     content: Optional[str] = Form(None),
     category_ids: Optional[str] = Form(None),
+    subcategory_ids: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     tags_list = str_to_list(tags)
@@ -48,6 +57,19 @@ def create_article_with_media(
         except ValueError:
             raise HTTPException(status_code=422, detail="Invalid datetime format, use YYYY-MM-DD HH:MM:SS")
 
+    category_ids_list, subcategory_ids_list = [], []
+    if category_ids:
+        try:
+            category_ids_list = [int(x.strip()) for x in category_ids.split(',') if x.strip()]
+        except ValueError:
+            raise HTTPException(status_code=422, detail="category_ids must be comma-separated integers")
+
+    if subcategory_ids:
+        try:
+            subcategory_ids_list = [int(x.strip()) for x in subcategory_ids.split(',') if x.strip()]
+        except ValueError:
+            raise HTTPException(status_code=422, detail="subcategory_ids must be comma-separated integers")
+
     article_data = ArticleCreate(
         title=title,
         slug=slug,
@@ -56,17 +78,12 @@ def create_article_with_media(
         start_date=parse_dt(start_date),
         end_date=parse_dt(end_date),
         tags=tags_list,
-        hashtags=hashtags_list
+        hashtags=hashtags_list,
+        category_ids=category_ids_list,
+        subcategory_ids=subcategory_ids_list  
     )
 
-    category_ids_list = []
-    if category_ids:
-        try:
-            category_ids_list = [int(x.strip()) for x in category_ids.split(',') if x.strip()]
-        except ValueError:
-            raise HTTPException(status_code=422, detail="category_ids must be comma-separated integers")
-
-    article = create_article_with_categories(db, article_data, category_ids_list)
+    article = create_article_with_categories(db, article_data, category_ids_list, subcategory_ids_list)
 
     minio_service = get_minio_article_service()
     media_refs = upload_and_attach_media(db, article, embedded_files or [], attached_files or [], minio_service)
@@ -101,6 +118,7 @@ def update_article_route(
     tags: Optional[str] = Form(None),
     hashtag: Optional[str] = Form(None),
     category_ids: Optional[str] = Form(None),
+    subcategory_ids: Optional[str] = Form(None),  # ✅ เพิ่ม subcategory_ids
     media_links: Optional[List[ArticleMediaIn]] = Body(None),
     db: Session = Depends(get_db)
 ):
@@ -115,12 +133,19 @@ def update_article_route(
     tags_list = str_to_list(tags)
     hashtag_list = str_to_list(hashtag)
 
-    category_ids_list = []
+    # ✅ แปลง category_ids และ subcategory_ids
+    category_ids_list, subcategory_ids_list = [], []
     if category_ids:
         try:
             category_ids_list = [int(x.strip()) for x in category_ids.split(',') if x.strip()]
         except ValueError:
             raise HTTPException(status_code=422, detail="category_ids must be comma-separated integers")
+
+    if subcategory_ids:
+        try:
+            subcategory_ids_list = [int(x.strip()) for x in subcategory_ids.split(',') if x.strip()]
+        except ValueError:
+            raise HTTPException(status_code=422, detail="subcategory_ids must be comma-separated integers")
 
     data = ArticleUpdate(
         title=title,
@@ -130,12 +155,13 @@ def update_article_route(
         start_date=parse_dt(start_date),
         end_date=parse_dt(end_date),
         tags=tags_list,
-        hashtag=hashtag_list,
-        media_links=media_links,
-        category_ids=category_ids_list
+        hashtags=hashtag_list,
+        category_ids=category_ids_list,
+        subcategory_ids=subcategory_ids_list  # ✅ เพิ่มตรงนี้
     )
 
-    article = update_article_with_categories(db, slug, data, category_ids_list)
+    # ✅ ส่ง subcategory_ids ไปด้วย
+    article = update_article_with_categories(db, slug, data, category_ids_list, subcategory_ids_list)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
 

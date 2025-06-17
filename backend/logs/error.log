@@ -489,3 +489,13 @@ DETAIL:  Key (slug)=(rra) already exists.
 2025-06-17 04:55:21,484 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
 2025-06-17 04:56:24,698 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
 2025-06-17 05:02:20,155 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'embedded_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}, {'type': 'value_error', 'loc': ('body', 'attached_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-17 07:22:55,684 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'embedded_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}, {'type': 'value_error', 'loc': ('body', 'attached_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-17 07:24:31,187 - app.db.session - ERROR - Database session error: 
+2025-06-17 07:24:51,072 - app.db.session - ERROR - Database session error: 
+2025-06-17 07:24:56,740 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(dd111) already exists.
+
+[SQL: INSERT INTO article (title, slug, status, content, start_date, end_date, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(status)s, %(content)s, %(start_date)s, %(end_date)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'dd111', 'slug': 'dd111', 'status': 'private', 'content': None, 'start_date': None, 'end_date': None, 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 17, 7, 24, 56, 737415), 'updated_at': datetime.datetime(2025, 6, 17, 7, 24, 56, 737418)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-17 07:26:51,914 - app.db.session - ERROR - Database session error: 
