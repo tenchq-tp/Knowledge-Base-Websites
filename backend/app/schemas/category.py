@@ -4,6 +4,7 @@ from typing import Optional, List
 class SubCategoryBase(BaseModel):
     name: str
     description: Optional[str] = None
+    status: Optional[str] = "public"
 
 class SubCategoryCreate(SubCategoryBase):
     category_id: int
@@ -22,6 +23,7 @@ class CategoryBase(BaseModel):
     icon: Optional[str] = None
     name: str
     description: Optional[str] = None
+    status: Optional[str] = "public"
 
 class CategoryCreate(CategoryBase):
     pass

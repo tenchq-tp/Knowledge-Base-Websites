@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, B
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
+from slugify import slugify
 
 from app.db.session import get_db
 from app.schemas.article import ArticleCreate, ArticleOut, ArticleUpdate, ArticleMediaIn, TagOut, HashtagOut
@@ -33,7 +34,6 @@ def get_all_hashtags(db: Session = Depends(get_db)):
 @router.post("/", response_model=ArticleOut)
 def create_article_with_media(
     title: str = Form(...),
-    slug: str = Form(...),
     embedded_files: List[UploadFile] = File(None),
     attached_files: List[UploadFile] = File(None),
     status: Optional[str] = Form("private"),
@@ -69,10 +69,12 @@ def create_article_with_media(
             subcategory_ids_list = [int(x.strip()) for x in subcategory_ids.split(',') if x.strip()]
         except ValueError:
             raise HTTPException(status_code=422, detail="subcategory_ids must be comma-separated integers")
-
+    
+    slug_basic = slugify(title)
+    
     article_data = ArticleCreate(
         title=title,
-        slug=slug,
+        slug=slug_basic,
         content=content,
         status=status,
         start_date=parse_dt(start_date),
@@ -91,6 +93,8 @@ def create_article_with_media(
     if content:
         article.content = replace_media_placeholders(content, media_refs)
 
+    new_slug = f"{article.id}/{slugify(article.title)}"
+    article.slug = new_slug
     db.commit()
     db.refresh(article)
     return article

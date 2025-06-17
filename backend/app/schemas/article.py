@@ -41,7 +41,7 @@ class ArticleMediaOut(BaseModel):
 
 class ArticleCreate(BaseModel):
     title: str
-    slug: str
+    slug: Optional[str] = None
     tags: Optional[List[str]] = []
     hashtags: Optional[List[str]] = []
     category_ids: Optional[List[int]] = []

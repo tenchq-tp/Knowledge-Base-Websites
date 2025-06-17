@@ -8,6 +8,7 @@ from app.schemas.article import ArticleCreate, ArticleUpdate
 from app.services.minio_service import MinIOArticleService
 from datetime import datetime, timedelta
 from sqlalchemy import text
+from slugify import slugify
 
 def str_to_list(s: Optional[str]) -> List[str]:
     if not s:
@@ -61,7 +62,6 @@ def create_article_with_categories(
         if missing_sub_ids:
             raise HTTPException(status_code=422, detail=f"SubCategory IDs not found: {sorted(missing_sub_ids)}")
 
-        # ✅ ตรวจสอบว่า subcategory ต้องอยู่ภายใต้ category ที่กำหนด
         for sub in existing_subcategories:
             if sub.category_id not in existing_cat_ids:
                 raise HTTPException(
@@ -69,30 +69,32 @@ def create_article_with_categories(
                     detail=f"SubCategory '{sub.name}' does not belong to selected categories"
                 )
 
-    # ✅ สร้าง Article
+    # ✅ สร้าง Article พร้อม slug ชั่วคราว
     article = Article(
         title=article_data.title,
-        slug=article_data.slug,
         content=article_data.content,
         status=article_data.status or "private",
         start_date=datetime.fromisoformat(article_data.start_date) if article_data.start_date else None,
         end_date=datetime.fromisoformat(article_data.end_date) if article_data.end_date else None,
-        view_count=0
+        view_count=0,
+        slug="temp"  # slug ต้องไม่เป็น None เพื่อผ่าน constraint
     )
 
     # ✅ ผูกความสัมพันธ์
-    if category_ids:
-        article.categories = db.query(Category).filter(Category.id.in_(category_ids)).all()
-    if subcategory_ids:
-        article.subcategories = existing_subcategories
-
-    # ✅ Tags และ Hashtags
+    article.categories = db.query(Category).filter(Category.id.in_(category_ids)).all()
+    article.subcategories = existing_subcategories
     article.tags = get_or_create_tags(db, article_data.tags or [])
     article.hashtags = get_or_create_hashtags(db, article_data.hashtags or [])
 
     db.add(article)
+    db.flush()  # ✅ ได้ article.id แล้ว แต่ยังไม่ commit
+
+    # ✅ อัปเดต slug ด้วย id ที่ได้
+    article.slug = f"{article.id}/{slugify(article.title)}"
+    
     db.commit()
     db.refresh(article)
+
     return article
 
 def upload_and_attach_media(db: Session, article: Article, embedded_files: List[UploadFile], attached_files: List[UploadFile], minio_service: MinIOArticleService):

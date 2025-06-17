@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from app.models.category import Category, SubCategory
 from app.schemas.category import CategoryCreate, CategoryUpdate, SubCategoryCreate, SubCategoryUpdate
 
@@ -42,6 +43,18 @@ def get_subcategories_by_category_id(db: Session, category_id: int):
     return db.query(SubCategory).filter(SubCategory.category_id == category_id).all()
 
 def create_subcategory(db: Session, subcategory: SubCategoryCreate):
+    # ??? Category ???????????????????
+    category = db.query(Category).filter(Category.id == subcategory.category_id).first()
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    # ??? Category ???? private ??? SubCategory ???? public -> ????
+    if category.status == "private" and subcategory.status == "public":
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot set subcategory to public when its category is private"
+        )
+
     db_subcategory = SubCategory(**subcategory.dict())
     db.add(db_subcategory)
     db.commit()
@@ -52,6 +65,19 @@ def update_subcategory(db: Session, subcategory_id: int, subcategory_data: SubCa
     subcategory = get_subcategory_by_id(db, subcategory_id)
     if not subcategory:
         return None
+
+    # ??????????? status ?????????????????????
+    new_status = subcategory_data.status or subcategory.status
+
+    # ???????????????????????? status ?????????????????
+    category = subcategory.category  # ???? relationship
+
+    if category.status == "private" and new_status == "public":
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot set subcategory to public when its category is private"
+        )
+
     for key, value in subcategory_data.dict(exclude_unset=True).items():
         setattr(subcategory, key, value)
     db.commit()
