@@ -1,79 +1,107 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
-from fastapi import Form, File, UploadFile, HTTPException
-from app.models.article import Article, ArticleMedia, ArticleViewLog, ArticleCategory
+from fastapi import HTTPException, UploadFile
+from app.models.article import Article, ArticleMedia, ArticleViewLog
+from app.models.category import Category
 from app.models.user import User, UserSession
 from app.schemas.article import ArticleCreate, ArticleUpdate
+from app.services.minio_service import MinIOArticleService
 from datetime import datetime, timedelta
-import json
 from sqlalchemy import text
 
-def create_article_with_categories(db: Session, article_data, category_ids: Optional[List[int]] = None):
-    if category_ids is None:
-        category_ids = []
+def str_to_list(s: Optional[str]) -> List[str]:
+    if not s:
+        return []
+    return [item.strip() for item in s.replace(',', ' ').split() if item.strip()]
 
-    # สร้าง article
-    article = Article(**article_data.dict())
+def create_article_with_categories(db: Session, article_data: ArticleCreate, category_ids: Optional[List[int]] = None):
+    category_ids = category_ids or []
+
+    if category_ids:
+        existing_categories = db.query(Category.id).filter(Category.id.in_(category_ids)).all()
+        existing_ids = {cat.id for cat in existing_categories}
+        missing_ids = set(category_ids) - existing_ids
+        if missing_ids:
+            raise HTTPException(status_code=422, detail=f"Category IDs not found: {sorted(missing_ids)}")
+
+    article = Article(
+        title=article_data.title,
+        slug=article_data.slug,
+        content=article_data.content,
+        status=article_data.status or "private",
+        schedule=datetime.fromisoformat(article_data.schedule) if article_data.schedule else None,
+        tags=article_data.tags or [],
+        hashtag=article_data.hashtag or [],
+        view_count=0
+    )
+
+    if category_ids:
+        article.categories = db.query(Category).filter(Category.id.in_(category_ids)).all()
+
     db.add(article)
     db.commit()
     db.refresh(article)
-
-    # สร้างความสัมพันธ์ article-category
-    for cat_id in category_ids:
-        # เช็คก่อนว่า record นี้มีอยู่แล้วไหม (ถ้าไม่ใช้ ON CONFLICT DO NOTHING)
-        exists = db.query(ArticleCategory).filter_by(article_id=article.id, category_id=cat_id).first()
-        if not exists:
-            article_category = ArticleCategory(article_id=article.id, category_id=cat_id)
-            db.add(article_category)
-
-    db.commit()
     return article
-def create_media(db: Session, filename: str, file_type: str, url: str):
-    media = ArticleMedia(filename=filename, file_type=file_type, url=url)
-    db.add(media)
-    db.commit()
-    db.refresh(media)
-    return media
 
-def parse_positions_field(positions: Optional[str] = Form(None), media_files: List[UploadFile] = File(default=[])):
-    if not positions or str(positions).strip() == '':
-        positions_list = [0] * len(media_files)
-    else:
-        try:
-            positions_list = json.loads(positions)
-            if not isinstance(positions_list, list) or not all(isinstance(i, int) for i in positions_list):
-                raise ValueError()
-        except Exception:
-            raise HTTPException(status_code=400, detail="positions must be a JSON list of integers")
-    if len(positions_list) != len(media_files):
-        raise HTTPException(status_code=400, detail="Number of media_files and positions must be equal")
-    return positions_list
+def upload_and_attach_media(db: Session, article: Article, embedded_files: List[UploadFile], attached_files: List[UploadFile], minio_service: MinIOArticleService):
+    media_refs = []
+    for file in embedded_files:
+        url = minio_service.upload_embedded_file(article.id, file)
+        media = ArticleMedia(
+            article_id=article.id,
+            filename=file.filename,
+            file_type=file.content_type,
+            url=url,
+            media_type="embedded",
+            uploaded_at=datetime.utcnow()
+        )
+        db.add(media)
+        media_refs.append((file.filename, url))
+
+    for file in attached_files:
+        url = minio_service.upload_attached_file(article.id, file)
+        media = ArticleMedia(
+            article_id=article.id,
+            filename=file.filename,
+            file_type=file.content_type,
+            url=url,
+            media_type="attached",
+            uploaded_at=datetime.utcnow()
+        )
+        db.add(media)
+        media_refs.append((file.filename, url))
+
+    db.commit()
+    return media_refs
+
+def replace_media_placeholders(content: str, media_refs: List[tuple]) -> str:
+    for filename, url in media_refs:
+        key = f"{{{filename.rsplit('.', 1)[0]}}}"
+        content = content.replace(key, url)
+    return content
 
 def get_article_by_slug(db: Session, slug: str):
     return db.query(Article).filter(Article.slug == slug).first()
 
 def list_articles(db: Session):
-    return db.query(Article).all()
+    return db.query(Article).order_by(Article.view_count.desc()).all()
 
-def update_article_with_categories(db: Session, slug: str, data: ArticleUpdate, category_ids: List[int]):
+def update_article_with_categories(db: Session, slug: str, data: ArticleUpdate, category_ids: List[int] = []):
     article = db.query(Article).filter(Article.slug == slug).first()
     if not article:
         return None
-
-    if data.title is not None:
-        article.title = data.title
-    if data.slug is not None:
-        article.slug = data.slug
-    if data.content is not None:
-        article.content = data.content
-
+    for field in ["title", "slug", "content", "status", "tags", "hashtag"]:
+        value = getattr(data, field)
+        if value is not None:
+            setattr(article, field, value)
+    if data.schedule:
+        article.schedule = datetime.fromisoformat(data.schedule)
     db.execute("DELETE FROM article_category WHERE article_id = :aid", {"aid": article.id})
     for cat_id in category_ids:
         db.execute(
             text("INSERT INTO article_category (article_id, category_id) VALUES (:a, :c) ON CONFLICT DO NOTHING"),
             {"a": article.id, "c": cat_id}
         )
-
     db.commit()
     db.refresh(article)
     return article
@@ -82,45 +110,29 @@ def delete_article(db: Session, slug: str):
     article = db.query(Article).filter(Article.slug == slug).first()
     if not article:
         return None
-
     db.query(ArticleMedia).filter(ArticleMedia.article_id == article.id).delete()
-
     db.delete(article)
-    db.commit()
-
-    used_media_ids = db.query(ArticleMedia.media_id).distinct().all()
-    used_media_ids = [m[0] for m in used_media_ids]
-    unused_media = db.query(ArticleMedia).filter(ArticleMedia.id.notin_(used_media_ids)).all()
-    for m in unused_media:
-        db.delete(m)
-
     db.commit()
     return True
 
 def record_article_view(db: Session, article: Article, user: User, session: UserSession):
     now = datetime.utcnow()
     one_hour_ago = now - timedelta(hours=1)
-
-    recent_view = (
-        db.query(ArticleViewLog)
-        .filter(
-            ArticleViewLog.article_id == article.id,
-            ArticleViewLog.user_id == user.id,
-            ArticleViewLog.ip_address == session.ip_address,
-            ArticleViewLog.viewed_at >= one_hour_ago,
-        )
-        .first()
-    )
-
+    recent_view = db.query(ArticleViewLog).filter(
+        ArticleViewLog.article_id == article.id,
+        ArticleViewLog.user_id == user.id,
+        ArticleViewLog.ip_address == session.ip_address,
+        ArticleViewLog.viewed_at >= one_hour_ago,
+    ).first()
     if not recent_view:
         view_log = ArticleViewLog(
             article_id=article.id,
             user_id=user.id,
             user_session_id=session.id,
             ip_address=session.ip_address,
-            viewed_at=now,
+            viewed_at=now
         )
         db.add(view_log)
-
         article.view_count = (article.view_count or 0) + 1
         db.commit()
+    return article

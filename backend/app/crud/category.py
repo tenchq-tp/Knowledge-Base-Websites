@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session 
+from sqlalchemy.orm import Session
 from app.models.category import Category, SubCategory
 from app.schemas.category import CategoryCreate, CategoryUpdate, SubCategoryCreate, SubCategoryUpdate
 
+# Category CRUD
 def get_all_category(db: Session):
     return db.query(Category).all()
 
@@ -29,11 +30,11 @@ def delete_category(db: Session, category_id: int):
     category = get_category_by_id(db, category_id)
     if not category:
         return None
-
     db.delete(category)
     db.commit()
     return category
 
+# SubCategory CRUD
 def get_subcategory_by_id(db: Session, subcategory_id: int):
     return db.query(SubCategory).filter(SubCategory.id == subcategory_id).first()
 

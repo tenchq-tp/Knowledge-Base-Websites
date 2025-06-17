@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, BigInteger, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, BigInteger, UniqueConstraint, Table
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, INET
+from sqlalchemy.dialects.postgresql import UUID, INET, ARRAY
 from datetime import datetime
 from app.db.database import Base
 from sqlalchemy import Enum
@@ -9,13 +9,17 @@ import enum
 class MediaTypeEnum(str, enum.Enum):
     embedded = "embedded"
     attached = "attached"
-    
+
 class Article(Base):
     __tablename__ = "article"
     id = Column(Integer, primary_key=True)
     title = Column(Text, nullable=False)
     slug = Column(String, unique=True, nullable=False)
+    status = Column(String, nullable=False, default="private")
+    tags = Column(ARRAY(String), default=[])  
+    hashtag = Column(ARRAY(String), default=[])
     content = Column(Text)
+    schedule = Column(DateTime, nullable=True)
     view_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
@@ -23,7 +27,7 @@ class Article(Base):
     article_media = relationship("ArticleMedia", back_populates="article", cascade="all, delete-orphan")
     view_logs = relationship("ArticleViewLog", back_populates="article", cascade="all, delete-orphan")
     categories = relationship("Category", secondary="article_category", back_populates="articles")
-
+    
     @property
     def category_names(self):
         return [c.name for c in self.categories] if self.categories else []

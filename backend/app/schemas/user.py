@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, date
 from app.models.user import GenderType
 from fastapi import Form
@@ -40,8 +40,8 @@ class UserProfileUpdate(BaseModel):
     address: Optional[str] = None
 
 class UserProfileResponse(UserProfileBase):
-    role_id: Optional[int] = None 
     role_name: Optional[str] = None
+    fav_article: Optional[List[int]] = None
     avatar_url: Optional[str] = None
     avatar_filename: Optional[str] = None
     full_name: str

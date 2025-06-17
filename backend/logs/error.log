@@ -433,3 +433,48 @@ DETAIL:  Key (slug)=(gg) already exists.
 2025-06-16 09:33:24,274 - app.db.session - ERROR - Database session error: 'ArticleMedia' object has no attribute 'position'
 2025-06-16 09:33:44,571 - app.db.session - ERROR - Database session error: 'ArticleMedia' object has no attribute 'position'
 2025-06-16 09:34:18,924 - app.db.session - ERROR - Database session error: 'ArticleMedia' object has no attribute 'position'
+2025-06-16 10:05:41,136 - app.db.session - ERROR - Database session error: 
+2025-06-16 10:09:34,944 - app.db.session - ERROR - Database session error: 3 validation errors for ArticleCreate
+tags
+  Input should be a valid list [type=list_type, input_value='ไทย', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+hashtag
+  Input should be a valid list [type=list_type, input_value='#ไทย', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.11/v/list_type
+schedule
+  Input should be a valid string [type=string_type, input_value=datetime.datetime(2025, 6, 20, 10, 0), input_type=datetime]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-06-16 10:13:17,809 - app.db.session - ERROR - Database session error: 1 validation error for ArticleCreate
+schedule
+  Input should be a valid string [type=string_type, input_value=datetime.datetime(2025, 6, 20, 10, 0), input_type=datetime]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-06-16 10:14:03,589 - app.db.session - ERROR - Database session error: 
+2025-06-16 10:14:11,062 - app.db.session - ERROR - Database session error: 1 validation error for ArticleCreate
+schedule
+  Input should be a valid string [type=string_type, input_value=datetime.datetime(2025, 6, 20, 10, 0), input_type=datetime]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-06-16 10:15:31,745 - app.db.session - ERROR - Database session error: 1 validation error for ArticleCreate
+schedule
+  Input should be a valid string [type=string_type, input_value=datetime.datetime(2025, 6, 20, 10, 0), input_type=datetime]
+    For further information visit https://errors.pydantic.dev/2.11/v/string_type
+2025-06-16 10:17:09,355 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
+2025-06-16 10:20:03,454 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
+2025-06-16 10:20:46,837 - app.db.session - ERROR - Database session error: 'str' object has no attribute '_sa_instance_state'
+2025-06-16 10:28:09,054 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'attached_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-16 10:28:23,094 - app.db.session - ERROR - Database session error: 3 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response', 'tags', 0), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': 'ไทย', 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+  {'type': 'model_attributes_type', 'loc': ('response', 'hashtag', 0), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': '#wmp', 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+  {'type': 'list_type', 'loc': ('response', 'status'), 'msg': 'Input should be a valid list', 'input': 'private', 'url': 'https://errors.pydantic.dev/2.11/v/list_type'}
+
+2025-06-16 10:30:15,942 - app.db.session - ERROR - Database session error: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "article_slug_key"
+DETAIL:  Key (slug)=(zz) already exists.
+
+[SQL: INSERT INTO article (title, slug, status, tags, hashtag, content, schedule, view_count, created_at, updated_at) VALUES (%(title)s, %(slug)s, %(status)s, %(tags)s::VARCHAR[], %(hashtag)s::VARCHAR[], %(content)s, %(schedule)s, %(view_count)s, %(created_at)s, %(updated_at)s) RETURNING article.id]
+[parameters: {'title': 'zz', 'slug': 'zz', 'status': 'private', 'tags': ['ไทย'], 'hashtag': ['#wmp'], 'content': 'zz {user_5036458879_5db619fe-ed15-4f4b-9121-df5855293dbf}', 'schedule': datetime.datetime(2025, 6, 20, 10, 0), 'view_count': 0, 'created_at': datetime.datetime(2025, 6, 16, 10, 30, 15, 938333), 'updated_at': datetime.datetime(2025, 6, 16, 10, 30, 15, 938336)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-06-16 10:30:26,206 - app.db.session - ERROR - Database session error: 3 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response', 'tags', 0), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': 'ไทย', 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+  {'type': 'model_attributes_type', 'loc': ('response', 'hashtag', 0), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': '#wmp', 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+  {'type': 'model_attributes_type', 'loc': ('response', 'status'), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': 'private', 'url': 'https://errors.pydantic.dev/2.11/v/model_attributes_type'}
+
+2025-06-17 03:24:21,392 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'embedded_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}, {'type': 'value_error', 'loc': ('body', 'attached_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]

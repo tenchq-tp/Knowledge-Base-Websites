@@ -4,6 +4,7 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 from app.models.user import User, UserProfile, UserSession
 from app.models.user_setting import UserSetting
+from app.models.article import Article
 from app.schemas.user import UserCreate, UserProfileUpdate, UserUpdate
 from app.core.security import get_password_hash, verify_password, generate_secure_token, hash_token
 
@@ -323,3 +324,32 @@ def remove_user_avatar(db: Session, user_id: int, modified_by: Optional[int] = N
         
         return f"user_{user_id}/{old_file_key}" if old_file_key else None
     return None
+
+def add_favorite_article(db: Session, profile: UserProfile, article_id: int) -> UserProfile:
+    article = db.query(Article).filter(Article.id == article_id).first()
+    if not article:
+        raise ValueError("Article not found")
+
+    fav_articles = profile.fav_article or []
+
+    if article_id in fav_articles:
+        raise ValueError("Article already in favorites")
+
+    fav_articles.append(article_id)
+    profile.fav_article = fav_articles
+
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
+    return profile
+
+
+def remove_favorite_article(db: Session, profile: UserProfile, article_id: int) -> UserProfile:
+    if not profile.fav_article or article_id not in profile.fav_article:
+        raise ValueError("Article not in favorites")
+
+    profile.fav_article.remove(article_id)
+    db.add(profile)
+    db.commit()
+    db.refresh(profile)
+    return profile

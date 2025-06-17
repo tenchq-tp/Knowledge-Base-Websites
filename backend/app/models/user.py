@@ -1,7 +1,8 @@
-from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, Enum, Text, Date, ForeignKey
+from sqlalchemy import Column, BigInteger, String, Boolean, DateTime, Enum, Text, Date, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import INET, UUID
+from sqlalchemy.dialects.postgresql import INET, UUID, ARRAY
+from sqlalchemy.ext.mutable import MutableList
 from app.db.database import Base
 from pydantic import BaseModel
 import enum
@@ -74,6 +75,8 @@ class UserProfile(Base):
     country = Column(String(50), index=True)
     city = Column(String(50), index=True)
     address = Column(Text)
+    
+    fav_article = Column(MutableList.as_mutable(ARRAY(BigInteger)), nullable=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(BigInteger, ForeignKey('users.id'), nullable=True)

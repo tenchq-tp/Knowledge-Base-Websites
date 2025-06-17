@@ -10,6 +10,15 @@ class MediaType(str, Enum):
     embedded = "embedded"
     attached = "attached"
     
+class TagOut(BaseModel):
+    name: str
+
+class HashtagOut(BaseModel):
+    name: str
+
+class StatusOut(BaseModel):
+    name: str
+
 class MediaFileOut(BaseModel):
     id: int
     filename: str
@@ -29,7 +38,11 @@ class ArticleMediaOut(BaseModel):
 class ArticleCreate(BaseModel):
     title: str
     slug: str
+    tags: Optional[List[str]] = []
+    hashtag: Optional[List[str]] = []
     content: Optional[str] = None
+    status: Optional[str] = "private"
+    schedule: Optional[str] = None
     
 class ArticleMediaIn(BaseModel):
     media_id: int
@@ -39,10 +52,17 @@ class ArticleUpdate(BaseModel):
     title: Optional[str] = None
     slug: Optional[str] = None
     content: Optional[str] = None
-    media_links: Optional[List[ArticleMediaIn]] = []
-
+    status: Optional[str] = None
+    schedule: Optional[str] = None
+    tags: Optional[List[str]] = None
+    hashtag: Optional[List[str]] = None
+    
 class ArticleOut(ArticleCreate):
     id: int
+    tags: List[str] = []
+    hashtag: List[str] = []
+    status: str
+    schedule: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     view_count: int

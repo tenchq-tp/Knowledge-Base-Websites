@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, List
 from app.db.database import get_db
 from app.schemas.user import UserProfileResponse, UserProfileUpdate
+from app.schemas.article import ArticleOut
 from app.crud import user as crud_user
 from app.models.user import User
+from app.models.article import Article  
 from app.routes.auth import get_current_user
 from app.services.minio_service import MinIOAvatarService, get_minio_avatar_service, validate_avatar_image, resize_avatar
 from app.crud.user import remove_user_avatar, update_user_avatar
@@ -201,7 +203,6 @@ def update_user_profile_by_id(
 
     return UserProfileResponse.from_orm(profile)
 
-
 @router.post("/avatar/{user_id}", response_model=UserProfileResponse)
 def upload_user_avatar(
     user_id: int,
@@ -278,3 +279,57 @@ def delete_user_avatar(
     minio_service.delete_avatar(old_file_key)
     
     return {"message": "Avatar deleted successfully"}
+
+@router.get("/me/favorite", response_model=List[ArticleOut])
+def get_favorite_articles(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    profile = current_user.profile
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    if not profile.fav_article:
+        return []
+
+    articles = (
+        db.query(Article)
+        .filter(Article.id.in_(profile.fav_article))
+        .all()
+    )
+
+    return articles
+
+@router.post("/me/favorite/{article_id}", response_model=UserProfileResponse)
+def add_favorite_article_route(
+    article_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    profile = current_user.profile
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    try:
+        profile = crud_user.add_favorite_article(db, profile, article_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return profile
+
+@router.delete("/me/favorite/{article_id}", response_model=UserProfileResponse)
+def remove_favorite_article_route(
+    article_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    profile = current_user.profile
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    try:
+        profile = crud_user.remove_favorite_article(db, profile, article_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return profile
