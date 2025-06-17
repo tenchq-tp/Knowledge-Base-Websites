@@ -16,8 +16,6 @@ class Article(Base):
     title = Column(Text, nullable=False)
     slug = Column(String, unique=True, nullable=False)
     status = Column(String, nullable=False, default="private")
-    tags = Column(ARRAY(String), default=[])  
-    hashtag = Column(ARRAY(String), default=[])
     content = Column(Text)
     start_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
@@ -25,6 +23,8 @@ class Article(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
+    tags = relationship("Tag", secondary="article_tag", back_populates="articles")
+    hashtags = relationship("Hashtag", secondary="article_hashtag", back_populates="articles")
     article_media = relationship("ArticleMedia", back_populates="article", cascade="all, delete-orphan")
     view_logs = relationship("ArticleViewLog", back_populates="article", cascade="all, delete-orphan")
     categories = relationship("Category", secondary="article_category", back_populates="articles")
@@ -32,10 +32,17 @@ class Article(Base):
     @property
     def category_names(self):
         return [c.name for c in self.categories] if self.categories else []
-    
+
+    @property
+    def tag_names(self):
+        return [t.name for t in self.tags]
+
+    @property
+    def hashtag_names(self):
+        return [h.name for h in self.hashtags]
+
     @property
     def media_links(self):
-        # alias ชื่อเดียวกับ schema ArticleOut.media_links
         return self.article_media or []
 
     @property
@@ -80,3 +87,30 @@ class ArticleCategory(Base):
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"))
     
     __table_args__ = (UniqueConstraint("article_id", "category_id", name="_article_category_uc"),)
+
+class Tag(Base):
+    __tablename__ = "tag"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
+
+    articles = relationship("Article", secondary="article_tag", back_populates="tags")
+
+
+class Hashtag(Base):
+    __tablename__ = "hashtag"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
+
+    articles = relationship("Article", secondary="article_hashtag", back_populates="hashtags")
+
+
+class ArticleTag(Base):
+    __tablename__ = "article_tag"
+    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"), primary_key=True)
+    tag_id = Column(Integer, ForeignKey("tag.id", ondelete="CASCADE"), primary_key=True)
+
+
+class ArticleHashtag(Base):
+    __tablename__ = "article_hashtag"
+    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"), primary_key=True)
+    hashtag_id = Column(Integer, ForeignKey("hashtag.id", ondelete="CASCADE"), primary_key=True)

@@ -12,10 +12,14 @@ class MediaType(str, Enum):
     
 class TagOut(BaseModel):
     name: str
-
+    class Config:
+        orm_mode = True
+        
 class HashtagOut(BaseModel):
     name: str
-
+    class Config:
+        orm_mode = True
+        
 class StatusOut(BaseModel):
     name: str
 
@@ -39,7 +43,7 @@ class ArticleCreate(BaseModel):
     title: str
     slug: str
     tags: Optional[List[str]] = []
-    hashtag: Optional[List[str]] = []
+    hashtags: Optional[List[str]] = []
     content: Optional[str] = None
     status: Optional[str] = "private"
     start_date: Optional[str] = None
@@ -57,12 +61,12 @@ class ArticleUpdate(BaseModel):
     start_date: Optional[str] = None
     end_date: Optional[str] = None  
     tags: Optional[List[str]] = None
-    hashtag: Optional[List[str]] = None
+    hashtags: Optional[List[str]] = None
     
 class ArticleOut(ArticleCreate):
     id: int
-    tags: List[str] = []
-    hashtag: List[str] = []
+    tags: List[TagOut]
+    hashtags: List[HashtagOut]
     status: str
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None

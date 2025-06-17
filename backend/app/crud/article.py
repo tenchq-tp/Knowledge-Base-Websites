@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from fastapi import HTTPException, UploadFile
-from app.models.article import Article, ArticleMedia, ArticleViewLog
+from app.models.article import Article, ArticleMedia, ArticleViewLog, Tag, Hashtag
 from app.models.category import Category
 from app.models.user import User, UserSession
 from app.schemas.article import ArticleCreate, ArticleUpdate
@@ -13,6 +13,28 @@ def str_to_list(s: Optional[str]) -> List[str]:
     if not s:
         return []
     return [item.strip() for item in s.replace(',', ' ').split() if item.strip()]
+
+def get_or_create_tags(db: Session, tag_names: List[str]):
+    tags = []
+    for name in tag_names:
+        tag = db.query(Tag).filter(Tag.name == name).first()
+        if not tag:
+            tag = Tag(name=name)
+            db.add(tag)
+            db.flush()  # เพื่อให้มี ID ทันที
+        tags.append(tag)
+    return tags
+
+def get_or_create_hashtags(db: Session, hashtag_names: List[str]):
+    hashtags = []
+    for name in hashtag_names:
+        h = db.query(Hashtag).filter(Hashtag.name == name).first()
+        if not h:
+            h = Hashtag(name=name)
+            db.add(h)
+            db.flush()
+        hashtags.append(h)
+    return hashtags
 
 def create_article_with_categories(db: Session, article_data: ArticleCreate, category_ids: Optional[List[int]] = None):
     category_ids = category_ids or []
@@ -31,13 +53,14 @@ def create_article_with_categories(db: Session, article_data: ArticleCreate, cat
         status=article_data.status or "private",
         start_date=datetime.fromisoformat(article_data.start_date) if article_data.start_date else None,
         end_date=datetime.fromisoformat(article_data.end_date) if article_data.end_date else None,
-        tags=article_data.tags or [],
-        hashtag=article_data.hashtag or [],
         view_count=0
     )
 
     if category_ids:
         article.categories = db.query(Category).filter(Category.id.in_(category_ids)).all()
+
+    article.tags = get_or_create_tags(db, article_data.tags or [])
+    article.hashtags = get_or_create_hashtags(db, article_data.hashtags or [])
 
     db.add(article)
     db.commit()
@@ -101,7 +124,11 @@ def update_article_with_categories(db: Session, slug: str, data: ArticleUpdate, 
         article.start_date = datetime.fromisoformat(data.start_date)
     if data.end_date:
         article.end_date = datetime.fromisoformat(data.end_date)
-
+    if data.tags is not None:
+        article.tags = get_or_create_tags(db, data.tags)
+    if data.hashtag is not None:
+        article.hashtags = get_or_create_hashtags(db, data.hashtags)
+        
     db.execute("DELETE FROM article_category WHERE article_id = :aid", {"aid": article.id})
     for cat_id in category_ids:
         db.execute(

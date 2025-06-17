@@ -32,13 +32,13 @@ def create_article_with_media(
     start_date: Optional[str] = Form(None),
     end_date: Optional[str] = Form(None),
     tags: Optional[str] = Form(None),
-    hashtag: Optional[str] = Form(None),
+    hashtags: Optional[str] = Form(None),
     content: Optional[str] = Form(None),
     category_ids: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     tags_list = str_to_list(tags)
-    hashtag_list = str_to_list(hashtag)
+    hashtags_list = str_to_list(hashtags)
 
     def parse_dt(dt_str):
         if not dt_str:
@@ -56,7 +56,7 @@ def create_article_with_media(
         start_date=parse_dt(start_date),
         end_date=parse_dt(end_date),
         tags=tags_list,
-        hashtag=hashtag_list
+        hashtags=hashtags_list
     )
 
     category_ids_list = []
