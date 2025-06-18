@@ -1,407 +1,1318 @@
+/* General Layout */
 .pageBackground {
+    background-color: #f0f2f5;
+    /* Light gray background */
+    min-height: calc(100vh - 60px);
+    /* Adjust for Navbar height */
+    padding: 0;
+    /* Remove padding from here as it's now on containers */
     display: flex;
-    justify-content: center;
-    padding: 40px 20px;
-    background-color: #f8f8f8;
+    flex-direction: column;
+    align-items: center;
 }
 
-.editorContainer {
-    background-color: #ffffff;
-    /* White background for the editor area */
-    border: 1px solid #e0e0e0;
-    /* Light border */
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    padding: 30px;
+/* กล่องรวมทั้งกลุ่ม */
+.groupSection {
+    margin: 0;
+    /* ไม่มีระยะขอบ */
+    padding: 0 16px;
+    /* ซ้าย-ขวา */
+    background: #f0f2f5;
+}
+
+/* หัวข้อ Section */
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 20px;
+    background-color: #003366;
+    /* สีพื้นหลังตามเดิม */
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+
     width: 100%;
-    max-width: 900px;
-    /* Max width for readability */
+    max-width: 1100px;
+    min-width: 1100px;
+
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-bottom: 4px solid #0055aa;
+
+    margin: 20px auto 0 auto;
+    /* เพิ่ม margin-top:20px; ซ้ายขวา auto กึ่งกลาง */
+
+    box-sizing: border-box;
+
+    /* ลองเพิ่มเพื่อลบ background ปริศนา */
+    background-image: none;
+    /* ลบ background image ถ้ามี */
+    box-shadow: none;
+    /* ลบเงาที่อาจเป็นสีดำ */
 }
 
-/* Article Title Input */
+/* ปรับ h2 ที่อยู่ข้างในให้ไม่ดันขอบ */
+.groupTitle {
+    margin: 0;
+    /* ลบ margin บน-ล่างของ <h2> */
+    padding: 0;
+}
+
+.sectionHeader:hover {
+    background-color: #002244;
+    /* น้ำเงินเข้มขึ้นตอน hover */
+}
+
+.sectionHeader svg {
+    color: white;
+}
+
+/* กล่อง section */
+.sectionContent {
+    width: 100%;
+    max-width: 1100px;
+    background-color: white;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    border-bottom: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ปรับความเรียบร้อย spacing และความสวยงาม */
 .title {
-    color: #1a1a1a;
+    font-size: 24px;
+    font-weight: bold;
     margin-bottom: 20px;
+    color: #333;
+}
+
+.inputTitle {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    color: #000;
+}
+
+.inputTitle::placeholder,
+.inputTag::placeholder,
+.select::placeholder,
+.input::placeholder {
+    color: #aaa;
+}
+
+.inputTag {
+    flex: 1;
+    padding: 10px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-right: 10px;
+    color: #000;
+}
+
+.addTagButton {
+    padding: 10px 14px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.addTagButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.tagsDisplay {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tagItem {
+    background-color: #e0e0e0;
+    padding: 6px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #333;
+}
+
+.removeTagButton {
+    background: none;
+    border: none;
+    color: red;
+    cursor: pointer;
+}
+
+.inputGroup {
+    margin-bottom: 24px;
+    flex: 1;
+}
+
+.inputRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.select,
+.input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    color: #000;
+}
+
+.fileAttachmentContainer {
+    margin-top: 30px;
+}
+
+.attachFileButton {
+    display: inline-block;
+    padding: 10px 14px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
+
+.hiddenFileInput {
+    display: none;
+}
+
+.attachedFilesDisplay {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.attachedFileItem {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.removeFileButton {
+    background: none;
+    border: none;
+    color: red;
+    cursor: pointer;
+}
+
+.noFilesMessage {
+    color: #777;
+    font-style: italic;
+}
+
+.saveButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #28a745;
+    /* สีเขียว */
+    color: white;
+    font-weight: 600;
+    padding: 13px 32px;
+    /* ปรับให้เล็กลง */
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    /* ขนาดฟอนต์ลดลง */
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+
+    /* อยู่ตรงกลาง */
+    margin: 20px auto 0 auto;
+    /* ด้านบน 20px, ซ้ายขวา auto */
+    display: block;
+    /* ทำให้ margin auto ซ้ายขวาทำงาน */
+    max-width: fit-content;
+    /* ขนาดตามเนื้อหา */
+}
+
+.saveButton:hover {
+    background-color: #1e7e34;
+    /* สีเข้มเวลาชี้ */
+}
+
+/* Sticky Toolbar Section */
+.stickyToolbar {
+    position: sticky;
+    top: 0px;
+    /* Adjust based on your Navbar height */
+    z-index: 1000;
+    /* Ensure it stays on top of other content */
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+
+    padding: 10px 20px;
+    /* Reduced vertical padding */
+    width: 100%;
+    min-width: 1100px;
+    max-width: 1100px;
+
+    border-radius: 0 0 8px 8px;
+    /* Rounded bottom corners, sharp top for floating toolbar */
+    box-sizing: border-box;
+
+    /* Space between toolbar and editor content */
+    /* Remove fixed height if any, let content define height */
+}
+
+.title {
+    color: #333;
     font-size: 2em;
+    margin-bottom: 10px;
+    /* Reduced margin */
     text-align: center;
 }
 
 .inputTitle {
-    width: calc(100% - 20px);
-    /* Adjust for padding */
-    padding: 12px 10px;
-    margin-bottom: 25px;
-    border: 1px solid #cccccc;
-    border-radius: 6px;
-    font-size: 1.4em;
+    width: 100%;
+    padding: 8px 15px;
+    /* Reduced padding */
+    margin-bottom: 15px;
+    /* Reduced margin */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1.1em;
+    /* Slightly smaller font for input */
+    font-weight: bold;
     color: #333;
-    background-color: #fefefe;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
 }
 
-.inputTitle::placeholder {
-    color: #999;
+/* This div creates space for the sticky toolbar so content doesn't get hidden behind it */
+.toolbarSpacer {
+    height: 40px;
+    /* **IMPORTANT: Adjust this height to match your new simplified toolbar's actual height.** */
+    /* Use your browser's developer tools to measure the height of .stickyToolbar */
+    /* It needs to be enough to push the editor content down past the toolbar. */
 }
 
-/* Menu Bar (Toolbar) Styles */
+/* Editor Content Container */
+.editorContainer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 1250px;
+    /* Max width for content */
+    box-sizing: border-box;
+    margin-top: 0;
+    /* No negative margin anymore */
+    margin-bottom: 50px;
+    /* Space at the bottom */
+}
+
+
+/* Tab Bar Styling */
+.tabBar {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 5px;
+    /* Reduced margin */
+    justify-content: flex-start;
+    /* Align tabs to the left */
+    flex-wrap: nowrap;
+    /* Prevent tabs from wrapping, try to keep them in one row */
+}
+
+.tabButton {
+    background-color: #f8f8f8;
+    color: #555;
+    border: none;
+    padding: 8px 12px;
+    /* Reduced padding */
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    /* Slightly smaller font */
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    margin-right: 5px;
+    margin-bottom: -1px;
+    /* To make active tab's border overlap */
+}
+
+.tabButton:hover {
+    background-color: #e0e0e0;
+}
+
+.tabButton.activeTab {
+    background-color: #ffffff;
+    color: #007bff;
+    border-bottom: 3px solid #007bff;
+}
+
+/* Menu Bar (Toolbox) - Adjusted for single row */
 .menuBar {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    /* Space between groups */
-    margin-bottom: 25px;
-    background-color: #f0f0f0;
-    /* Light grey background for the toolbar */
-    padding: 10px 15px;
-    border-radius: 6px;
-    border: 1px solid #e5e5e5;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+    /* Allow wrapping if too many items, but try to fit in one row */
+    gap: 8px;
+    /* Reduced gap */
+    padding: 5px 0;
+    /* Reduced padding */
+    align-items: center;
+    /* Align items vertically in center */
+    justify-content: flex-start;
+    /* Align items to the left */
+    min-height: 40px;
+    /* Ensure a minimum height for the toolbar row */
 }
 
 .menuGroup {
-    border: 1px solid #d0d0d0;
-    /* Subtle border for each group */
-    padding: 8px 10px 25px 10px;
-    /* Bottom padding for label space */
-    border-radius: 5px;
-    position: relative;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    /* Try to keep group items in one row */
     align-items: center;
-    gap: 8px;
-    /* Space between buttons within a group */
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    padding: 5px 8px;
+    /* Reduced padding */
+    position: relative;
     background-color: #fdfdfd;
-    /* Slightly whiter background for groups */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow for groups */
 }
 
 .menuGroupLabel {
-    position: absolute;
-    bottom: 5px;
-    /* Position label at the bottom */
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.7em;
-    /* Smaller font for labels */
-    color: #666;
-    /* Darker grey for labels */
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    /* Removed label as per "one row" simplification */
+    display: none;
 }
 
-/* Toolbar Buttons, Selects, and Color Pickers */
-.menuBar button,
-.menuBar select,
-.menuBar input[type="color"] {
-    background-color: #1a1a1a;
-    /* Black background for tools */
-    color: #ffffff;
-    /* White text/icon color */
-    border: 1px solid #000000;
-    /* Black border */
-    padding: 8px 12px;
+.menuGroup button {
+    background-color: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    padding: 6px 8px;
+    /* Reduced padding */
+    margin: 0 2px;
+    /* Reduced margin */
     cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    font-size: 0.85em;
+    /* Smaller font */
+    color: #333;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.95em;
-    min-width: 38px;
-    /* Ensure consistent button size */
     justify-content: center;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+    /* Prevent button text/icon from wrapping */
 }
 
-.menuBar button:hover,
-.menuBar select:hover,
-.menuBar input[type="color"]:hover {
-    background-color: #333333;
-    /* Darker grey on hover */
-    border-color: #333333;
+.menuGroup button:hover {
+    background-color: #e9e9e9;
+    border-color: #c0c0c0;
 }
 
-.menuBar button.active {
-    background-color: #555555;
-    /* Even darker grey for active state */
-    border-color: #555555;
-    color: #ffffff;
+.menuGroup button.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
 }
 
-/* Specific styles for select elements in the toolbar */
-.menuBar select {
+.menuGroup button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8f8f8;
+    border-color: #e0e0e0;
+    color: #999;
+}
+
+.menuGroup svg {
+    margin-right: 0px;
+    /* Remove margin for icons */
+    font-size: 1.1em;
+    /* Slightly larger icon */
+}
+
+.menuGroup button:last-child svg {
+    margin-right: 0;
+}
+
+.menuGroup select {
+    padding: 5px 3px;
+    /* Reduced padding */
+    margin: 0 2px;
+    /* Reduced margin */
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 0.85em;
+    /* Smaller font */
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    min-width: 70px;
+    /* Reduced min-width */
+}
+
+.menuGroup .colorInput {
+    width: 30px;
+    /* Smaller width */
+    height: 25px;
+    /* Smaller height */
+    padding: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+    margin: 0 2px;
+    /* Reduced margin */
+    cursor: pointer;
     -webkit-appearance: none;
-    /* Remove default arrow */
     -moz-appearance: none;
     appearance: none;
-    padding-right: 25px;
-    /* Space for custom arrow */
-    background-image: url('data:image/svg+xml;utf8,<svg fill="#ffffff" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-    /* White SVG arrow */
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
+    background-color: transparent;
 }
 
-.menuBar select option {
-    background-color: #ffffff;
-    /* White background for dropdown options */
-    color: #333333;
-    /* Black text for dropdown options */
-}
-
-/* Color input special sizing */
-.menuBar input[type="color"] {
-    width: 40px;
-    /* Small fixed width for color picker */
-    height: 38px;
-    /* Match button height */
+.menuGroup .colorInput::-webkit-color-swatch-wrapper {
     padding: 0;
+}
+
+.menuGroup .colorInput::-webkit-color-swatch {
     border: none;
-    /* Color picker has its own border styling */
-    cursor: pointer;
-    border-radius: 4px;
-    overflow: hidden;
-    /* Hide default color input border */
+    border-radius: 3px;
+}
+
+.menuGroup .colorInput::-moz-color-swatch-wrapper {
+    padding: 0;
+}
+
+.menuGroup .colorInput::-moz-color-swatch {
+    border: none;
+    border-radius: 3px;
 }
 
 
 /* Tiptap Editor Content Area */
 .editor {
     border: 1px solid #e0e0e0;
-    /* Light border around the editor content */
-    min-height: 500px;
-    /* Sufficient height for editing */
-    padding: 25px;
-    border-radius: 6px;
-    background-color: #ffffff;
-    /* White background for the actual editable area */
+    border-radius: 8px;
+    padding: 30px;
+    /* Increased padding */
+    min-height: 1200px;
+    /* **Increased min-height to make it much longer** */
+    outline: none;
+    font-family: Arial, sans-serif;
+    line-height: 1.7;
+    /* Slightly increased line height for readability */
     font-size: 1.1em;
-    /* Slightly larger base font size for content */
-    line-height: 1.6;
-    color: #222;
-    /* Dark grey for content text */
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
-    /* Subtle inner shadow */
-}
-
-/* Styles for elements inside the Tiptap editor */
-.editor p {
-    margin-bottom: 1em;
-    /* Space between paragraphs */
-}
-
-.editor h1,
-.editor h2,
-.editor h3,
-.editor h4,
-.editor h5,
-.editor h6 {
-    margin-top: 1.5em;
-    margin-bottom: 0.8em;
-    line-height: 1.2;
-    color: #1a1a1a;
-}
-
-.editor h1 {
-    font-size: 2.2em;
-}
-
-.editor h2 {
-    font-size: 1.8em;
-}
-
-.editor h3 {
-    font-size: 1.5em;
-}
-
-.editor h4 {
-    font-size: 1.3em;
-}
-
-.editor strong {
-    font-weight: bold;
-}
-
-.editor em {
-    font-style: italic;
-}
-
-.editor u {
-    text-decoration: underline;
-}
-
-.editor s {
-    text-decoration: line-through;
-}
-
-.editor sub {
-    vertical-align: sub;
-    font-size: 0.75em;
-}
-
-.editor sup {
-    vertical-align: super;
-    font-size: 0.75em;
-}
-
-.editor code {
-    font-family: 'Courier New', monospace;
-    background-color: #f0f0f0;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    color: #c7254e;
-}
-
-.editor pre {
-    background: #2d2d2d;
-    /* Dark background for code blocks */
-    color: #f8f8f2;
-    /* Light text color for code */
-    padding: 1em;
-    border-radius: 5px;
-    overflow-x: auto;
-    font-family: 'Fira Code', 'JetBrains Mono', monospace;
-    /* Preferred monospaced font */
-    font-size: 0.9em;
-    line-height: 1.5;
-}
-
-.editor blockquote {
-    border-left: 4px solid #cccccc;
-    margin-left: 0;
-    padding-left: 1em;
-    color: #666;
-    font-style: italic;
-}
-
-.editor ul,
-.editor ol {
-    padding-left: 1.5em;
-    margin-bottom: 1em;
-}
-
-.editor li {
-    margin-bottom: 0.5em;
-}
-
-.editor hr {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 2em 0;
-}
-
-.editor img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    /* Ensures it takes its own line */
-    margin: 1em 0;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.editor a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-.editor a:hover {
-    text-decoration: underline;
-}
-
-/* Tiptap Table Styles */
-.editor table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1em 0;
-    border: 1px solid #ddd;
-}
-
-.editor th,
-.editor td {
-    border: 1px solid #e0e0e0;
-    padding: 8px 12px;
-    text-align: left;
-}
-
-.editor th {
-    background-color: #f5f5f5;
-    font-weight: bold;
+    /* Slightly larger default text size */
     color: #333;
-}
+    width: 100%;
+    box-sizing: border-box;
 
-.editor tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
+    /* --- IMPORTANT CHANGES FOR THE BLACK BORDER --- */
+    &> :global(.ProseMirror) {
+        /* Target the ProseMirror content directly */
+        outline: none;
+        /* Remove default browser outline */
+        border: none;
+        /* Ensure no border is added by default or on focus */
+        box-shadow: none;
+        /* Remove any default box-shadow on focus */
+        min-height: 1140px;
+        /* Adjusted to fit within the increased .editor min-height (1200px - 2*30px padding) */
+    }
 
-/* Action Buttons (Save/Export) */
-.actionButtons {
-    margin-top: 30px;
-    display: flex;
-    gap: 15px;
-    justify-content: flex-end;
-    /* Align buttons to the right */
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-    /* Separator line */
-}
+    &> :global(.ProseMirror:focus),
+    /* When the editor content is focused */
+    &> :global(.ProseMirror:focus-visible) {
+        /* When focused via keyboard navigation */
+        outline: none;
+        /* Explicitly remove outline */
+        border: none;
+        /* Explicitly remove border */
+        box-shadow: none;
+        /* Explicitly remove box-shadow */
+    }
 
-.actionButtons button {
-    background-color: #007bff;
-    /* A pleasant blue for actions */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1em;
-}
+    /* --- END IMPORTANT CHANGES --- */
 
-.actionButtons button:hover {
-    background-color: #0056b3;
-    /* Darker blue on hover */
-    transform: translateY(-1px);
-    /* Slight lift effect */
-}
+    &> :global(.ProseMirror p) {
+        margin-bottom: 1em;
+    }
 
-.actionButtons button:active {
-    background-color: #004085;
-    transform: translateY(0);
+    &> :global(.ProseMirror h1),
+    &> :global(.ProseMirror h2),
+    &> :global(.ProseMirror h3),
+    &> :global(.ProseMirror h4),
+    &> :global(.ProseMirror h5),
+    &> :global(.ProseMirror h6) {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        line-height: 1.2;
+    }
+
+    &> :global(.ProseMirror h1) {
+        font-size: 2.2em;
+    }
+
+    &> :global(.ProseMirror h2) {
+        font-size: 1.8em;
+    }
+
+    &> :global(.ProseMirror h3) {
+        font-size: 1.5em;
+    }
+
+    &> :global(.ProseMirror ul),
+    &> :global(.ProseMirror ol) {
+        padding-left: 1.5em;
+        margin-bottom: 1em;
+    }
+
+    &> :global(.ProseMirror blockquote) {
+        border-left: 4px solid #ccc;
+        padding-left: 1em;
+        margin-left: 0;
+        font-style: italic;
+        color: #666;
+    }
+
+    &> :global(.ProseMirror code) {
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #f0f0f0;
+        padding: 2px 4px;
+        border-radius: 3px;
+    }
+
+    &> :global(.ProseMirror pre) {
+        background: #333;
+        color: #eee;
+        font-family: 'Courier New', Courier, monospace;
+        padding: 1em;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+
+    &> :global(.ProseMirror hr) {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin: 1em 0;
+    }
+
+    &> :global(.ProseMirror a) {
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+    &> :global(.ProseMirror img) {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 10px 0;
+    }
+
+    &> :global(.ProseMirror table) {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+    }
+
+    &> :global(.ProseMirror th),
+    &> :global(.ProseMirror td) {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+
+    &> :global(.ProseMirror th) {
+        background-color: #f0f0f0;
+    }
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+
+    .stickyToolbar,
     .editorContainer {
-        padding: 20px;
+        padding: 15px;
+        width: 95%;
+    }
+
+    .menuGroup button {
+        padding: 5px 7px;
+        font-size: 0.8em;
+    }
+
+    .menuGroup svg {
+        margin-right: 2px;
+    }
+
+    .menuGroup select {
+        min-width: 60px;
+        font-size: 0.8em;
+    }
+
+    .tabButton {
+        padding: 7px 10px;
+        font-size: 0.8em;
+    }
+
+    .toolbarSpacer {
+        height: 160px;
+        /* Adjust for smaller screens */
+    }
+
+    .editor {
+        min-height: 800px;
+        /* Adjusted for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+
+    .stickyToolbar,
+    .editorContainer {
+        padding: 10px;
+        width: 100%;
+        border-radius: 0;
     }
 
     .menuBar {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-wrap: wrap;
+        /* Allow wrapping on very small screens */
+        gap: 5px;
+        justify-content: center;
     }
 
     .menuGroup {
-        width: 100%;
-        justify-content: flex-start;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 3px;
+        border: none;
+        /* Remove border for groups on tiny screens */
+        box-shadow: none;
+        /* Remove shadow */
+        background-color: transparent;
     }
 
-    .menuBar button,
-    .menuBar select,
-    .menuBar input[type="color"] {
-        width: auto;
-        /* Allow buttons to size naturally */
+    .menuGroup button,
+    .menuGroup select,
+    .menuGroup .colorInput {
+        margin: 1px;
+        padding: 4px 6px;
+        font-size: 0.75em;
+    }
+
+    .menuGroup svg {
+        margin-right: 0;
+    }
+
+    .tabButton {
         flex-grow: 1;
-        /* Allow them to grow if needed */
+        margin-right: 0;
+        border-radius: 0;
     }
 
-    .actionButtons {
-        flex-direction: column;
-        align-items: stretch;
+    .stickyToolbar {
+        border-radius: 0;
     }
+
+    .toolbarSpacer {
+        height: 180px;
+        /* May need more height if buttons wrap significantly */
+    }
+
+    .editor {
+        min-height: 700px;
+        /* Adjusted for very small screens */
+    }
+}
+
+.colorIndicator {
+    width: 100%;
+    /* ให้แถบสีมีความกว้างเท่ากับปุ่ม */
+    height: 4px;
+    /* ความสูงของแถบสี */
+    border-radius: 0 0 4px 4px;
+    /* ทำให้ขอบล่างโค้งมนเล็กน้อย */
+    /* ตำแหน่งสัมพันธ์กับ .colorPickerWrapper */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    /* ทำให้ไม่รบกวนการคลิกปุ่ม */
+    transition: background-color 0.2s ease;
+    /* เพิ่ม transition ให้เปลี่ยนสีอย่างนุ่มนวล */
+}
+
+/* ปรับปรุง .colorPickerWrapper เล็กน้อยเพื่อให้มีที่ว่างสำหรับแถบสี */
+.colorPickerWrapper {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 3px;
+    /* เพิ่ม padding-bottom เพื่อให้มีที่ว่างสำหรับแถบสี */
+    padding-bottom: 1px;
+    /* ความสูงของแถบสี + เว้นระยะเล็กน้อย */
+}
+
+.hiddenColorInput {
+    /* ทำให้ input color ตัวจริงถูกซ่อนจากสายตา แต่ยังคงทำงานได้ */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    /* ทำให้มองไม่เห็น */
+    cursor: pointer;
+    /* ทำให้มี pointer เมื่อ hover แม้จะซ่อนอยู่ */
+    z-index: 1;
+    /* ให้ input อยู่ด้านบนปุ่ม เพื่อให้คลิกได้ */
+}
+
+.iconButton {
+    /* สไตล์สำหรับปุ่มที่แสดงไอคอน */
+    background-color: transparent;
+    border: 1px solid var(--border-color, #ccc);
+    /* สีขอบตามที่คุณต้องการ */
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    min-width: 10px;
+    /* เพื่อให้ไอคอนมีพื้นที่ */
+
+    box-sizing: border-box;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.iconButton:hover {
+    background-color: var(--hover-bg, #f0f0f0);
+    border-color: var(--hover-border, #aaa);
+}
+
+.iconButton:active {
+    background-color: var(--active-bg, #e0e0e0);
+}
+
+/* สไตล์สำหรับ FontAwesomeIcon ภายในปุ่ม */
+.iconButton svg {
+    font-size: 1.2em;
+    /* ขนาดไอคอนที่เหมาะสม */
+}
+
+
+.tagControlRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tagInput {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #fff;
+    transition: border-color 0.2s;
+    color: black;
+}
+
+.tagInput:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.tagAddButton,
+.tagSearchButton {
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ✅ ปุ่มเพิ่ม (เขียว) */
+.tagAddButton {
+    background-color: #28a745;
+    /* เขียว */
+}
+
+.tagAddButton:disabled,
+.disabledButton {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+.tagAddButton:hover {
+    background-color: #218838;
+}
+
+/* 🔵 ปุ่มค้นหา */
+.tagSearchButton {
+    background-color: #007bff;
+}
+
+.tagSearchButton:hover {
+    background-color: #0056b3;
+}
+
+.tagsDisplay {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tagItem {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.removeTagButton {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.removeTagButton:hover {
+    color: #dc3545;
+}
+
+.noTags {
+    color: #999;
+    font-size: 14px;
+}
+
+.inputTitle::placeholder,
+/* Added placeholder styling for inputTitle */
+.inputTag::placeholder {
+    color: #888888;
+    /* สี placeholder ที่มองเห็นได้บนพื้นหลังขาว */
+    opacity: 1;
+    /* Ensure placeholder is not transparent */
+}
+
+.inputTitle:focus,
+/* Added .inputTitle focus here */
+.inputTag:focus {
+    outline: none;
+    border-color: #6aabff;
+    /* Blue highlight on focus */
+    box-shadow: 0 0 0 3px rgba(106, 171, 255, 0.3);
+    /* Soft glow on focus */
+}
+
+
+.addTagButton,
+.removeTagButton {
+    background-color: #4CAF50;
+    /* Changed to a standard green for add button */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    /* More rounded */
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    /* Slightly smaller font for buttons */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    /* Added transform for subtle click effect */
+}
+
+.addTagButton:hover {
+    background-color: #45a049;
+    /* Darker green on hover */
+    transform: translateY(-1px);
+    /* Slight lift on hover */
+}
+
+.addTagButton:active {
+    transform: translateY(0);
+    /* Return on click */
+}
+
+.addTagButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    /* No transform when disabled */
+}
+
+.tagsDisplay {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    /* Increased space between tags for clarity */
+    margin-top: 15px;
+    /* Increased space above the displayed tags */
+    width: 100%;
+    /* Ensure tags take full width below input */
+}
+
+.tagItem {
+    background-color: #e0f2f7;
+    /* Light blue background for tags (unchanged from previous user request) */
+    border-radius: 20px;
+    padding: 8px 15px;
+    /* More padding for a softer look */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Space between tag text and remove button */
+    font-size: 0.95rem;
+    /* Consistent font size */
+    color: #333;
+    /* Dark font for tags (unchanged) */
+    border: 1px solid #b3e0ed;
+    /* Subtle border for definition */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    /* Soft shadow for depth */
+}
+
+.removeTagButton {
+    background: none;
+    color: #607d8b;
+    /* Darker gray for times icon */
+    border: none;
+    font-size: 0.85rem;
+    /* Slightly smaller icon */
+    padding: 0;
+    margin-left: 5px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    line-height: 1;
+    /* Ensures icon is vertically centered */
+}
+
+.removeTagButton:hover {
+    color: #f44336;
+    /* Red on hover for removal */
+}
+
+/* --- File Attachment Styles --- */
+.fileAttachmentContainer {
+    display: flex;
+    flex-direction: column;
+    /* Stack elements vertically */
+    gap: 10px;
+    margin-bottom: 20px;
+    /* Space below the file section */
+    width: 100%;
+}
+
+.attachFileButton {
+    background-color: #007bff;
+    /* Blue button for attaching files */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: inline-flex;
+    /* Use flex to align icon and text */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    /* Space between icon and text */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: fit-content;
+    /* Make button fit its content */
+    align-self: flex-start;
+    /* Align button to the left */
+}
+
+.attachFileButton:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.attachFileButton:active {
+    transform: translateY(0);
+}
+
+.hiddenFileInput {
+    /* Completely hide the actual file input */
+    display: none;
+    color: black;
+}
+
+.attachedFilesDisplay {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    /* Space between attached file items */
+    padding: 5px 0;
+}
+
+.attachedFileItem {
+    background-color: #e0f2f7;
+    /* Light blue background for file items */
+    border-radius: 20px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: #333;
+    border: 1px solid #b3e0ed;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.removeFileButton {
+    background: none;
+    color: #607d8b;
+    border: none;
+    font-size: 0.85rem;
+    padding: 0;
+    margin-left: 5px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+
+.removeFileButton:hover {
+    color: #f44336;
+}
+
+.noFilesMessage {
+    color: #777;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-left: 5px;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: space-between;
+    /* --- เปลี่ยนจาก flex-end เป็น space-between --- */
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+    /* --- สำคัญ: ทำให้กล่อง actions กว้างเต็มพื้นที่ Modal --- */
+}
+
+.modalActionButton,
+.modalCancelButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    /* --- เพิ่มเติม: ทำให้ปุ่มมีขนาดใกล้เคียงกัน (Optional) --- */
+    flex-grow: 1;
+    /* ทำให้ปุ่มขยายเต็มพื้นที่ที่เหลืออยู่ (ถ้ามี) */
+    max-width: 150px;
+    /* กำหนดขนาดสูงสุดของปุ่มเพื่อให้ไม่ใหญ่เกินไป */
+    text-align: center;
+    /* จัดข้อความในปุ่มให้อยู่กึ่งกลาง */
+    /* --- สิ้นสุดการเพิ่มเติม --- */
+}
+
+.modalActionButton {
+    background-color: #007bff;
+    color: white;
+}
+
+.modalActionButton:hover {
+    background-color: #0056b3;
+}
+
+.modalCancelButton {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.modalCancelButton:hover {
+    background-color: #ccc;
+}
+
+.modalInputGroup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    /* Space between input rows */
+}
+
+.modalInputGroup label {
+    flex-basis: 80px;
+    /* Fixed width for labels */
+    font-weight: bold;
+    color: #333;
+}
+
+.modalInput {
+    flex-grow: 1;
+    /* Input takes remaining space */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    min-width: 0;
+    /* Allow it to shrink if needed by flex-grow */
+}
+
+.modalInput:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.modalBackdrop {
+    position: fixed;
+    /* ให้อยู่เหนือทุกสิ่งบนหน้าจอ */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    /* กว้างเต็ม Viewport */
+    height: 100vh;
+    /* สูงเต็ม Viewport */
+    background-color: rgba(0, 0, 0, 0.7);
+    /* พื้นหลังสีดำทึบ 70% */
+    display: flex;
+    justify-content: center;
+    /* จัด Modal ให้อยู่ตรงกลางแนวนอน */
+    align-items: center;
+    /* จัด Modal ให้อยู่ตรงกลางแนวตั้ง */
+    z-index: 9999;
+    /* ค่า z-index สูงมาก เพื่อให้ Modal อยู่หน้าสุด */
+    backdrop-filter: blur(5px);
+    /* (Optional) เพิ่มเอฟเฟกต์เบลอพื้นหลัง */
+}
+
+/* MODIFIED: Modal Content */
+.modalContent {
+    background-color: #fff;
+    padding: 30px;
+    color: black;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    /* เพิ่มเงาให้ดูมีมิติมากขึ้น */
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 10000;
+    /* ให้ Modal Content อยู่เหนือ Backdrop (ไม่จำเป็นต้องสูงกว่า backdrop มากถ้าอยู่ภายใน) */
+    position: relative;
+    /* สำคัญ: เพื่อให้ z-index ทำงานได้ถูกต้องหากมี element ภายใน Modal ที่ซ้อนทับ */
+    transform: scale(0.95);
+    /* (Optional) เริ่มต้นด้วยขนาดเล็กกว่านิดหน่อย */
+    animation: modalPopIn 0.3s ease-out forwards;
+    /* (Optional) เพิ่ม animation */
+}
+
+/* (Optional) Animation for Modal */
+@keyframes modalPopIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.emoji-button-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.emoji-button {
+    font-size: 18px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+/* modal แบบ fixed ลอยบนสุด แต่อยู่ใต้ปุ่ม emoji */
+.emoji-picker-modal {
+    position: fixed;
+    z-index: 9999;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 8px;
+    width: 260px;
+    max-height: 180px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+}
+
+.emoji-picker-modal span {
+    font-size: 22px;
+    user-select: none;
+    transition: transform 0.15s ease-in-out;
+    cursor: pointer;
+    display: inline-block;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.emoji-picker-modal span:hover {
+    transform: scale(1.3);
+    background-color: #f0f0f0;
 }
