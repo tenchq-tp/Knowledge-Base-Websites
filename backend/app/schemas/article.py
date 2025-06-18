@@ -126,3 +126,17 @@ class ArticleOutSeparateMedia(ArticleCreate):
 
     class Config:
         orm_mode = True
+
+class ArticleCommentCreate(BaseModel):
+    comment: str
+    score: float
+
+class ArticleCommentOut(BaseModel):
+    id: int
+    user_id: int
+    comment: str
+    score: float
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

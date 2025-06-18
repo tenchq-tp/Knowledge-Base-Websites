@@ -507,3 +507,18 @@ DETAIL:  Key (slug)=(dd111) already exists.
 2025-06-17 10:01:24,960 - app.db.session - ERROR - Database session error: 'NoneType' object is not iterable
 2025-06-17 10:01:31,560 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'attached_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
 2025-06-17 10:04:52,259 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'embedded_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}, {'type': 'value_error', 'loc': ('body', 'attached_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
+2025-06-18 03:39:44,248 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:39:52,350 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:39:52,747 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:39:52,919 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:39:53,079 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:39:53,226 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:39:53,382 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:41:09,800 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:41:35,858 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:41:56,273 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:41:56,626 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:41:56,815 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:41:56,993 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:41:57,148 - app.db.session - ERROR - Database session error: 
+2025-06-18 03:43:30,054 - app.db.session - ERROR - Database session error: 

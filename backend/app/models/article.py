@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, BigInteger, UniqueConstraint, Table
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, BigInteger, UniqueConstraint, Table, Float
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, INET, ARRAY
+from sqlalchemy.dialects.postgresql import UUID, INET
 from datetime import datetime
 from app.db.database import Base
 from sqlalchemy import Enum
@@ -29,6 +29,7 @@ class Article(Base):
     view_logs = relationship("ArticleViewLog", back_populates="article", cascade="all, delete-orphan")
     categories = relationship("Category", secondary="article_category", back_populates="articles")
     subcategories = relationship("SubCategory", secondary="article_subcategory", back_populates="articles")
+    comments = relationship("ArticleComment", back_populates="article", cascade="all, delete-orphan")
 
     @property
     def category_names(self):
@@ -57,6 +58,16 @@ class Article(Base):
     @property
     def attached_media(self):
         return [m for m in self.media_links if m.media_type == MediaTypeEnum.attached]
+    
+    @property
+    def average_score(self) -> float:
+        if not self.comments:
+            return 0.0
+        return round(sum(c.score for c in self.comments) / len(self.comments), 2)
+
+    @property
+    def ordered_comments(self):
+        return sorted(self.comments, key=lambda c: c.created_at)
 
 class ArticleMedia(Base):
     __tablename__ = "article_media"
@@ -127,3 +138,16 @@ class ArticleHashtag(Base):
     __tablename__ = "article_hashtag"
     article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"), primary_key=True)
     hashtag_id = Column(Integer, ForeignKey("hashtag.id", ondelete="CASCADE"), primary_key=True)
+
+class ArticleComment(Base):
+    __tablename__ = "article_comment"
+
+    id = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey("article.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    comment = Column(Text, nullable=False)
+    score = Column(Float, nullable=False)  # ตั้งให้ max score เป็น 5
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    article = relationship("Article", back_populates="comments")
+    user = relationship("User", back_populates="comments")

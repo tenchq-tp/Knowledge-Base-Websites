@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from fastapi import HTTPException, UploadFile
-from app.models.article import Article, ArticleMedia, ArticleViewLog, Tag, Hashtag
+from app.models.article import Article, ArticleMedia, ArticleViewLog, Tag, Hashtag, ArticleComment
 from app.models.category import Category, SubCategory
 from app.models.user import User, UserSession
 from app.schemas.article import ArticleCreate, ArticleUpdate
@@ -136,7 +136,14 @@ def replace_media_placeholders(content: str, media_refs: List[tuple]) -> str:
     return content
 
 def get_article_by_slug(db: Session, slug: str):
-    return db.query(Article).filter(Article.slug == slug).first()
+    try:
+        article = db.query(Article).filter(Article.slug == slug).first()
+        if not article:
+            print(f"Article with slug '{slug}' not found in DB")
+        return article
+    except Exception as e:
+        print(f"Error querying article by slug '{slug}': {e}")
+        raise
 
 def list_articles(db: Session):
     return db.query(Article).order_by(Article.view_count.desc()).all()
@@ -180,24 +187,48 @@ def delete_article(db: Session, slug: str):
     db.commit()
     return True
 
-def record_article_view(db: Session, article: Article, user: User, session: UserSession):
-    now = datetime.utcnow()
-    one_hour_ago = now - timedelta(hours=1)
+def record_article_view(db: Session, article_id: int, user_id: int, ip_address: str):
+    one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+
     recent_view = db.query(ArticleViewLog).filter(
-        ArticleViewLog.article_id == article.id,
-        ArticleViewLog.user_id == user.id,
-        ArticleViewLog.ip_address == session.ip_address,
-        ArticleViewLog.viewed_at >= one_hour_ago,
+        ArticleViewLog.article_id == article_id,
+        ArticleViewLog.ip_address == ip_address,
+        ArticleViewLog.viewed_at >= one_hour_ago
     ).first()
-    if not recent_view:
-        view_log = ArticleViewLog(
-            article_id=article.id,
-            user_id=user.id,
-            user_session_id=session.id,
-            ip_address=session.ip_address,
-            viewed_at=now
+
+    if recent_view:
+        return False  # ไม่เพิ่ม view
+
+    # เพิ่ม log
+    new_log = ArticleViewLog(
+        article_id=article_id,
+        user_id=user_id,
+        ip_address=ip_address
+    )
+    db.add(new_log)
+
+    # เพิ่ม view_count
+    article = db.query(Article).filter(Article.id == article_id).first()
+    if article:
+        article.view_count += 1
+
+    db.commit()
+    return True
+
+def create_or_update_comment(db: Session, article_id: int, user_id: int, comment_text: str, score: float):
+    existing = db.query(ArticleComment).filter_by(article_id=article_id, user_id=user_id).first()
+    if existing:
+        existing.comment = comment_text
+        existing.score = score
+    else:
+        new_comment = ArticleComment(
+            article_id=article_id,
+            user_id=user_id,
+            comment=comment_text,
+            score=score
         )
-        db.add(view_log)
-        article.view_count = (article.view_count or 0) + 1
-        db.commit()
-    return article
+        db.add(new_comment)
+    db.commit()
+
+def get_comments_by_article(db: Session, article_id: int):
+    return db.query(ArticleComment).filter_by(article_id=article_id).order_by(ArticleComment.created_at.asc()).all()

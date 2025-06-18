@@ -40,7 +40,8 @@ class User(Base):
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan", foreign_keys="[UserProfile.user_id]")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     setting = relationship("UserSetting", back_populates="user", uselist=False)
-    
+    comments = relationship("ArticleComment", back_populates="user", cascade="all, delete-orphan")
+
     creator = relationship("User", foreign_keys=[created_by], remote_side=[id], post_update=True)
     modifier = relationship("User", foreign_keys=[modified_by], remote_side=[id], post_update=True)
     
