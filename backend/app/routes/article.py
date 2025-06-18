@@ -16,7 +16,8 @@ from app.crud.article import (
     delete_article,
     get_article_by_slug,
     create_or_update_comment,
-    get_comments_by_article
+    get_comments_by_article,
+    record_article_view
 )
 from app.services.minio_service import get_minio_article_service
 from app.models.article import Article, Tag, Hashtag
@@ -109,11 +110,50 @@ def create_article_with_media(
 def list_all_articles(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return list_articles(db)
 
-@router.get("/{slug:path}", response_model=ArticleOut)
-def get_article(slug: str, db: Session = Depends(get_db)):
+@router.post("/comment/{slug:path}", response_model=dict)
+def comment_article(
+    slug: str,
+    comment_data: ArticleCommentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     article = get_article_by_slug(db, slug)
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
+
+    create_or_update_comment(
+        db=db,
+        article_id=article.id,
+        user_id=current_user.id,
+        comment_text=comment_data.comment,
+        score=comment_data.score
+    )
+    return {"detail": "Comment submitted successfully"}
+
+@router.get("/comments/{slug:path}", response_model=List[ArticleCommentOut])
+def get_article_comments(slug: str, db: Session = Depends(get_db)):
+    print("Received slug:", slug)
+    article = get_article_by_slug(db, slug)
+    if not article:
+        print("Article not found for slug:", slug)
+        raise HTTPException(status_code=404, detail="Article not found")
+    return get_comments_by_article(db, article.id)
+
+@router.get("/{slug:path}", response_model=ArticleOut)
+def get_article(
+    slug: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    article = get_article_by_slug(db, slug)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    ip_address = request.client.host
+
+    record_article_view(db, article.id, current_user.id, ip_address)
+
     return article
 
 @router.put("/{slug:path}", response_model=ArticleOut)
@@ -184,31 +224,3 @@ def delete_article_route(slug: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Article not found")
     return {"detail": "Article deleted"}
 
-@router.post("/comment/{slug:path}", response_model=dict)
-def comment_article(
-    slug: str,
-    comment_data: ArticleCommentCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    article = get_article_by_slug(db, slug)
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
-
-    create_or_update_comment(
-        db=db,
-        article_id=article.id,
-        user_id=current_user.id,
-        comment_text=comment_data.comment,
-        score=comment_data.score
-    )
-    return {"detail": "Comment submitted successfully"}
-
-@router.get("/comments/{slug:path}", response_model=List[ArticleCommentOut])
-def get_article_comments(slug: str, db: Session = Depends(get_db)):
-    print("Received slug:", slug)
-    article = get_article_by_slug(db, slug)
-    if not article:
-        print("Article not found for slug:", slug)
-        raise HTTPException(status_code=404, detail="Article not found")
-    return get_comments_by_article(db, article.id)

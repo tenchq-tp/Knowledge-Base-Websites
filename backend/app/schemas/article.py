@@ -58,6 +58,20 @@ class ArticleMediaIn(BaseModel):
 class ArticleUpdate(ArticleCreate):
     pass
 
+class ArticleCommentCreate(BaseModel):
+    comment: str
+    score: float
+
+class ArticleCommentOut(BaseModel):
+    id: int
+    user_id: int
+    comment: str
+    score: float
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+        
 class ArticleOut(ArticleCreate):
     id: int
     tags: List[TagOut]
@@ -71,6 +85,9 @@ class ArticleOut(ArticleCreate):
     categories: List[CategoryBase] = []
     subcategories: List[SubCategoryResponse] = [] 
     media_links: List[ArticleMediaOut] = []
+    average_score: Optional[float] = None
+    comments: List[ArticleCommentOut] = []
+    
     class Config:
         orm_mode = True
 
@@ -123,20 +140,6 @@ class ArticleOutSeparateMedia(ArticleCreate):
     subcategories: List[SubCategoryResponse] = [] 
     embedded_files: List[ArticleMediaOut] = []
     attached_files: List[ArticleMediaOut] = []
-
-    class Config:
-        orm_mode = True
-
-class ArticleCommentCreate(BaseModel):
-    comment: str
-    score: float
-
-class ArticleCommentOut(BaseModel):
-    id: int
-    user_id: int
-    comment: str
-    score: float
-    created_at: datetime
 
     class Config:
         orm_mode = True
