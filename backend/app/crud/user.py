@@ -132,7 +132,7 @@ def verify_user_email(db: Session, user_id: int, verified_by: Optional[int] = No
     return True
 
 def create_user_session(db: Session, user_id: int, device_info: str = None, ip_address: str = None, user_agent: str = None,
-                        session_expires_minutes: int = 30, refresh_expires_hours: int = 168):
+                        session_expires_minutes: int = 600, refresh_expires_hours: int = 1000):
     session_token = generate_secure_token() 
     refresh_token = generate_secure_token() 
 

@@ -522,3 +522,4 @@ DETAIL:  Key (slug)=(dd111) already exists.
 2025-06-18 03:41:56,993 - app.db.session - ERROR - Database session error: 
 2025-06-18 03:41:57,148 - app.db.session - ERROR - Database session error: 
 2025-06-18 03:43:30,054 - app.db.session - ERROR - Database session error: 
+2025-06-18 04:39:59,659 - app.db.session - ERROR - Database session error: [{'type': 'value_error', 'loc': ('body', 'embedded_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}, {'type': 'value_error', 'loc': ('body', 'attached_files', 0), 'msg': "Value error, Expected UploadFile, received: <class 'str'>", 'input': '', 'ctx': {'error': ValueError("Expected UploadFile, received: <class 'str'>")}, 'url': 'https://errors.pydantic.dev/2.11/v/value_error'}]
