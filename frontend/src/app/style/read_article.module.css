@@ -1,0 +1,246 @@
+/* styles/article_reader.module.css */
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+.loading,
+.error,
+.noArticle {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.error {
+    color: #d9534f;
+    /* Red for errors */
+}
+
+.articleTitle {
+    font-size: 2.5em;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+}
+
+.tagsContainer,
+.hashtagsContainer,
+.categoryInfo,
+.dateInfo {
+    margin-bottom: 15px;
+    padding: 10px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.tagsContainer strong,
+.hashtagsContainer strong,
+.categoryInfo strong,
+.dateInfo strong {
+    margin-right: 8px;
+    color: #555;
+}
+
+.tagItem,
+.hashtagItem {
+    display: inline-block;
+    background-color: #e2f0fb;
+    /* Light blue */
+    color: #2b7bb9;
+    /* Darker blue */
+    padding: 5px 12px;
+    border-radius: 15px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+.categoryInfo span,
+.dateInfo span {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 0.95em;
+    color: #666;
+}
+
+.articleContent {
+    margin-top: 30px;
+    font-size: 1.1em;
+    color: #444;
+}
+
+/* Basic styling for Tiptap content elements for better readability */
+.articleContent p {
+    margin-bottom: 1em;
+}
+
+.articleContent h1,
+.articleContent h2,
+.articleContent h3,
+.articleContent h4,
+.articleContent h5,
+.articleContent h6 {
+    color: #2c3e50;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.2;
+}
+
+.articleContent h1 {
+    font-size: 2em;
+}
+
+.articleContent h2 {
+    font-size: 1.75em;
+}
+
+.articleContent h3 {
+    font-size: 1.5em;
+}
+
+.articleContent h4 {
+    font-size: 1.25em;
+}
+
+.articleContent h5 {
+    font-size: 1em;
+}
+
+.articleContent h6 {
+    font-size: 0.875em;
+}
+
+.articleContent ul,
+.articleContent ol {
+    margin-left: 25px;
+    margin-bottom: 1em;
+}
+
+.articleContent li {
+    margin-bottom: 0.5em;
+}
+
+.articleContent a {
+    color: #3498db;
+    text-decoration: underline;
+}
+
+.articleContent strong {
+    font-weight: bold;
+}
+
+.articleContent em {
+    font-style: italic;
+}
+
+.articleContent code {
+    background-color: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: "Courier New", Courier, monospace;
+}
+
+.articleContent pre {
+    background-color: #2d2d2d;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin-bottom: 1em;
+}
+
+.articleContent blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 15px;
+    margin-left: 0;
+    font-style: italic;
+    color: #666;
+}
+
+.articleContent img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 15px auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.articleContent table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.articleContent th,
+.articleContent td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.articleContent th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.articleContent hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 30px 0;
+}
+
+.articleContent .mention {
+    background-color: #ffed8d;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #5c4b01;
+}
+
+.attachedFiles {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #eee;
+}
+
+.attachedFiles h3 {
+    font-size: 1.4em;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.attachedFiles ul {
+    list-style: none;
+    padding: 0;
+}
+
+.attachedFiles li {
+    margin-bottom: 8px;
+}
+
+.attachedFiles a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #3498db;
+    text-decoration: none;
+    background-color: #eaf6ff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.attachedFiles a:hover {
+    background-color: #d1e7f5;
+}

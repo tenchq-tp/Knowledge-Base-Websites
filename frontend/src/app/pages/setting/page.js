@@ -32,13 +32,13 @@ export default function Setting() {
       localStorage.getItem("user_permissions") || "[]"
     );
 
-    const hasViewHome = permissions.some(
-      (perm) => perm.permission?.name === "view_home"
-    );
-    if (!hasViewHome) {
-      router.push("/pages/access-denied");
-      return;
-    }
+    // const hasViewHome = permissions.some(
+    //   (perm) => perm.permission?.name === "view_home"
+    // );
+    // if (!hasViewHome) {
+    //   router.push("/pages/access-denied");
+    //   return;
+    // }
 
     setCanManageUser(
       permissions.some((perm) => perm.permission?.name === "user_setting")
