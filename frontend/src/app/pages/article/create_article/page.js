@@ -36,6 +36,7 @@ import {
   faCheckSquare,
   faHeading,
   faCaretDown,
+  faImage,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // 💡 ฟีเจอร์เสริม
@@ -494,6 +495,9 @@ export default function CreateArticlePage() {
 
   const editor = useEditor({
     extensions: [
+      Placeholder.configure({
+        placeholder: "เริ่มต้นพิมพ์บทความของคุณที่นี่...",
+      }),
       // ของเดิมคุณ
       ArticleImage.configure({
         inline: true,
@@ -521,7 +525,7 @@ export default function CreateArticlePage() {
       Highlight.configure({ multicolor: true }),
       Superscript,
       Subscript,
-      Placeholder.configure({ placeholder: "เริ่มพิมพ์บทความของคุณ..." }),
+
       Link.configure({
         openOnClick: true,
         autolink: true,
@@ -546,26 +550,9 @@ export default function CreateArticlePage() {
       HorizontalRule, // แม้คุณ enable ใน StarterKit ก็สามารถใช้ extension ตรงนี้ได้เพื่อ config เพิ่มเติม
       TaskList,
       TaskItem,
-      Mention.configure({
-        HTMLAttributes: { class: "mention" },
-        suggestion: {
-          items: ({ query }) => {
-            return [
-              { id: 1, label: "@delta" },
-              { id: 2, label: "@support" },
-            ].filter((item) =>
-              item.label.toLowerCase().includes(query.toLowerCase())
-            );
-          },
-          render: () => {
-            // ต้องเขียน render UI dropdown ตามที่คุณใช้ (React, etc.)
-            return { onStart: () => {}, onUpdate: () => {}, onExit: () => {} };
-          },
-        },
-      }),
       Typography,
     ],
-    content: "<p>เริ่มต้นพิมพ์บทความของคุณที่นี่...</p>",
+    content: "",
   });
 
   const setFontSize = useCallback(
@@ -1633,6 +1620,17 @@ export default function CreateArticlePage() {
                   onChange={handleImageUpload}
                   className={styles.hiddenFileInput}
                 />
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById("image-upload-input").click()
+                  }
+                  className={styles.menuGroupButton}
+                  title="Insert Image"
+                >
+                  <FontAwesomeIcon icon={faImage} />
+                </button>
+
                 {/* ปุ่ม Insert Horizontal Rule (FloatingMenu เหมาะใช้เมนูนี้) */}
                 <button
                   type="button"
