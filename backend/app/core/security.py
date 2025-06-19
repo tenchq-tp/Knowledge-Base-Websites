@@ -9,26 +9,31 @@ from fastapi import HTTPException, status
 from .config import settings
 
 pwd_context = CryptContext(
-    schemes=["argon2", "bcrypt"],  # Prefer argon2, fallback to bcrypt
-    deprecated="auto",
-    argon2__rounds=3,
-    argon2__memory_cost=65536,
-    argon2__parallelism=1,
-    bcrypt__rounds=12
+    schemes=["argon2", "bcrypt"], #กำหนดว่าใช้วิธีการเข้ารหัสแบบ "argon2", "bcrypt"
+    deprecated="auto", #ถ้ามีหลายอัลกอริทึม จะเลือกอันที่ไม่ถูก mark ว่าเก่า
+    argon2__rounds=3, #จำนวนรอบในการประมวลผล(ยิ่งมากยิ่งปลอดภัยแต่ก็ใช้เวลานานขึ้น)ค่าdefaultทั่วไป: 2 – 4
+    argon2__memory_cost=65536, #หน่วยความจำที่ใช้ในการ hash = 64 MB ค่า default ที่แนะนำ: 64MB – 256MB ยิ่งสูง = ปลอดภัยขึ้นแต่กิน RAM มากขึ้น
+    argon2__parallelism=1, #จำนวน thread/CPU core ที่ใช้ประมวลผลพร้อมกัน
+    bcrypt__rounds=12 #จำนวนรอบของ bcrypt (รอบมากขึ้น → ปลอดภัยขึ้นแต่ช้าขึ้น)
 )
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+#ตรวจสอบว่า plaintext password ตรงกับ hashed password หรือไม่
+def verify_password(plain_password: str, hashed_password: str) -> bool: 
     return pwd_context.verify(plain_password, hashed_password)
 
+#แปลงรหัสผ่านธรรมดาเป็นแบบเข้ารหัส (hash) เพื่อเก็บในฐานข้อมูล
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
+#สร้าง token ใช้เป็น refresh token, session token
 def generate_secure_token(length: int = 32) -> str:
     return secrets.token_urlsafe(length)
 
+#ใช้ แฮช token ก่อนเก็บลงฐานข้อมูล เพื่อความปลอดภัย
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
+#สร้าง JWT Access Token
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, session_id: Optional[UUID] = None):
     to_encode = data.copy()
     
@@ -48,9 +53,11 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, s
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
+#สร้าง refresh token 32 bytes ไม่ใช่ JWT แต่เป็นแบบ random string
 def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
     return generate_secure_token(32)
 
+#ตรวจสอบว่า JWT token ถูกต้องหรือไม่
 def verify_token(token: str) -> str:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -69,6 +76,7 @@ def verify_token(token: str) -> str:
             detail="Could not validate credentials"
         )
 
+#ตรวจสอบว่ารหัสผ่านแข็งแรงพอหรือไม่
 def validate_password_strength(password: str) -> bool:
     if len(password) < 8:
         return False

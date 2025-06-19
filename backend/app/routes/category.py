@@ -20,7 +20,7 @@ def read_categories(
 ):
     return crud.get_all_category(db)
 
-@router.get("/{categorise_id}", response_model=schemas.CategoryResponse)
+@router.get("/{category_id}", response_model=schemas.CategoryResponse)
 def read_category(
     category_id: int,
     db: Session = Depends(get_db),
@@ -39,7 +39,7 @@ def create_category(
 ):
     return crud.create_category(db, category)
 
-@router.put("/{categorise_id}", response_model=schemas.CategoryResponse)
+@router.put("/{category_id}", response_model=schemas.CategoryResponse)
 def update_category(
     category_id: int,
     category: schemas.CategoryUpdate,
@@ -51,7 +51,7 @@ def update_category(
         raise HTTPException(status_code=404, detail="Category not found")
     return updated
 
-@router.delete("/{categorise_id}", response_model=schemas.CategoryResponse)
+@router.delete("/{category_id}", response_model=schemas.CategoryResponse)
 def delete_category(
     category_id: int,
     db: Session = Depends(get_db),
@@ -63,7 +63,7 @@ def delete_category(
     return deleted
 
 # SubCategories
-@router.get("/subcategories/{subcategories_id}", response_model=schemas.SubCategoryResponse)
+@router.get("/subcategories/{subcategory_id}", response_model=schemas.SubCategoryResponse)
 def get_subcategory_by_id(
     subcategory_id: int,
     db: Session = Depends(get_db),
@@ -82,7 +82,7 @@ def create_subcategory(
 ):
     return crud.create_subcategory(db, subcategory)
 
-@router.put("/subcategories/{subcategories_id}", response_model=schemas.SubCategoryResponse)
+@router.put("/subcategories/{subcategory_id}", response_model=schemas.SubCategoryResponse)
 def update_subcategory(
     subcategory_id: int,
     subcategory: schemas.SubCategoryUpdate,
@@ -94,7 +94,7 @@ def update_subcategory(
         raise HTTPException(status_code=404, detail="SubCategory not found")
     return updated
 
-@router.delete("/subcategories/{subcategories_id}", response_model=schemas.SubCategoryResponse)
+@router.delete("/subcategories/{subcategory_id}", response_model=schemas.SubCategoryResponse)
 def delete_subcategory(
     subcategory_id: int,
     db: Session = Depends(get_db),

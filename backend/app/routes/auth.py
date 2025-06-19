@@ -18,8 +18,11 @@ from fastapi.openapi.utils import get_openapi
 
 app = FastAPI()
 router = APIRouter(prefix="/v1/api/auth", tags=["Authentication"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/api/auth/login")
 
+#dependency class ใน FastAPI ที่ใช้สำหรับการดึง token (โดยเฉพาะ JWT token) จาก header ของ HTTP request เพื่อใช้ในการตรวจสอบสิทธิ์ (authentication)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/api/auth/login") 
+
+#ปรับ OpenAPI schema เพื่อให้ Swagger UI รองรับ OAuth2
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -107,7 +110,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), request: Reques
 
     device_info = get_device_info(request)
     
-    session, session_token, refresh_token = crud_user.create_user_session(
+    session, access_token, refresh_token = crud_user.create_user_session(
         db=db,
         user_id=user.id,
         device_info=device_info["device_info"],
@@ -135,7 +138,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), request: Reques
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="bearer",
-        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, #แแปลงจากนาที → วินาที เพื่อให้ expires_in ใน token response เป็นจำนวน วินาที ตามมาตรฐานที่ client คาดหวัง
         user=user_safe
     )
 
