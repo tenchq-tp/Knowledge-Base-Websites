@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import * as FaIcons from "react-icons/fa";
 import CreateCategoryModal from "../../component/create_category_modal";
+import SubcategoryModal from "./subcategory";
 import styles from "../../style/category.module.css";
 import Navbar from "../../component/Navbar";
 import Swal from "sweetalert2";
@@ -16,6 +17,9 @@ export default function CategoryPage() {
   const { t } = useTranslation();
   const { tokens, isDark } = useTheme();
   const [showModal, setShowModal] = useState(false);
+  const [showSubcategoryModal, setShowSubcategoryModal] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedCategoryIcon, setSelectedCategoryIcon] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -47,6 +51,11 @@ export default function CategoryPage() {
     }
   }
 
+  const handleModalClose = () => {
+  setShowModal(false);
+  setEditingCategory(null);
+};
+
   // เรียก fetch ครั้งแรกตอน mount
   useEffect(() => {
     fetchCategories();
@@ -63,6 +72,12 @@ export default function CategoryPage() {
   const handleEdit = (category) => {
     setEditingCategory(category);
     setShowModal(true);
+  };
+
+  const handleViewSubcategory = (category) => {
+    setSelectedCategoryId(category.id);
+    setSelectedCategoryIcon(category.icon);
+    setShowSubcategoryModal(true);
   };
 
   // ฟังก์ชันลบ category พร้อม Swal และ fetch ใหม่
@@ -120,7 +135,7 @@ export default function CategoryPage() {
       router.push("/pages/access-denied");
     }
   }, [router]);
-  
+
   useEffect(() => {
     const stored = localStorage.getItem("user_permissions");
     if (stored) {
@@ -177,6 +192,7 @@ export default function CategoryPage() {
             {t("navbar.category")}
           </button>
         )}
+        
 
         <div className={styles.grid}>
           {categories.map((cat) => {
@@ -234,6 +250,32 @@ export default function CategoryPage() {
                     </button>
                   )}
 
+                  {/* ปุ่มดู Subcategory ใหม่ */}
+                  {canRead && (
+                    <button
+                      className={styles.subcategoryBtn}
+                      onClick={(e) => {
+                        e.stopPropagation(); // ป้องกัน event bubbling
+                        handleViewSubcategory(cat);
+                      }}
+                      style={{
+                        backgroundColor: tokens.info,
+                        boxShadow: `0 4px 10px ${tokens.info}70`,
+                        color: "white",
+                      }}
+                    >
+                      {(() => {
+                        const { IconComponent, color } = parseIcon(cat.icon);
+                        return IconComponent ? (
+                          <IconComponent className={styles.icon} size={16} />
+                        ) : (
+                          <FaIcons.FaList className={styles.icon} />
+                        );
+                      })()}
+                      {t("actions.viewSubcategory", { defaultValue: "ดู Subcategory" })}
+                    </button>
+                  )}
+
                   {canRead && (
                     <button
                       className={styles.readBtn}
@@ -277,15 +319,24 @@ export default function CategoryPage() {
 
         {showModal && (
           <CreateCategoryModal
-            onClose={() => {
-              setShowModal(false);
-              setEditingCategory(null);
-            }}
+            onClose={handleModalClose}
             mode={editingCategory ? "edit" : "create"}
             categoryData={editingCategory}
             onUpdate={fetchCategories} // ส่งฟังก์ชัน fetch ใหม่ให้ modal
           />
         )}
+        {showSubcategoryModal && (
+          <SubcategoryModal
+            categoryId={selectedCategoryId}
+            categoryIcon={selectedCategoryIcon}
+            onClose={() => {
+              setShowSubcategoryModal(false);
+              setSelectedCategoryId(null);
+              setSelectedCategoryIcon(null);
+            }}
+          />
+        )}
+
       </div>
     </>
   );

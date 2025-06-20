@@ -133,6 +133,8 @@ export default function ProfilePage() {
         style={{
           backgroundColor: tokens.background,
           color: tokens.text,
+           minHeight: "100vh"
+          
         }}
       >
         <div className={styles.container}>

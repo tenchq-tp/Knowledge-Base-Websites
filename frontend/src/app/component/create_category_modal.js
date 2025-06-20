@@ -31,7 +31,6 @@ const colors = [
   "#ff9800", // Orange
   "#ff5722", // Deep Orange
 ];
-
 const categoryIcons = [
   "FaBook", // หนังสือ, ความรู้
   "FaGraduationCap", // การศึกษา
@@ -125,12 +124,14 @@ export default function CreateCategoryModal({
   onClose,
   mode = "create",
   categoryData = null,
+  onUpdate,
 }) {
   const [search, setSearch] = useState("");
   const [selectedIcon, setSelectedIcon] = useState(null);
   const [selectedColor, setSelectedColor] = useState("#000000");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { tokens, isDark } = useTheme();
@@ -138,12 +139,14 @@ export default function CreateCategoryModal({
   // ✅ ดึงข้อมูลเก่ามาใช้เมื่อ mode = "edit"
   useEffect(() => {
     if (mode === "edit" && categoryData) {
+      console.log("Category data:", categoryData);
       const [iconName, iconColorRaw] = categoryData.icon.split("_");
       const iconColor = "#" + iconColorRaw; // เติม # นำหน้า
       setSelectedIcon(iconName);
       setSelectedColor(colors.includes(iconColor) ? iconColor : "#000000");
       setName(categoryData.name || "");
       setDescription(categoryData.description || "");
+      setIsPublic(categoryData.status === "public");
     }
   }, [mode, categoryData]);
 
@@ -164,8 +167,7 @@ export default function CreateCategoryModal({
       const accessToken = localStorage.getItem("access_token");
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/categories${
-          mode === "edit" ? `/${categoryData.id}` : ""
+        `${process.env.NEXT_PUBLIC_API}/categories${mode === "edit" ? `/${categoryData.id}` : ""
         }`,
         {
           method: mode === "edit" ? "PUT" : "POST",
@@ -177,6 +179,7 @@ export default function CreateCategoryModal({
             icon: `${iconName}_${iconColor.replace("#", "")}`,
             name,
             description,
+            status: isPublic ? "public" : "private",
           }),
         }
       );
@@ -200,11 +203,10 @@ export default function CreateCategoryModal({
         background: tokens.surface,
         color: tokens.text,
       });
-
-      {
-        onClose();
-        window.location.reload();
+      if (onUpdate) {
+        await onUpdate();
       }
+      onClose();
     } catch (err) {
       setError(err.message || "Something went wrong");
 
@@ -261,9 +263,8 @@ export default function CreateCategoryModal({
           {colors.map((color) => (
             <div
               key={color}
-              className={`${styles.colorCircle} ${
-                selectedColor === color ? styles.colorSelected : ""
-              }`}
+              className={`${styles.colorCircle} ${selectedColor === color ? styles.colorSelected : ""
+                }`}
               style={{
                 backgroundColor: color,
                 border:
@@ -307,9 +308,8 @@ export default function CreateCategoryModal({
             return (
               <div
                 key={iconName}
-                className={`${styles.iconItem} ${
-                  selectedIcon === iconName ? styles.selected : ""
-                }`}
+                className={`${styles.iconItem} ${selectedIcon === iconName ? styles.selected : ""
+                  }`}
                 style={{
                   backgroundColor:
                     selectedIcon === iconName
@@ -369,6 +369,78 @@ export default function CreateCategoryModal({
           }}
         />
 
+        <div className={styles.toggleContainer}>
+          <label className={styles.label} style={{ color: tokens.text }}>
+            {t("categoryModal.visibilityLabel", { defaultValue: "Visibility" })}
+          </label>
+          <div className={styles.toggleWrapper}>
+            <div
+              className={styles.toggle}
+              onClick={() => setIsPublic(!isPublic)}
+              style={{
+                backgroundColor: tokens.background,
+                border: `2px solid ${tokens.border}`,
+                cursor: 'pointer',
+                width: '140px',
+                height: '40px',
+                borderRadius: '20px',
+                position: 'relative',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Background Slider */}
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '70px',
+                  height: '36px',
+                  backgroundColor: tokens.primary,
+                  borderRadius: '18px',
+                  left: isPublic ? '68px' : '2px',
+                  top: '2px',
+                  transition: 'all 0.3s ease',
+                  zIndex: 1
+                }}
+              />
+
+              {/* Private Text */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  color: !isPublic ? 'white' : tokens.textMuted,
+                  fontSize: '12px',
+                  fontWeight: !isPublic ? 'bold' : 'normal',
+                  zIndex: 2,
+                  transition: 'all 0.3s ease',
+                  userSelect: 'none'
+                }}
+              >
+                {t("categoryModal.private", { defaultValue: "Private" })}
+              </div>
+
+              {/* Public Text */}
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  color: isPublic ? 'white' : tokens.textMuted,
+                  fontSize: '12px',
+                  fontWeight: isPublic ? 'bold' : 'normal',
+                  zIndex: 2,
+                  transition: 'all 0.3s ease',
+                  userSelect: 'none'
+                }}
+              >
+                {t("categoryModal.public", { defaultValue: "Public" })}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {error && <p style={{ color: "red" }}>{error}</p>}
 
         <div className={styles.buttonGroup}>
@@ -388,8 +460,8 @@ export default function CreateCategoryModal({
                 ? `${t("categoryModal.updateBtn")}...`
                 : `${t("categoryModal.createBtn")}...`
               : mode === "edit"
-              ? t("categoryModal.updateBtn")
-              : t("categoryModal.createBtn")}
+                ? t("categoryModal.updateBtn")
+                : t("categoryModal.createBtn")}
           </button>
           <button
             className={styles.cancelBtn}
