@@ -20,8 +20,8 @@ import { useRouter } from "next/navigation";
 import api from "../../../lib/axios";
 
 export default function ProfilePage() {
-  const { t, i18n } = useTranslation();
-  const { tokens, isDark } = useTheme();
+  const { t } = useTranslation();
+  const { tokens } = useTheme();
   const [profile, setProfile] = useState(null);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
@@ -76,11 +76,6 @@ export default function ProfilePage() {
       if (section === "personal") setIsEditingPersonal(false);
       if (section === "address") setIsEditingAddress(false);
 
-      const successMessage =
-        section === "personal"
-          ? t("profile.savePersonalSuccess")
-          : t("profile.saveAddressSuccess");
-
       Swal.fire({
         icon: "success",
         title: t("profile.saveSuccess"),
@@ -133,8 +128,7 @@ export default function ProfilePage() {
         style={{
           backgroundColor: tokens.background,
           color: tokens.text,
-           minHeight: "100vh"
-          
+          minHeight: "100vh",
         }}
       >
         <div className={styles.container}>

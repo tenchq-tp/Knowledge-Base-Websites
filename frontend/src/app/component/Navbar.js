@@ -24,7 +24,7 @@ import "@/lib/i18n";
 export default function Navbar() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const [forceUpdate, setForceUpdate] = useState(0);
+
   const [username, setUsername] = useState(null);
   const [permissions, setPermissions] = useState([]);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
@@ -38,7 +38,6 @@ export default function Navbar() {
         console.log("token type:", typeof token, ", token value:", token);
 
         const now = Date.now() / 1000;
-        const expDate = new Date(decoded.exp * 1000).toLocaleString();
 
         if (decoded.exp < now) {
           console.log(

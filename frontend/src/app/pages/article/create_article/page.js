@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
-import { Node, mergeAttributes, Mark } from "@tiptap/core";
+import { Mark } from "@tiptap/core";
 import { Plugin, PluginKey } from "prosemirror-state";
 import { useEditor, EditorContent } from "@tiptap/react";
 import Swal from "sweetalert2";
@@ -33,9 +33,6 @@ import {
   faSearch,
   faMinus,
   faSmile,
-  faCheckSquare,
-  faHeading,
-  faCaretDown,
   faImage,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -52,16 +49,13 @@ import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 
-// 🔎 Mention
-import Mention from "@tiptap/extension-mention";
-
 // ✨ Typography
 import Typography from "@tiptap/extension-typography";
 
 // 👥 Collaboration
-import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 
+import Image from "@tiptap/extension-image";
+import { ResizableImage } from "tiptap-extension-resizable-image";
 import ImageResize from "tiptap-extension-resize-image";
 import "@tiptap/extension-text-style";
 import StarterKit from "@tiptap/starter-kit";
@@ -69,7 +63,6 @@ import Underline from "@tiptap/extension-underline";
 import TextStyle from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import TextAlign from "@tiptap/extension-text-align";
-import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Highlight from "@tiptap/extension-highlight";
 import Superscript from "@tiptap/extension-superscript";
@@ -91,6 +84,7 @@ const html2pdf = dynamic(() => import("html2pdf.js"), { ssr: false });
 
 // --- Hashtag Extension Code ---
 const HASHTAG_REGEX = /(#[\w\u0E00-\u0E7F]+)/g; // Added Thai character support
+
 const ArticleImage = Image.extend({
   name: "articleImage", // ชื่อเฉพาะของ Node นี้ (ใช้ใน toJSON และ addCommands)
 
@@ -195,7 +189,7 @@ const ArticleImage = Image.extend({
   },
 });
 
-export const Hashtag = Mark.create({
+const Hashtag = Mark.create({
   name: "hashtag",
 
   addAttributes() {
@@ -313,7 +307,7 @@ export const Hashtag = Mark.create({
 });
 
 // --- CustomFontSize Extension Code ---
-export const CustomFontSize = TextStyle.extend({
+const CustomFontSize = TextStyle.extend({
   addAttributes() {
     return {
       fontSize: {
@@ -432,14 +426,11 @@ const emojiList = [
   "😱",
 ];
 export default function CreateArticlePage() {
-  const [isImportTableModalOpen, setIsImportTableModalOpen] = useState(false);
   const [isNewTableModalOpen, setIsNewTableModalOpen] = useState(false);
   const [isHyperlinkModalOpen, setIsHyperlinkModalOpen] = useState(false);
-  const tableHtmlRef = useRef(null); // สำหรับ Import HTML Table
   const hyperlinkTextRef = useRef(null); // NEW Ref สำหรับ Input Text to display
   const hyperlinkUrlRef = useRef(null); // NEW Ref สำหรับ Input URL Path
   const [attachedImageFiles, setAttachedImageFiles] = useState([]);
-  const nextImagePlaceholderId = useRef(0);
   const newTableRowsRef = useRef(null); // NEW Ref สำหรับ Input Rows
   const newTableColsRef = useRef(null); // NEW Ref สำหรับ Input Cols
   const [activeTab, setActiveTab] = useState("Home");
@@ -517,8 +508,10 @@ export default function CreateArticlePage() {
         horizontalRule: true,
       }),
       ImageResize,
+      ResizableImage,
       Underline,
       CustomFontSize,
+
       Color,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       FontFamily,
@@ -553,6 +546,7 @@ export default function CreateArticlePage() {
       Typography,
     ],
     content: "",
+    editable: true,
   });
 
   const setFontSize = useCallback(
@@ -580,7 +574,7 @@ export default function CreateArticlePage() {
   const getHashtags = useCallback(() => {
     if (!editor) return [];
     const hashtags = [];
-    editor.state.doc.descendants((node, pos) => {
+    editor.state.doc.descendants((node) => {
       if (node.isText) {
         node.marks.forEach((mark) => {
           if (mark.type.name === "hashtag") {
@@ -893,7 +887,7 @@ export default function CreateArticlePage() {
         try {
           const errorData = await response.json();
           errorDetail = errorData.detail || errorData.message || errorDetail;
-        } catch (jsonError) {
+        } catch {
           errorDetail += ` สถานะ: ${response.status} ${response.statusText}`;
         }
         throw new Error(errorDetail);

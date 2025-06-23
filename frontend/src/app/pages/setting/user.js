@@ -40,13 +40,16 @@ export default function UserSettings() {
       address: "",
     },
   });
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
 
   const fetchRoles = async () => {
     setIsLoadingRoles(true);
     try {
       const { data } = await api.get("/roles");
       setRolesList(data);
-    } catch (error) {
+    } catch {
       showAlert("error", "Error", "Failed to load roles. Please try again.");
     } finally {
       setIsLoadingRoles(false);
@@ -107,14 +110,14 @@ export default function UserSettings() {
         is_active: user.is_active,
         updatedDate: user.updated_at
           ? new Date(user.updated_at)
-            .toLocaleString("en-GB", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-            .replace(",", "")
+              .toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+              .replace(",", "")
           : "N/A",
         profile: user.profile || {},
       }));
@@ -302,21 +305,24 @@ export default function UserSettings() {
           prev.map((user) =>
             user.id === editingUser.id
               ? {
-                ...user,
-                username: userFormData.username,
-                email: userFormData.email,
-                role: userFormData.role,
-                profile: {...userFormData.profile, role_name: userFormData.role},
-                updatedDate: new Date()
-                  .toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                  .replace(",", ""),
-              }
+                  ...user,
+                  username: userFormData.username,
+                  email: userFormData.email,
+                  role: userFormData.role,
+                  profile: {
+                    ...userFormData.profile,
+                    role_name: userFormData.role,
+                  },
+                  updatedDate: new Date()
+                    .toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                    .replace(",", ""),
+                }
               : user
           )
         );
@@ -429,8 +435,9 @@ export default function UserSettings() {
 
             <td style={{ textAlign: "center" }}>
               <span
-                className={`status-badge ${user.status === "active" ? "status-active" : "status-inactive"
-                  }`}
+                className={`status-badge ${
+                  user.status === "active" ? "status-active" : "status-inactive"
+                }`}
               >
                 {user.status}
               </span>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,7 +11,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import "../../../style/login.css";
-import apiWithoutAuth from '../../../../lib/axiosWithoutAuth';
 
 export default function ChangePasswordPage() {
   const [username, setUsername] = useState("");
@@ -48,40 +47,31 @@ export default function ChangePasswordPage() {
     setIsLoading(true);
 
     try {
-    const response = await apiWithoutAuth.post("/users/change-password", {
-      username: username,
-      old_password: oldPassword,
-      new_password: newPassword,
-    });
-
-
-      const data = response.data;
-
-        Swal.fire({
-          icon: "success",
-          title: "Password Changed!",
-          text: "You can now log in with your new password",
-          confirmButtonText: "Login",
-        }).then(() => {
-          router.push("/pages/login");
-        });
+      Swal.fire({
+        icon: "success",
+        title: "Password Changed!",
+        text: "You can now log in with your new password",
+        confirmButtonText: "Login",
+      }).then(() => {
+        router.push("/pages/login");
+      });
     } catch (error) {
       console.error("Change password error:", error);
       if (error.response && error.response.data && error.response.data.detail) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response.data.detail,
-        confirmButtonText: "Try Again",
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Server Error",
-        text: "Could not connect to server",
-        confirmButtonText: "OK",
-      });
-    }
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.response.data.detail,
+          confirmButtonText: "Try Again",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Server Error",
+          text: "Could not connect to server",
+          confirmButtonText: "OK",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

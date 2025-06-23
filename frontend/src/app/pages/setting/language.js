@@ -17,7 +17,7 @@ export default function LanguageSettings() {
     try {
       const lang = localStorage.getItem("language");
       return { language: lang || "en" };
-    } catch (error) {
+    } catch {
       return { language: "en" };
     }
   });

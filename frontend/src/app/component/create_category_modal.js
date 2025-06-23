@@ -134,7 +134,7 @@ export default function CreateCategoryModal({
   const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { tokens, isDark } = useTheme();
+  const { tokens } = useTheme();
   const { t } = useTranslation();
   // ✅ ดึงข้อมูลเก่ามาใช้เมื่อ mode = "edit"
   useEffect(() => {
@@ -167,7 +167,8 @@ export default function CreateCategoryModal({
       const accessToken = localStorage.getItem("access_token");
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/categories${mode === "edit" ? `/${categoryData.id}` : ""
+        `${process.env.NEXT_PUBLIC_API}/categories${
+          mode === "edit" ? `/${categoryData.id}` : ""
         }`,
         {
           method: mode === "edit" ? "PUT" : "POST",
@@ -188,21 +189,21 @@ export default function CreateCategoryModal({
         throw new Error("Failed to save category");
       }
 
-      const data = await response.json();
+      // const data = await response.json();
 
-      const result = await Swal.fire({
-        icon: "success",
-        title: t("categoryModal.successTitle"),
-        text:
-          mode === "edit"
-            ? t("categoryModal.successUpdate")
-            : t("categoryModal.successCreate"),
+      // const result = await Swal.fire({
+      //   icon: "success",
+      //   title: t("categoryModal.successTitle"),
+      //   text:
+      //     mode === "edit"
+      //       ? t("categoryModal.successUpdate")
+      //       : t("categoryModal.successCreate"),
 
-        confirmButtonColor: tokens.primary,
-        cancelButtonColor: tokens.error,
-        background: tokens.surface,
-        color: tokens.text,
-      });
+      //   confirmButtonColor: tokens.primary,
+      //   cancelButtonColor: tokens.error,
+      //   background: tokens.surface,
+      //   color: tokens.text,
+      // });
       if (onUpdate) {
         await onUpdate();
       }
@@ -263,8 +264,9 @@ export default function CreateCategoryModal({
           {colors.map((color) => (
             <div
               key={color}
-              className={`${styles.colorCircle} ${selectedColor === color ? styles.colorSelected : ""
-                }`}
+              className={`${styles.colorCircle} ${
+                selectedColor === color ? styles.colorSelected : ""
+              }`}
               style={{
                 backgroundColor: color,
                 border:
@@ -308,8 +310,9 @@ export default function CreateCategoryModal({
             return (
               <div
                 key={iconName}
-                className={`${styles.iconItem} ${selectedIcon === iconName ? styles.selected : ""
-                  }`}
+                className={`${styles.iconItem} ${
+                  selectedIcon === iconName ? styles.selected : ""
+                }`}
                 style={{
                   backgroundColor:
                     selectedIcon === iconName
@@ -380,43 +383,43 @@ export default function CreateCategoryModal({
               style={{
                 backgroundColor: tokens.background,
                 border: `2px solid ${tokens.border}`,
-                cursor: 'pointer',
-                width: '140px',
-                height: '40px',
-                borderRadius: '20px',
-                position: 'relative',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                overflow: 'hidden'
+                cursor: "pointer",
+                width: "140px",
+                height: "40px",
+                borderRadius: "20px",
+                position: "relative",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                overflow: "hidden",
               }}
             >
               {/* Background Slider */}
               <div
                 style={{
-                  position: 'absolute',
-                  width: '70px',
-                  height: '36px',
+                  position: "absolute",
+                  width: "70px",
+                  height: "36px",
                   backgroundColor: tokens.primary,
-                  borderRadius: '18px',
-                  left: isPublic ? '68px' : '2px',
-                  top: '2px',
-                  transition: 'all 0.3s ease',
-                  zIndex: 1
+                  borderRadius: "18px",
+                  left: isPublic ? "68px" : "2px",
+                  top: "2px",
+                  transition: "all 0.3s ease",
+                  zIndex: 1,
                 }}
               />
 
               {/* Private Text */}
               <div
                 style={{
-                  position: 'absolute',
-                  left: '12px',
-                  color: !isPublic ? 'white' : tokens.textMuted,
-                  fontSize: '12px',
-                  fontWeight: !isPublic ? 'bold' : 'normal',
+                  position: "absolute",
+                  left: "12px",
+                  color: !isPublic ? "white" : tokens.textMuted,
+                  fontSize: "12px",
+                  fontWeight: !isPublic ? "bold" : "normal",
                   zIndex: 2,
-                  transition: 'all 0.3s ease',
-                  userSelect: 'none'
+                  transition: "all 0.3s ease",
+                  userSelect: "none",
                 }}
               >
                 {t("categoryModal.private", { defaultValue: "Private" })}
@@ -425,14 +428,14 @@ export default function CreateCategoryModal({
               {/* Public Text */}
               <div
                 style={{
-                  position: 'absolute',
-                  right: '12px',
-                  color: isPublic ? 'white' : tokens.textMuted,
-                  fontSize: '12px',
-                  fontWeight: isPublic ? 'bold' : 'normal',
+                  position: "absolute",
+                  right: "12px",
+                  color: isPublic ? "white" : tokens.textMuted,
+                  fontSize: "12px",
+                  fontWeight: isPublic ? "bold" : "normal",
                   zIndex: 2,
-                  transition: 'all 0.3s ease',
-                  userSelect: 'none'
+                  transition: "all 0.3s ease",
+                  userSelect: "none",
                 }}
               >
                 {t("categoryModal.public", { defaultValue: "Public" })}
@@ -460,8 +463,8 @@ export default function CreateCategoryModal({
                 ? `${t("categoryModal.updateBtn")}...`
                 : `${t("categoryModal.createBtn")}...`
               : mode === "edit"
-                ? t("categoryModal.updateBtn")
-                : t("categoryModal.createBtn")}
+              ? t("categoryModal.updateBtn")
+              : t("categoryModal.createBtn")}
           </button>
           <button
             className={styles.cancelBtn}

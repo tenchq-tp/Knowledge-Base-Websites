@@ -15,7 +15,7 @@ import api from "../../../lib/axios";
 
 export default function CategoryPage() {
   const { t } = useTranslation();
-  const { tokens, isDark } = useTheme();
+  const { tokens } = useTheme();
   const [showModal, setShowModal] = useState(false);
   const [showSubcategoryModal, setShowSubcategoryModal] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -41,10 +41,8 @@ export default function CategoryPage() {
         setCategories(data);
       } else {
         setCategories([]); // กรณีไม่ใช่ array ตั้งเป็น array ว่าง
-        console.error("Data is not an array");
       }
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
+    } catch {
       setCategories([]); // กรณี error ตั้ง array ว่าง
     } finally {
       setLoading(false);
@@ -52,9 +50,9 @@ export default function CategoryPage() {
   }
 
   const handleModalClose = () => {
-  setShowModal(false);
-  setEditingCategory(null);
-};
+    setShowModal(false);
+    setEditingCategory(null);
+  };
 
   // เรียก fetch ครั้งแรกตอน mount
   useEffect(() => {
@@ -109,7 +107,7 @@ export default function CategoryPage() {
         });
 
         fetchCategories(); // fetch ข้อมูลใหม่หลังลบ
-      } catch (error) {
+      } catch {
         Swal.fire({
           icon: "error",
           title: t("categoryModal.errorTitle"),
@@ -192,7 +190,6 @@ export default function CategoryPage() {
             {t("navbar.category")}
           </button>
         )}
-        
 
         <div className={styles.grid}>
           {categories.map((cat) => {
@@ -265,14 +262,16 @@ export default function CategoryPage() {
                       }}
                     >
                       {(() => {
-                        const { IconComponent, color } = parseIcon(cat.icon);
+                        const { IconComponent } = parseIcon(cat.icon);
                         return IconComponent ? (
                           <IconComponent className={styles.icon} size={16} />
                         ) : (
                           <FaIcons.FaList className={styles.icon} />
                         );
                       })()}
-                      {t("actions.viewSubcategory", { defaultValue: "ดู Subcategory" })}
+                      {t("actions.viewSubcategory", {
+                        defaultValue: "ดู Subcategory",
+                      })}
                     </button>
                   )}
 
@@ -336,7 +335,6 @@ export default function CategoryPage() {
             }}
           />
         )}
-
       </div>
     </>
   );

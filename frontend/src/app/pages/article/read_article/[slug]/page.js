@@ -84,7 +84,7 @@ export default function ReadArticlePage() {
     if (typeof content === "string") {
       try {
         content = JSON.parse(content);
-      } catch (e) {
+      } catch {
         content = {
           type: "doc",
           content: [
